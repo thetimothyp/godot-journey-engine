@@ -2,7 +2,14 @@
 
 [ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://journey_core/journey_choice.gd" id="1_g84oo"]
 [ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://journey_core/journey_event.gd" id="2_kdssd"]
+[ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://journey_core/journey_consequence.gd" id="2_x4sbb"]
+
+[sub_resource type="Resource" id="Resource_n1jr3"]
+script = ExtResource("1_g84oo")
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 
 [resource]
 script = ExtResource("2_kdssd")
+narrative_text = "You wake up "
+choices = Array[ExtResource("1_g84oo")]([SubResource("Resource_n1jr3")])
 metadata/_custom_type_script = "uid://cd45ite7r06rf"
