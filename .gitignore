@@ -1,0 +1,29 @@
+# Godot 4 editor cache and imported assets
+.godot/
+.import/
+
+# Generated translation binaries
+*.translation
+
+# Exported builds
+build/
+exports/
+*.pck
+*.zip
+
+# Mono/C# (not used here, but harmless to ignore)
+.mono/
+data_*/
+mono_crash.*.json
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

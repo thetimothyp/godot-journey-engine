@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="JourneyEvent" format=3 uid="uid://fhgtc5t7cmfn"]
+
+[ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://journey_core/journey_choice.gd" id="1_g84oo"]
+[ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://journey_core/journey_event.gd" id="2_kdssd"]
+
+[resource]
+script = ExtResource("2_kdssd")
+metadata/_custom_type_script = "uid://cd45ite7r06rf"

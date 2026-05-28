@@ -25,7 +25,7 @@ the two design docs to orient before doing anything.
 - **Determinism:** fixed RNG seed + identical state ⇒ identical stochastic results. (eng §1.3)
 
 ## Build order & status
-- [ ] **Step 1** — Resource classes: Condition, Consequence, ConditionGroup, Choice,
+- [x] **Step 1** — Resource classes: Condition, Consequence, ConditionGroup, Choice,
       Event, ResourceDef, Config
 - [ ] **Step 2** — Blackboard + initialization
 - [ ] **Step 3** — Evaluator (conditions) + Mutator (consequences), as pure helpers + tests
@@ -38,3 +38,4 @@ the two design docs to orient before doing anything.
 
 ## Session log (append one line per completed step)
 <!-- e.g. "2026-05-28 — Step 1 complete. 7 resource classes in journey_core/. Tested via inspector." -->
+2026-05-28 — Step 1 complete. Created 7 resource classes in journey_core/ (JourneyCondition, JourneyConsequence, JourneyConditionGroup, JourneyChoice, JourneyEvent, JourneyResourceDef, JourneyConfig) matching eng design §3.2–§3.7. Pure data, no methods. Manual inspector verification passed: project loads error-free, all 7 types appear in New Resource dialog, enums render as dropdowns, test_condition.tres and test_event.tres saved.
