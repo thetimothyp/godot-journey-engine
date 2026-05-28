@@ -1,10 +1,25 @@
-# Releasing Journey Engine Core
+# Releasing Journey Engine
 
 Maintainer playbook for cutting a release, publishing the docs, and listing on
 the Godot Asset Library. This file is for maintainers — it is **not** part of the
 published documentation site.
 
 Repo: <https://github.com/thetimothyp/godot-journey-engine>
+
+## What ships
+
+The repo is a **monorepo** with two addons distributed together as one product,
+**"Journey Engine"**:
+
+| Addon | Role | Versioned by |
+| --- | --- | --- |
+| `addons/journey_engine_core/` | The presentation-agnostic runtime. | `VERSION` const + `plugin.cfg` (see below). |
+| `addons/journey_engine_ui_kit/` | Optional UI Starter Kit (Control components). | The **bundle** version — it has no `VERSION` const and no `plugin.cfg`. |
+
+Distribution is **one bundled Asset Library entry** ("Journey Engine" = engine + UI
+kit + sample), plus **per-addon zips** attached to each GitHub Release so users can
+grab core-only or kit-only. Bundling is a *distribution* choice — the one-way
+core → kit dependency and the kit's optionality are unchanged.
 
 The flow, in order:
 
@@ -34,7 +49,13 @@ The version lives in **three places that must stay in sync**:
 | --- | --- |
 | `addons/journey_engine_core/journey_runtime.gd` | `const VERSION := "X.Y.Z"` |
 | `addons/journey_engine_core/plugin.cfg` | `version="X.Y.Z"` |
-| `docs/about/changelog.md` | Add a new `## X.Y.Z — YYYY-MM-DD` section |
+| `docs/about/changelog.md` | Roll `## Unreleased` into a new `## X.Y.Z — YYYY-MM-DD` section |
+
+!!! note "The UI kit has no version of its own"
+    `addons/journey_engine_ui_kit/` ships **no `VERSION` const and no `plugin.cfg`**
+    (it's pure runtime `Control` nodes — nothing to register). Its version *is* the
+    bundle version: the same `X.Y.Z` you set above, tracked through the changelog.
+    There's nothing to bump inside the kit folder.
 
 !!! note
     `JourneyConfig.save_version` is **independent** of the engine version. Only
@@ -101,17 +122,21 @@ landed on the remote:
 git ls-remote --tags origin | grep vX.Y.Z
 ```
 
-### 3b. Build the addon zip (optional but recommended)
+### 3b. Build the per-addon zips (recommended)
 
-Ship a zip containing **only** the addon, with the `addons/` path preserved so a
-user can extract it straight into their project root:
+Ship one zip per addon, each with its `addons/` path preserved so a user can extract
+it straight into their project root. The UI kit zip lets users grab the front end
+without the sample/docs; the core zip is the runtime-only option.
 
 ```bash
-zip -r journey-engine-core-vX.Y.Z.zip addons/journey_engine_core
+zip -r journey-engine-core-vX.Y.Z.zip   addons/journey_engine_core
+zip -r journey-engine-ui-kit-vX.Y.Z.zip addons/journey_engine_ui_kit
 ```
 
-(Leave `sample_game/`, `tests/`, and `docs/` out of the artifact — they aren't
-needed at runtime. Keep the `.uid` files in; Godot 4 uses them.)
+(Leave `sample_game/`, `tests/`, and `docs/` out of the artifacts — they aren't
+needed at runtime. Keep the `.uid` files in; Godot 4 uses them. The UI kit zip needs
+only its own folder — its dependency on the core is satisfied by the user also having
+the core installed, not by bundling it.)
 
 ### 3c. Create the release
 
@@ -121,14 +146,14 @@ needed at runtime. Keep the `.uid` files in; Godot 4 uses them.)
     `gh auth login`.
 
     ```bash
-    # Notes pulled from the annotated tag message:
+    # Notes pulled from the annotated tag message; attach BOTH per-addon zips:
     gh release create vX.Y.Z --title "vX.Y.Z" --notes-from-tag \
-        journey-engine-core-vX.Y.Z.zip
+        journey-engine-core-vX.Y.Z.zip journey-engine-ui-kit-vX.Y.Z.zip
 
     # …or write notes from the changelog section instead of the tag:
     gh release create vX.Y.Z --title "vX.Y.Z" \
         --notes "$(sed -n '/## X.Y.Z/,/## /p' docs/about/changelog.md)" \
-        journey-engine-core-vX.Y.Z.zip
+        journey-engine-core-vX.Y.Z.zip journey-engine-ui-kit-vX.Y.Z.zip
     ```
 
 === "With the web UI"
@@ -138,7 +163,8 @@ needed at runtime. Keep the `.uid` files in; Godot 4 uses them.)
     2. Choose the existing tag `vX.Y.Z`.
     3. Title `vX.Y.Z`; paste the matching section from
        [`docs/about/changelog.md`](docs/about/changelog.md) as the notes.
-    4. Attach `journey-engine-core-vX.Y.Z.zip` (optional).
+    4. Attach `journey-engine-core-vX.Y.Z.zip` **and**
+       `journey-engine-ui-kit-vX.Y.Z.zip`.
     5. **Publish release.**
 
 ---
@@ -182,23 +208,26 @@ then check the site is live at the URL above.
 ## 5. Submit / update the Asset Library entry
 
 The [Godot Asset Library](https://godotengine.org/asset-library/) lets users
-install the addon from inside the editor's **AssetLib** tab. An entry points at
-this GitHub repo at a specific commit/tag and downloads the repo zip at that ref.
+install from inside the editor's **AssetLib** tab. **One bundled entry** —
+**Journey Engine** — points at this GitHub repo at a specific commit/tag and
+downloads the repo zip at that ref, shipping both addons + the sample.
 
 !!! info "How installs look"
     AssetLib downloads the **whole repo** at the chosen commit, then shows the
-    user a file tree to install. Because everything ships under
-    `addons/journey_engine_core/`, the addon installs cleanly; the user can
-    uncheck `sample_game/`, `tests/`, and `docs/` in the install dialog. (There's
-    no per-file filter on the library side — the `addons/` layout is what keeps
-    installs tidy.)
+    user a file tree to install. Both addons ship under `addons/`
+    (`journey_engine_core/` and `journey_engine_ui_kit/`), so they install cleanly;
+    the user keeps the core, optionally keeps `journey_engine_ui_kit/`, and unchecks
+    `sample_game/`, `tests/`, and `docs/` in the install dialog. (There's no per-file
+    filter on the library side — the `addons/` layout is what keeps installs tidy.)
+    Users who want a single addon instead can grab the per-addon zips from the
+    [GitHub Release](#3b-build-the-per-addon-zips-recommended).
 
 ### First submission
 
 1. Sign in at <https://godotengine.org/> and go to **Submit Asset**:
    <https://godotengine.org/asset-library/asset/edit> → _Submit_.
 2. Fill in:
-    - **Asset name:** Journey Engine Core
+    - **Asset name:** Journey Engine
     - **Category:** Tools (or Scripts)
     - **Godot version:** 4.6
     - **Repository host:** GitHub · **Repository URL:** the repo URL above
@@ -224,9 +253,10 @@ this GitHub repo at a specific commit/tag and downloads the repo zip at that ref
 
 ```text
 1. Edit VERSION in journey_runtime.gd + plugin.cfg + changelog.md → commit
+   (UI kit has no version of its own — it tracks the bundle)
 2. Headless tests + mkdocs build --strict
 3. git tag -a vX.Y.Z -m "..." && git push origin main --follow-tags
-   → gh release create vX.Y.Z (+ addon zip)
+   → gh release create vX.Y.Z (+ core zip + ui-kit zip)
 4. mkdocs gh-deploy --force
-5. AssetLib: update version + commit SHA (git rev-list -n1 vX.Y.Z)
+5. AssetLib "Journey Engine": update version + commit SHA (git rev-list -n1 vX.Y.Z)
 ```

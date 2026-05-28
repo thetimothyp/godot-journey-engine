@@ -4,6 +4,22 @@ This project follows [Keep a Changelog](https://keepachangelog.com/) conventions
 and [Semantic Versioning](https://semver.org/). The engine version is exposed at
 runtime as `JourneyRuntime.VERSION`.
 
+## Unreleased
+
+### Added
+
+- **UI Starter Kit** (`addons/journey_engine_ui_kit/`) — an optional, themeable
+  presentation layer that turns the engine's signals into a complete animated front
+  end. Independent `Control` components (narrative with text-reveal pacing, a
+  config-driven resource HUD, choices, save/load, ending overlay, a background layer
+  with crossfade + idle motion, an audio layer with per-event ambient + UI SFX slots,
+  and a fade/wipe transition layer), assembled into a one-line **`JourneyView`** with
+  a default Theme and placeholder assets. Strict one-way dependency on the core; no
+  autoload or plugin to enable. See the [UI Kit](../ui-kit/overview.md) docs.
+- A `JourneyView` demo (`sample_game/journey_view_demo.tscn`) wired to the sample
+  config, now the project's main scene; the original Dumb-UI sample remains at
+  `sample_game/main.tscn`.
+
 ## 0.1.0 — 2026-05-28
 
 Initial release. The core runtime is feature-complete:

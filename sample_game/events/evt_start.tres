@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://addons/journey_engine_core/journey_choice.gd" id="2_choice"]
 [ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://addons/journey_engine_core/journey_consequence.gd" id="3_conseq"]
 [ext_resource type="Resource" uid="uid://sg0evroadbegin1" path="res://sample_game/events/evt_road_begins.tres" id="4_begins"]
+[ext_resource type="Texture2D" uid="uid://cjkitbg0dawn01" path="res://addons/journey_engine_ui_kit/assets/backgrounds/placeholder_dawn.tres" id="5_bg"]
 
 [sub_resource type="Resource" id="Conseq_start_helped"]
 script = ExtResource("3_conseq")
@@ -35,6 +36,7 @@ metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 [resource]
 script = ExtResource("1_event")
 narrative_text = "A traveler stands beside a broken wagon at the crossroads. They look up as you approach."
+background_texture = ExtResource("5_bg")
 id = &"evt_start"
 choices = Array[ExtResource("2_choice")]([SubResource("Choice_start_help"), SubResource("Choice_start_walk")])
 metadata/_custom_type_script = "uid://cd45ite7r06rf"

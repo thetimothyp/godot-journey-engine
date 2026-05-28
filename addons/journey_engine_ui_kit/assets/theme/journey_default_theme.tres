@@ -1,0 +1,75 @@
+[gd_resource type="Theme" format=3 uid="uid://cjkitthemedef01"]
+
+; Default theme for the Journey Engine UI kit. Muted indigo on near-black — readable
+; long-form narrative, distinct from Godot's own blue. To restyle YOUR game,
+; DUPLICATE this into res://<your_game>/ui/ and assign it to JourneyView.theme.
+; Do NOT edit this addon copy — a kit update would overwrite it.
+
+[sub_resource type="StyleBoxFlat" id="sb_button_normal"]
+bg_color = Color(0.2, 0.22, 0.32, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="sb_button_hover"]
+bg_color = Color(0.29, 0.33, 0.48, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="sb_button_pressed"]
+bg_color = Color(0.15, 0.17, 0.26, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="sb_button_disabled"]
+bg_color = Color(0.16, 0.17, 0.22, 0.55)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="sb_panel"]
+bg_color = Color(0.09, 0.1, 0.15, 0.86)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+
+[resource]
+default_font_size = 17
+Button/colors/font_color = Color(0.9, 0.92, 0.97, 1)
+Button/colors/font_hover_color = Color(1, 1, 1, 1)
+Button/colors/font_pressed_color = Color(0.78, 0.82, 0.95, 1)
+Button/colors/font_disabled_color = Color(0.6, 0.62, 0.68, 1)
+Button/styles/normal = SubResource("sb_button_normal")
+Button/styles/hover = SubResource("sb_button_hover")
+Button/styles/pressed = SubResource("sb_button_pressed")
+Button/styles/disabled = SubResource("sb_button_disabled")
+Label/colors/font_color = Color(0.9, 0.92, 0.97, 1)
+PanelContainer/styles/panel = SubResource("sb_panel")
+RichTextLabel/colors/default_color = Color(0.91, 0.93, 0.97, 1)

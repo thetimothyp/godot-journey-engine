@@ -1,0 +1,38 @@
+[gd_scene load_steps=8 format=3 uid="uid://sg0viewdemo0001"]
+
+[ext_resource type="PackedScene" uid="uid://cjkitview000001" path="res://addons/journey_engine_ui_kit/JourneyView.tscn" id="1_view"]
+[ext_resource type="Resource" uid="uid://sg0cfgmain00001" path="res://sample_game/config.tres" id="2_config"]
+[ext_resource type="Script" uid="uid://iswtm1e57oy4" path="res://addons/journey_engine_ui_kit/components/hud_binding.gd" id="3_bind"]
+
+[sub_resource type="Resource" id="bind_gold"]
+script = ExtResource("3_bind")
+key = "gold"
+label_format = "Gold: %d"
+is_metadata = false
+metadata/_custom_type_script = "uid://iswtm1e57oy4"
+
+[sub_resource type="Resource" id="bind_sanity"]
+script = ExtResource("3_bind")
+key = "sanity"
+label_format = "Sanity: %d"
+is_metadata = false
+metadata/_custom_type_script = "uid://iswtm1e57oy4"
+
+[sub_resource type="Resource" id="bind_rations"]
+script = ExtResource("3_bind")
+key = "rations"
+label_format = "Rations: %d"
+is_metadata = false
+metadata/_custom_type_script = "uid://iswtm1e57oy4"
+
+[sub_resource type="Resource" id="bind_turn"]
+script = ExtResource("3_bind")
+key = "turn_counter"
+label_format = "Turn: %d"
+is_metadata = true
+metadata/_custom_type_script = "uid://iswtm1e57oy4"
+
+[node name="JourneyViewDemo" instance=ExtResource("1_view")]
+config = ExtResource("2_config")
+seed = 13371
+hud_bindings = Array[ExtResource("3_bind")]([SubResource("bind_gold"), SubResource("bind_sanity"), SubResource("bind_rations"), SubResource("bind_turn")])

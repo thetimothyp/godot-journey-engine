@@ -1,0 +1,16 @@
+[gd_resource type="GradientTexture2D" format=3 uid="uid://cjkitbg0dawn01"]
+
+; PLACEHOLDER background shipped with the UI kit. Generated from a Gradient — NOT
+; real art. Replace by setting JourneyEvent.background_texture on your own event
+; .tres files (see docs: UI Kit › Assets & customization). Original / CC0, MIT-safe.
+
+[sub_resource type="Gradient" id="Gradient_dawn"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(0.96, 0.78, 0.55, 1, 0.78, 0.58, 0.55, 1, 0.36, 0.3, 0.42, 1)
+
+[resource]
+gradient = SubResource("Gradient_dawn")
+width = 1280
+height = 720
+fill_from = Vector2(0, 0)
+fill_to = Vector2(0, 1)

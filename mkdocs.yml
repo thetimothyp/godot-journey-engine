@@ -97,6 +97,12 @@ nav:
       - guides/save-and-load.md
       - guides/validation.md
       - guides/exporting.md
+  - UI Kit:
+      - ui-kit/overview.md
+      - ui-kit/install.md
+      - ui-kit/components.md
+      - ui-kit/animations.md
+      - ui-kit/assets-customization.md
   - Reference:
       - reference/api.md
       - reference/troubleshooting.md

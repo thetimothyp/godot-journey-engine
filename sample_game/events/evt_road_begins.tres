@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://addons/journey_engine_core/journey_event.gd" id="1_event"]
 [ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://addons/journey_engine_core/journey_choice.gd" id="2_choice"]
 [ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://addons/journey_engine_core/journey_consequence.gd" id="2_iu3vh"]
+[ext_resource type="Texture2D" uid="uid://cjkitbg0dusk01" path="res://addons/journey_engine_ui_kit/assets/backgrounds/placeholder_dusk.tres" id="3_bg"]
 
 [sub_resource type="Resource" id="Choice_begins_continue"]
 script = ExtResource("2_choice")
@@ -14,6 +15,7 @@ metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 [resource]
 script = ExtResource("1_event")
 narrative_text = "The crossroads behind you. The wind picks up. Whatever happens next is the road's to give."
+background_texture = ExtResource("3_bg")
 id = &"evt_road_begins"
 choices = Array[ExtResource("2_choice")]([SubResource("Choice_begins_continue")])
 metadata/_custom_type_script = "uid://cd45ite7r06rf"

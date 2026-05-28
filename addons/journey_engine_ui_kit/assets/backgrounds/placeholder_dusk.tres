@@ -1,0 +1,14 @@
+[gd_resource type="GradientTexture2D" format=3 uid="uid://cjkitbg0dusk01"]
+
+; PLACEHOLDER background (generated gradient, not real art). See placeholder_dawn.tres.
+
+[sub_resource type="Gradient" id="Gradient_dusk"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(0.3, 0.24, 0.45, 1, 0.42, 0.26, 0.4, 1, 0.12, 0.1, 0.2, 1)
+
+[resource]
+gradient = SubResource("Gradient_dusk")
+width = 1280
+height = 720
+fill_from = Vector2(0, 0)
+fill_to = Vector2(0, 1)
