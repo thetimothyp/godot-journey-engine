@@ -1,0 +1,2959 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A presentation-agnostic, studio-authorable narrative-journey runtime for Godot 4 / GDScript — resources, events, deterministic + stochastic routing, save/load, and an authoring validator.">
+      
+      
+      
+        <link rel="canonical" href="https://thetimothyp.github.io/godot-journey-engine-core/reference/design/engineering-design/">
+      
+      
+        <link rel="prev" href="../prd/">
+      
+      
+        <link rel="next" href="../starter-ui-kit/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Journey Engine — Engineering Design - Journey Engine</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#journey-engine-engineering-design" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Journey Engine" class="md-header__button md-logo" aria-label="Journey Engine" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Journey Engine
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Journey Engine — Engineering Design
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/thetimothyp/godot-journey-engine-core" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    godot-journey-engine-core
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../concepts/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../guides/authoring-content/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../api/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../about/license/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  About
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Journey Engine" class="md-nav__button md-logo" aria-label="Journey Engine" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Journey Engine
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/thetimothyp/godot-journey-engine-core" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    godot-journey-engine-core
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/blackboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Blackboard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/resources-and-events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources &amp; Events
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/routing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Routing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/presentation-contract/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Presentation Contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/authoring-content/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authoring Content
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/stochastic-pool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Stochastic Pool
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/save-and-load/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Save &amp; Load
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/exporting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exporting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting &amp; FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Docs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Docs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../prd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Name: Journey Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Journey Engine — Engineering Design
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Journey Engine — Engineering Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-goals-non-goals-and-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Goals, Non-Goals, and Constraints
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Goals, Non-Goals, and Constraints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Goals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-non-goals-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Non-Goals (v1)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-hard-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Hard Constraints
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-system-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. System Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-resource-layer-data-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Resource Layer (Data Model)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Resource Layer (Data Model)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-class-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Class hierarchy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-journeycondition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 JourneyCondition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-journeyconditiongroup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 JourneyConditionGroup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-journeyconsequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 JourneyConsequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-journeychoice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 JourneyChoice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-journeyevent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 JourneyEvent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-journeyresourcedef-and-journeyconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 JourneyResourceDef and JourneyConfig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-identity-and-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Identity and references
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-blackboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Blackboard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Blackboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-shape" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Shape
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Initialization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-missing-key-policy-correctness-critical" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Missing-key policy (correctness-critical)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-clamping-and-bottomtop-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Clamping and bottom/top-out
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-sequence-manager-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Sequence Manager (Routing)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Sequence Manager (Routing)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-public-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Public flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-_enter_eventevent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 _enter_event(event)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-signals-the-public-reactive-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Signals (the public reactive surface)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-why-routing-precedence-is-data-not-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Why routing precedence is data, not policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-presentation-contract-the-engineui-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Presentation Contract (the engine/UI boundary)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-starter-ui-kit-architectural-requirements-core-adjacent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 Starter UI Kit — architectural requirements (core-adjacent)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-stochastic-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Stochastic Pool
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Stochastic Pool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-index-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Index build
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-candidate-selection-one-pull" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Candidate selection (one pull)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-weighted-pick-deterministic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Weighted pick (deterministic)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-empty-pool-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Empty-pool handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-save-load" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Save / Load
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Save / Load">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-what-gets-serialized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 What gets serialized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-write-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Write path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-load-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Load path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-versioning-and-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Versioning and migration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-validation-errors-and-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Validation, Errors, and Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Validation, Errors, and Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-authoring-validation-validate-utility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Authoring validation (validate() utility)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-test-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Test strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-public-api-summary-game-facing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Public API Summary (game-facing)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-open-questions-future-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Open Questions &amp; Future Hooks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-build-order-implementation-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Build Order (implementation sequence)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../starter-ui-kit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Starter UI Kit (planned)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    About
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../about/license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../about/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-goals-non-goals-and-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Goals, Non-Goals, and Constraints
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Goals, Non-Goals, and Constraints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Goals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-non-goals-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Non-Goals (v1)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-hard-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Hard Constraints
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-system-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. System Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-resource-layer-data-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Resource Layer (Data Model)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Resource Layer (Data Model)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-class-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Class hierarchy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-journeycondition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 JourneyCondition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-journeyconditiongroup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 JourneyConditionGroup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-journeyconsequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 JourneyConsequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-journeychoice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 JourneyChoice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-journeyevent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 JourneyEvent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-journeyresourcedef-and-journeyconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 JourneyResourceDef and JourneyConfig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-identity-and-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Identity and references
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-blackboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Blackboard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Blackboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-shape" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Shape
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Initialization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-missing-key-policy-correctness-critical" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Missing-key policy (correctness-critical)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-clamping-and-bottomtop-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Clamping and bottom/top-out
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-sequence-manager-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Sequence Manager (Routing)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Sequence Manager (Routing)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-public-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Public flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-_enter_eventevent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 _enter_event(event)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-signals-the-public-reactive-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Signals (the public reactive surface)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-why-routing-precedence-is-data-not-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Why routing precedence is data, not policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-presentation-contract-the-engineui-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Presentation Contract (the engine/UI boundary)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-starter-ui-kit-architectural-requirements-core-adjacent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 Starter UI Kit — architectural requirements (core-adjacent)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-stochastic-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Stochastic Pool
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Stochastic Pool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-index-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Index build
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-candidate-selection-one-pull" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Candidate selection (one pull)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-weighted-pick-deterministic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Weighted pick (deterministic)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-empty-pool-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Empty-pool handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-save-load" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Save / Load
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Save / Load">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-what-gets-serialized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 What gets serialized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-write-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Write path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-load-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Load path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-versioning-and-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Versioning and migration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-validation-errors-and-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Validation, Errors, and Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Validation, Errors, and Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-authoring-validation-validate-utility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Authoring validation (validate() utility)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-test-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Test strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-public-api-summary-game-facing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Public API Summary (game-facing)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-open-questions-future-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Open Questions &amp; Future Hooks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-build-order-implementation-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Build Order (implementation sequence)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="journey-engine-engineering-design">Journey Engine — Engineering Design<a class="headerlink" href="#journey-engine-engineering-design" title="Permanent link">&para;</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Design doc — the code is the source of truth</p>
+<p>This is the original engineering design, kept for the <em>why</em> (architecture
+rationale, design philosophy). For accurate, current API details always
+prefer the <a href="../../api/">API Reference</a> and the
+<a href="../../../concepts/overview/">Concepts</a> section — they're verified against
+<code>addons/journey_engine_core/</code>. Known places where the shipped code diverges from this
+document:</p>
+<ul>
+<li><strong><code>JourneyRuntime</code> has no <code>class_name</code>.</strong> It's reached through the Autoload
+  global of the same name; a <code>class_name</code> would collide with it. (See
+  <a href="../../../getting-started/installation/#2-enable-the-plugin">Installation</a>.)</li>
+<li><strong>Boundary routes fire on <em>transition</em>, not presence.</strong> §4.4/§5.1's "if
+  clamped result == min_value" is implemented as a true transition
+  (off-boundary → on-boundary) to avoid an infinite re-trigger loop on a
+  value already sitting at the bound. (See
+  <a href="../../../concepts/routing/#forced-boundary-routes">Routing → Forced boundary routes</a>.)</li>
+<li><strong><code>docs/journey_engine_starter_ui_kit.md</code> was never written</strong> — the
+  <a href="../starter-ui-kit/">Starter UI Kit page</a> is a stub.</li>
+</ul>
+</div>
+<p><strong>Author:</strong> AI Collaborator
+<strong>Date:</strong> May 27, 2026
+<strong>Status:</strong> Design — for implementation
+<strong>Scope:</strong> Core Engine only (MIT, free tier). Journey Graph Studio is <strong>out of scope</strong> but is a first-class consumer of everything here; design decisions that affect it are flagged <strong>[Studio]</strong>.
+<strong>Companion:</strong> Journey Engine PRD, Revision 2.</p>
+<hr />
+<h2 id="1-goals-non-goals-and-constraints">1. Goals, Non-Goals, and Constraints<a class="headerlink" href="#1-goals-non-goals-and-constraints" title="Permanent link">&para;</a></h2>
+<h3 id="11-goals">1.1 Goals<a class="headerlink" href="#11-goals" title="Permanent link">&para;</a></h3>
+<ol>
+<li>A pure-GDScript, Godot 4.x runtime that drives choice-and-consequence games from native <code>.tres</code> resources with zero external dependencies.</li>
+<li>A central Blackboard holding all mutable playthrough state, with bounded numeric resources and boolean flags.</li>
+<li>A typed condition/consequence evaluation engine built from <code>Resource</code> sub-objects (no string parsing, no stringly-typed dictionaries).</li>
+<li>Deterministic and stochastic (tag-indexed, condition-filtered, weighted) event routing.</li>
+<li>Signal-based, fully decoupled presentation ("Dumb-UI").</li>
+<li>Save/load of flat primitive state, with opt-in obfuscation.</li>
+</ol>
+<h3 id="12-non-goals-v1">1.2 Non-Goals (v1)<a class="headerlink" href="#12-non-goals-v1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Journey Graph Studio (separate plugin, separate doc).</li>
+<li>The Starter UI Kit (separate optional package, separate doc). The <em>core</em> ships no presentation. The kit's two architectural constraints are recorded in §5.6 because they protect the engine's Presentation Contract, but the kit itself is not part of core scope.</li>
+<li>An economy/pricing layer, combat system, or any genre-specific mechanic. The engine supplies <em>state and routing</em>; games supply <em>rules</em>.</li>
+<li>Nested boolean condition trees (single-level <code>ALL</code>/<code>ANY</code> only).</li>
+<li>Computed/Blackboard-driven encounter weights (static weights only).</li>
+<li>Networking, multiplayer, or server-authoritative state.</li>
+<li>Localization framework (text is authored in resources; i18n is the game's concern, though §10.3 keeps the door open).</li>
+</ul>
+<h3 id="13-hard-constraints">1.3 Hard Constraints<a class="headerlink" href="#13-hard-constraints" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>GDScript only.</strong> No C#, no GDExtension. Must run on Web/WASM and mobile exports unmodified.</li>
+<li><strong>Godot 4.x</strong> (target 4.3+ for stable typed <code>Array[T]</code> export behavior).</li>
+<li><strong>Determinism on demand.</strong> Given a fixed RNG seed and identical Blackboard state, stochastic selection must be reproducible (required for save/load integrity and testing).</li>
+<li><strong>[Studio] Editor-authorable.</strong> Every resource must be fully constructable and editable in the Godot inspector with no code, because Studio will later generate exactly these resources. If the inspector can't express it, Studio can't either.</li>
+</ul>
+<hr />
+<h2 id="2-system-overview">2. System Overview<a class="headerlink" href="#2-system-overview" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>                         ┌─────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                         │     JourneyRuntime (Autoload)│
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                         │  ┌───────────────────────┐  │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>   .tres resources ─────►│  │ Blackboard            │  │
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>   (loaded on demand)    │  │  resources / flags    │  │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                         │  │  metadata / rng       │  │
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                         │  └───────────────────────┘  │
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                         │  ┌───────────────────────┐  │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>                         │  │ Evaluator             │  │ ◄── JourneyCondition(Group)
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>                         │  │ Mutator               │  │ ◄── JourneyConsequence
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>                         │  │ SequenceManager       │  │ ◄── JourneyEvent / Choice
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>                         │  │ PoolIndex             │  │
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>                         │  │ SaveManager           │  │
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>                         │  └───────────────────────┘  │
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>                         └──────────────┬──────────────┘
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>                                        │ signals
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>                                        ▼
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>                         ┌─────────────────────────────┐
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>                         │  Developer&#39;s UI (Dumb-UI)    │
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>                         └─────────────────────────────┘
+</code></pre></div>
+<p><code>JourneyRuntime</code> is the only Autoload and the only public entry point for game code. Internal collaborators (Evaluator, Mutator, SequenceManager, PoolIndex, SaveManager) are plain <code>RefCounted</code> helpers owned by the runtime. This keeps the public API a single, discoverable surface while letting the implementation stay modular and unit-testable.</p>
+<p><strong>Design rationale for the helper split:</strong> an earlier option was to put everything as methods directly on the Autoload. Rejected because (a) a 1500-line singleton is untestable in isolation, and (b) the Evaluator/Mutator are pure functions of <code>(resource, blackboard)</code> — keeping them as injectable helpers lets us unit-test them headlessly without instantiating the Autoload or a SceneTree.</p>
+<hr />
+<h2 id="3-resource-layer-data-model">3. Resource Layer (Data Model)<a class="headerlink" href="#3-resource-layer-data-model" title="Permanent link">&para;</a></h2>
+<p>All gameplay data are <code>Resource</code> subclasses with <code>class_name</code> declarations so they appear in the inspector's "New Resource" dialog and in typed exports. Every class is designed to round-trip losslessly through <code>.tres</code> and through the save serializer.</p>
+<h3 id="31-class-hierarchy">3.1 Class hierarchy<a class="headerlink" href="#31-class-hierarchy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Resource
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── JourneyConfig            # one per game; global rules + system settings
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├── JourneyResourceDef       # schema for ONE numeric resource (bounds, defaults)
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>├── JourneyEvent             # a node: presentation + tags + pool eligibility + choices
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>├── JourneyChoice            # a button: visibility + consequences + routing
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>├── JourneyCondition         # one comparison
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>├── JourneyConditionGroup    # ALL/ANY over conditions
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>└── JourneyConsequence       # one mutation
+</code></pre></div>
+<h3 id="32-journeycondition">3.2 <code>JourneyCondition</code><a class="headerlink" href="#32-journeycondition" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>extends Resource
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>class_name JourneyCondition
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>enum Op { GT, GTE, LT, LTE, EQ, NEQ, HAS_FLAG, NOT_FLAG }
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>@export var key: String = &quot;&quot;        # resource key OR flag key
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>@export var op: Op = Op.GTE
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>@export var value: float = 0.0      # ignored for HAS_FLAG / NOT_FLAG
+</code></pre></div>
+<p>Semantics: numeric ops read <code>blackboard.resources[key]</code>; <code>HAS_FLAG</code>/<code>NOT_FLAG</code> read <code>blackboard.flags[key]</code>. Missing-key handling is defined in §4.3 (this is a real correctness trap and is specified, not left to chance).</p>
+<h3 id="33-journeyconditiongroup">3.3 <code>JourneyConditionGroup</code><a class="headerlink" href="#33-journeyconditiongroup" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>extends Resource
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>class_name JourneyConditionGroup
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>enum Logic { ALL, ANY }
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>@export var logic: Logic = Logic.ALL
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>@export var conditions: Array[JourneyCondition] = []
+</code></pre></div>
+<ul>
+<li>Empty group ⇒ <strong>passes</strong> (vacuous truth). This is intentional: an event/choice with no conditions is always eligible. Documented because the opposite default ("empty = never") is a plausible and dangerous misreading.</li>
+<li><code>ALL</code> over empty = true; <code>ANY</code> over empty = true as well (we treat "no constraints" identically regardless of logic flag, to avoid an authoring footgun where flipping the dropdown on an empty group silently disables content).</li>
+</ul>
+<p><strong>[Studio]</strong> No nesting in v1. The model could later add an optional <code>Array[JourneyConditionGroup] subgroups</code> field; existing <code>.tres</code> files would deserialize with an empty subgroups array and behave identically. This forward-compatibility is why grouping is its own resource rather than two loose fields on the choice.</p>
+<h3 id="34-journeyconsequence">3.4 <code>JourneyConsequence</code><a class="headerlink" href="#34-journeyconsequence" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>extends Resource
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>class_name JourneyConsequence
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>enum Operation { ADD, SUBTRACT, SET_VALUE, SET_FLAG, TOGGLE_FLAG }
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>@export var operation: Operation = Operation.ADD
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>@export var key: String = &quot;&quot;
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>@export var value: float = 0.0      # numeric ops only
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>@export var flag_value: bool = true # SET_FLAG only
+</code></pre></div>
+<p><code>ADD</code>/<code>SUBTRACT</code>/<code>SET_VALUE</code> mutate <code>resources[key]</code> and are clamped to the resource's configured bounds (§4.4). <code>SET_FLAG</code> sets <code>flags[key] = flag_value</code>; <code>TOGGLE_FLAG</code> inverts it.</p>
+<h3 id="35-journeychoice">3.5 <code>JourneyChoice</code><a class="headerlink" href="#35-journeychoice" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>extends Resource
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>class_name JourneyChoice
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>@export_multiline var button_text: String = &quot;&quot;
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>@export var visibility: JourneyConditionGroup       # null ⇒ always visible
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>@export var consequences: Array[JourneyConsequence] = []
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>@export_group(&quot;Routing&quot;)
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>@export var target_event: JourneyEvent              # deterministic route (takes precedence)
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>@export var continue_to_pool: bool = false          # if true and no target, request stochastic pull
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>@export var pool_tags_filter: Array[String] = []    # optional tag scope for the pull
+</code></pre></div>
+<p>Routing precedence is explicit and total (§5.2): a non-null <code>target_event</code> always wins; otherwise <code>continue_to_pool</code> triggers a stochastic pull; otherwise the journey is treated as ended (a terminal choice). Defining this precedence in the data model — rather than by convention — prevents ambiguous nodes.</p>
+<h3 id="36-journeyevent">3.6 <code>JourneyEvent</code><a class="headerlink" href="#36-journeyevent" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>extends Resource
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>class_name JourneyEvent
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>@export_group(&quot;Presentation&quot;)
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>@export_multiline var narrative_text: String = &quot;&quot;
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>@export var background_texture: Texture2D
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>@export var ambient_audio: AudioStream
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>@export_group(&quot;System&quot;)
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>@export var id: StringName = &amp;&quot;&quot;        # stable identity; see §3.8
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>@export var event_tags: Array[String] = []
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>@export var weight: int = 100           # static selection weight (PRD §3.4)
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>@export var pool_conditions: JourneyConditionGroup  # eligibility for stochastic pool
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>@export var repeatable: bool = false    # may this event recur in one playthrough?
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>@export var choices: Array[JourneyChoice] = []
+</code></pre></div>
+<p>Note <code>weight</code> replaces the PRD's <code>absolute_priority</code> naming — same concept, clearer intent, and avoids implying a sort order. Default 100 gives authors integer headroom to make events relatively rarer/commoner without decimals.</p>
+<h3 id="37-journeyresourcedef-and-journeyconfig">3.7 <code>JourneyResourceDef</code> and <code>JourneyConfig</code><a class="headerlink" href="#37-journeyresourcedef-and-journeyconfig" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>extends Resource
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>class_name JourneyResourceDef
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>@export var key: String = &quot;&quot;
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>@export var default_value: float = 0.0
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>@export var min_value: float = 0.0
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>@export var max_value: float = 100.0
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>@export var bottom_out_event: JourneyEvent          # fired when value hits min_value
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>@export var top_out_event: JourneyEvent             # optional; fired at max_value
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>extends Resource
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>class_name JourneyConfig
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>@export var resource_defs: Array[JourneyResourceDef] = []
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>@export var initial_flags: Dictionary = {}          # String -&gt; bool
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>@export var start_event: JourneyEvent
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>@export_group(&quot;Pool&quot;)
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>@export var event_pool_dir: String = &quot;res://events/&quot;
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>@export var rebuild_pool_in_editor: bool = true     # [Studio] hot-reload hook
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>@export_group(&quot;Save&quot;)
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>@export var save_encryption_key: String = &quot;&quot;        # empty ⇒ plaintext
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>@export var save_version: int = 1                   # migration anchor (§7.4)
+</code></pre></div>
+<p><strong>[Studio]</strong> <code>JourneyConfig</code> deliberately concentrates all global authored settings in one resource. Studio will read it to populate dropdowns (e.g., offering known resource keys when authoring a condition) and write back to it. Keeping it a single resource keeps that integration simple. (The PRD flagged that this resource does two jobs; we accept that for v1 and note §10.1 as the split path if it grows.)</p>
+<h3 id="38-identity-and-references">3.8 Identity and references<a class="headerlink" href="#38-identity-and-references" title="Permanent link">&para;</a></h3>
+<p>Two referencing strategies coexist deliberately:</p>
+<ul>
+<li><strong>Direct object references</strong> (<code>target_event: JourneyEvent</code>, <code>bottom_out_event</code>) — used for authored, deterministic links. Godot stores these as sub-resource or <code>ext_resource</code> paths in <code>.tres</code>, and the editor makes them drag-and-droppable. This is the ergonomic default.</li>
+<li><strong>Stable string <code>id</code></strong> — used for save/load and for pool membership. At runtime we never serialize a live event into a save; we serialize its <code>id</code>. This decouples saves from file paths so that moving or renaming a <code>.tres</code> doesn't corrupt existing saves, as long as <code>id</code> is preserved.</li>
+</ul>
+<p><strong>Invariant:</strong> every <code>JourneyEvent</code> in the pool directory must have a unique non-empty <code>id</code>. The PoolIndex validates this at load and pushes an error naming the duplicates. <strong>[Studio]</strong> Studio will auto-assign ids on node creation; manual authors get a validation pass (§8.1) they can run.</p>
+<hr />
+<h2 id="4-blackboard">4. Blackboard<a class="headerlink" href="#4-blackboard" title="Permanent link">&para;</a></h2>
+<h3 id="41-shape">4.1 Shape<a class="headerlink" href="#41-shape" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>class Blackboard:
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    var resources: Dictionary = {}     # String -&gt; float
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    var flags: Dictionary = {}         # String -&gt; bool
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    var metadata: Dictionary = {}      # String -&gt; Variant (turn_counter, current_event_id, history…)
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    var rng := RandomNumberGenerator.new()
+</code></pre></div>
+<p>Implemented as an inner class / <code>RefCounted</code> rather than free-floating dictionaries on the Autoload, so the whole state object can be passed to the Evaluator/Mutator and snapshotted for save in one move.</p>
+<h3 id="42-initialization">4.2 Initialization<a class="headerlink" href="#42-initialization" title="Permanent link">&para;</a></h3>
+<p>On <code>start_new_journey()</code>:</p>
+<ol>
+<li>For each <code>JourneyResourceDef</code>, set <code>resources[key] = clamp(default_value, min, max)</code>.</li>
+<li>Copy <code>config.initial_flags</code> into <code>flags</code>.</li>
+<li>Seed <code>rng</code> — either from a provided seed (deterministic/testing) or <code>randomize()</code> (normal play). The seed is stored in <code>metadata</code> so it persists into saves.</li>
+<li>Set <code>metadata.turn_counter = 0</code>, clear history.</li>
+<li>Route to <code>config.start_event</code> via the SequenceManager.</li>
+</ol>
+<h3 id="43-missing-key-policy-correctness-critical">4.3 Missing-key policy (correctness-critical)<a class="headerlink" href="#43-missing-key-policy-correctness-critical" title="Permanent link">&para;</a></h3>
+<p>This is the most common source of silent narrative bugs, so it is specified rather than emergent:</p>
+<ul>
+<li><strong>Condition read on a missing resource key:</strong> treated as <code>0.0</code>, AND a runtime warning is pushed (<code>push_warning</code>) naming the key and the owning event id. Rationale: failing soft keeps a game playable, but the warning surfaces author typos. We do <em>not</em> fail hard, because a hard crash on a typo in one of thousands of events is a worse player experience than a soft-false branch.</li>
+<li><strong>Condition read on a missing flag key:</strong> absent flag = <code>false</code>. <code>HAS_FLAG</code> ⇒ false, <code>NOT_FLAG</code> ⇒ true. No warning (absence of a flag is a normal, expected state — flags are set lazily).</li>
+<li><strong>Consequence on a missing resource key:</strong> if the key matches a <code>JourneyResourceDef</code>, the resource was initialized, so this can't happen post-init. If it matches no def, the mutation is <strong>skipped</strong> with a warning. We never auto-create undeclared resources, because an undeclared resource has no bounds and would silently escape clamping.</li>
+</ul>
+<h3 id="44-clamping-and-bottomtop-out">4.4 Clamping and bottom/top-out<a class="headerlink" href="#44-clamping-and-bottomtop-out" title="Permanent link">&para;</a></h3>
+<p>After any numeric consequence:</p>
+<ol>
+<li>Look up the resource's <code>JourneyResourceDef</code>.</li>
+<li><code>resources[key] = clamp(new_value, def.min_value, def.max_value)</code>.</li>
+<li>If clamped result <code>== min_value</code> and <code>def.bottom_out_event</code> is set, enqueue a <strong>pending forced route</strong> to that event.</li>
+<li>Symmetric handling for <code>max_value</code> / <code>top_out_event</code>.</li>
+</ol>
+<p>Forced routes are <em>enqueued</em>, not executed mid-consequence, so that a choice applying several consequences finishes its whole batch before any bottom-out fires. The SequenceManager drains at most one pending forced route after consequence application, preferring the <em>first</em> triggered (lowest resource def index) for determinism. This ordering rule is explicit because "sanity and rations both hit zero on the same choice" is a real case and must resolve identically every run.</p>
+<hr />
+<h2 id="5-sequence-manager-routing">5. Sequence Manager (Routing)<a class="headerlink" href="#5-sequence-manager-routing" title="Permanent link">&para;</a></h2>
+<h3 id="51-public-flow">5.1 Public flow<a class="headerlink" href="#51-public-flow" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>start_new_journey()
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  └─► _enter_event(start_event)
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>process_choice(choice)
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>  ├─ apply consequences (Mutator)  ──► may enqueue forced route (§4.4)
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>  ├─ if forced route pending: _enter_event(forced)        [highest priority]
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>  ├─ elif choice.target_event:     _enter_event(target)   [deterministic]
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>  ├─ elif choice.continue_to_pool: _enter_event(pool_pull(choice.pool_tags_filter))
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>  └─ else:                         _end_journey()          [terminal choice]
+</code></pre></div>
+<h3 id="52-_enter_eventevent">5.2 <code>_enter_event(event)</code><a class="headerlink" href="#52-_enter_eventevent" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Guard against null (a route resolved to nothing ⇒ emit <code>journey_error</code>, do not crash).</li>
+<li>Update <code>metadata.current_event_id</code>, increment <code>turn_counter</code>, append to history (capped ring buffer; §10.2).</li>
+<li>Mark event seen (for non-<code>repeatable</code> pool exclusion).</li>
+<li>Compute the <strong>visible choice list</strong>: for each choice, evaluate <code>choice.visibility</code> against the Blackboard; include only those that pass.</li>
+<li>Emit <code>event_changed(event, visible_choices)</code>.</li>
+</ol>
+<p>The visible-choice computation lives here (not in the UI) so every front-end gets identical filtering for free — central to the Dumb-UI contract.</p>
+<h3 id="53-signals-the-public-reactive-surface">5.3 Signals (the public reactive surface)<a class="headerlink" href="#53-signals-the-public-reactive-surface" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>signal event_changed(event: JourneyEvent, choices: Array[JourneyChoice])
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>signal resource_changed(key: String, old_value: float, new_value: float)
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>signal flag_changed(key: String, value: bool)
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>signal journey_started()
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>signal journey_ended(ending_event: JourneyEvent)   # the terminal event, for ending screens
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>signal journey_error(message: String)               # soft failures, for dev tooling/telemetry
+</code></pre></div>
+<p><code>resource_changed</code>/<code>flag_changed</code> fire per mutation so HUD elements can animate individual deltas without diffing whole dictionaries. They fire <em>after</em> clamping, reporting the actual stored value.</p>
+<h3 id="54-why-routing-precedence-is-data-not-policy">5.4 Why routing precedence is data, not policy<a class="headerlink" href="#54-why-routing-precedence-is-data-not-policy" title="Permanent link">&para;</a></h3>
+<p>A choice could in principle specify both a <code>target_event</code> and <code>continue_to_pool</code>. Rather than forbid it (which the inspector can't enforce), we define a total precedence order (forced &gt; target &gt; pool &gt; end). Authors get predictable behavior; <strong>[Studio]</strong> Studio can render the effective route by applying the same precedence, and can warn on contradictory combinations without needing to block them.</p>
+<h3 id="55-presentation-contract-the-engineui-boundary">5.5 Presentation Contract (the engine/UI boundary)<a class="headerlink" href="#55-presentation-contract-the-engineui-boundary" title="Permanent link">&para;</a></h3>
+<p>The engine is <strong>presentation-agnostic</strong>: it computes <em>what is true now</em> and broadcasts it via signals carrying inert data; it never instantiates a Node, never touches the SceneTree, and never assumes a UI exists. The same logic runs identically behind a polished animated front end, a command-line harness (§8.2), or no presentation at all. This section formalizes the boundary so front-end authors — and the Starter UI Kit (§5.6) — build against a contract, not against implementation detail.</p>
+<p><strong>The division of responsibility:</strong></p>
+<ul>
+<li><strong>Engine owns <em>what</em>:</strong> the active event, its asset <em>references</em> (<code>background_texture</code>, <code>ambient_audio</code>), the filtered list of currently-visible choices, and all resource/flag values. It transports asset references as inert handles — it hands you "this event wants this texture," never "display it this way."</li>
+<li><strong>Presentation owns <em>how</em> and <em>when</em>:</strong> all visuals, animation, transitions, cutscenes, sprite work, text reveal, audio playback, and — critically — <strong>all timing and sequencing</strong>. None of this is state the engine tracks.</li>
+</ul>
+<p><strong>The timing caveat (the one real sharp edge).</strong> The engine is synchronous and fire-and-forget. <code>process_choice()</code> applies consequences and emits <code>event_changed</code> immediately; it does <strong>not</strong> wait for your transitions, cutscenes, or animations to finish. The engine has no timeline, no animation queue, and no <code>await</code>-this-animation facility — by deliberate non-goal, to keep the core tiny and genre-neutral. Consequences of this, which every front end must honor:</p>
+<ol>
+<li><strong>Input gating is the front end's job.</strong> Don't call <code>process_choice()</code> again until your own presentation is ready. Gate it behind an "is presenting" flag in your UI; the engine will not gate it for you.</li>
+<li><strong>"Animate, then advance" lives in your layer.</strong> If you want a consequence animation to play before the next event appears, run the animation in your <code>event_changed</code>/<code>resource_changed</code> handler and defer the <em>next</em> <code>process_choice()</code> until it completes. The engine has already moved on internally; your UI controls the visible pace.</li>
+<li><strong>Signals report post-clamp truth.</strong> <code>resource_changed</code> fires after clamping with the actual stored value, so HUD animations animate to real values, never to a value the engine will immediately correct.</li>
+</ol>
+<p>This is the only place where "the engine handles it" would be an overpromise. The engine gives you the state-change events to hang behavior off; orchestrating that behavior in time is yours. Stated plainly so no front end assumes a sequencing facility that does not exist.</p>
+<h3 id="56-starter-ui-kit-architectural-requirements-core-adjacent">5.6 Starter UI Kit — architectural requirements (core-adjacent)<a class="headerlink" href="#56-starter-ui-kit-architectural-requirements-core-adjacent" title="Permanent link">&para;</a></h3>
+<p>The Starter UI Kit is a separate, optional, free package (full design in its own doc), but two of its properties are <em>architectural constraints</em> that belong here because they protect the Presentation Contract and must not be violated by the kit or by anything that grows from it.</p>
+<p><strong>Constraint 1 — Widgets subscribe to the engine, never to each other.</strong> The kit is not "a UI"; it is a set of independent widgets (dialogue panel, choice list, resource HUD, background/audio, ending screen), each of which subscribes to <code>JourneyRuntime</code> signals on its own and owns one slice of the screen. <strong>No kit component may <code>preload</code>, reference, or call another kit component.</strong> Swappability is then a property that cannot break: deleting the HUD cannot affect the dialogue panel because they were never connected — they are two independent listeners on the same signal bus. This is the §5.5 Dumb-UI contract applied <em>recursively within</em> the kit.</p>
+<p><strong>Constraint 2 — One widget = one scene = one script, wired only at a thin root.</strong> A <code>JourneyView</code> root scene instances the widgets side by side and wires <em>nothing</em> between them. It is the explicit "delete me and write your own" seam. Replacing a widget means swapping one scene out of <code>JourneyView</code> and deleting nothing else; gutting the kit means emptying <code>JourneyView</code>.</p>
+<p>These constraints are enforceable mechanically (a dependency check: no kit script may reference another kit script — §8.1 of the kit doc). They are recorded here because if a future contributor "just quickly" lets the HUD read the dialogue widget's state, the kit silently stops being swappable, and the engine's central DX promise erodes. The constraint is the feature.</p>
+<hr />
+<h2 id="6-stochastic-pool">6. Stochastic Pool<a class="headerlink" href="#6-stochastic-pool" title="Permanent link">&para;</a></h2>
+<h3 id="61-index-build">6.1 Index build<a class="headerlink" href="#61-index-build" title="Permanent link">&para;</a></h3>
+<p><code>PoolIndex</code> scans <code>config.event_pool_dir</code> once:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>for each .tres under dir (recursive):
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    load as JourneyEvent (skip non-events)
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    assert unique non-empty id  → else push_error, skip
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    for tag in event.event_tags:
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>        by_tag[tag].append(event)
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    all_events.append(event)
+</code></pre></div>
+<p>Built lazily on first pull (or eagerly at <code>start_new_journey</code> — configurable). In editor with <code>rebuild_pool_in_editor</code>, the index exposes a <code>rebuild()</code> that game-side dev tools or <strong>[Studio]</strong> can call after writing new resources.</p>
+<p><strong>Web/WASM note:</strong> <code>DirAccess</code> enumeration of <code>res://</code> works in exported builds because resources are baked into the PCK; we rely on <code>ResourceLoader</code> paths, not OS filesystem calls, so this is export-safe. Verified as an explicit test target (§8.2) because directory scanning is a classic source of "works in editor, breaks in export" bugs.</p>
+<h3 id="62-candidate-selection-one-pull">6.2 Candidate selection (one pull)<a class="headerlink" href="#62-candidate-selection-one-pull" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>1. scope = union of by_tag[t] for t in requested_tags   (or all_events if none requested)
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>2. candidates = [e in scope where
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>       (e.repeatable or e.id not in seen) and
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>       evaluate(e.pool_conditions, blackboard) ]
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>3. if candidates empty:  emit journey_error(&quot;empty pool for tags …&quot;); return null
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>4. weighted pick over candidates using e.weight and blackboard.rng
+</code></pre></div>
+<h3 id="63-weighted-pick-deterministic">6.3 Weighted pick (deterministic)<a class="headerlink" href="#63-weighted-pick-deterministic" title="Permanent link">&para;</a></h3>
+<p>Standard cumulative-weight roll using <code>blackboard.rng.randi_range</code>/<code>randf</code>. Because the RNG is part of saved state and seeded explicitly, a reloaded save that makes the same choices reproduces the same pulls. Weights are static ints (PRD §3.4 / §6 deferral). The selection function is isolated and pure (<code>(candidates, rng) -&gt; event</code>) for unit testing with a fixed seed.</p>
+<h3 id="64-empty-pool-handling">6.4 Empty-pool handling<a class="headerlink" href="#64-empty-pool-handling" title="Permanent link">&para;</a></h3>
+<p>An empty candidate set is an authoring error, not a player-facing crash. We emit <code>journey_error</code> and return null; <code>_enter_event(null)</code> then surfaces the error. Optionally, <code>JourneyConfig</code> may later define a <code>fallback_event</code> for graceful degradation (noted, not in v1).</p>
+<hr />
+<h2 id="7-save-load">7. Save / Load<a class="headerlink" href="#7-save-load" title="Permanent link">&para;</a></h2>
+<h3 id="71-what-gets-serialized">7.1 What gets serialized<a class="headerlink" href="#71-what-gets-serialized" title="Permanent link">&para;</a></h3>
+<p>Only the Blackboard, reduced to primitives:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>{
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>  &quot;save_version&quot;: int,
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>  &quot;rng_state&quot;: int,                  # rng.state, to resume the exact stream
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>  &quot;rng_seed&quot;: int,
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>  &quot;resources&quot;: { String: float },
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>  &quot;flags&quot;: { String: bool },
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>  &quot;metadata&quot;: {                      # primitives only
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>      &quot;current_event_id&quot;: String,
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>      &quot;turn_counter&quot;: int,
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>      &quot;seen_ids&quot;: [String],
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>      &quot;history&quot;: [String],
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>  }
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>}
+</code></pre></div>
+<p>No <code>JourneyEvent</code>/<code>Resource</code> objects are ever written. <code>current_event_id</code> is the event's stable <code>id</code> (§3.8); on load we resolve it back through the PoolIndex / a direct lookup. This is why <code>id</code> exists.</p>
+<h3 id="72-write-path">7.2 Write path<a class="headerlink" href="#72-write-path" title="Permanent link">&para;</a></h3>
+<p><code>store_var(dict)</code> to <code>user://&lt;slot&gt;.dat</code>, plaintext or <code>open_encrypted_with_pass</code> per <code>config.save_encryption_key</code> (PRD §5). <code>store_var</code> with <code>full_objects=false</code> (default) guarantees we <em>cannot</em> accidentally embed an object — a deliberate safety: if a non-primitive sneaks into the dict, the write fails loudly rather than baking a brittle object reference into saves.</p>
+<h3 id="73-load-path">7.3 Load path<a class="headerlink" href="#73-load-path" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Open (encrypted iff key set), <code>get_var</code>.</li>
+<li>Check <code>save_version</code>; run migrations if older (§7.4).</li>
+<li>Restore resources/flags/metadata.</li>
+<li>Restore <code>rng.state</code>.</li>
+<li>Resolve <code>current_event_id</code> → event; re-enter it (re-emits <code>event_changed</code> so UI rebuilds). Loading is just "restore Blackboard, then re-enter current event" — the same code path as normal routing, so no special UI restore logic is needed.</li>
+</ol>
+<h3 id="74-versioning-and-migration">7.4 Versioning and migration<a class="headerlink" href="#74-versioning-and-migration" title="Permanent link">&para;</a></h3>
+<p><code>save_version</code> is stamped on every save. On load, a <code>_migrate(dict, from_version)</code> ladder upgrades old saves step-by-step to current. v1 ships the scaffold (identity migration) even though there's nothing to migrate yet, so that the <em>first</em> breaking change has a place to live and shipped games don't strand player saves. This is cheap now and expensive to retrofit, hence included in v1.</p>
+<hr />
+<h2 id="8-validation-errors-and-testing">8. Validation, Errors, and Testing<a class="headerlink" href="#8-validation-errors-and-testing" title="Permanent link">&para;</a></h2>
+<h3 id="81-authoring-validation-validate-utility">8.1 Authoring validation (<code>validate()</code> utility)<a class="headerlink" href="#81-authoring-validation-validate-utility" title="Permanent link">&para;</a></h3>
+<p>A dev-only function games can call in <code>_ready</code> under <code>OS.is_debug_build()</code>:</p>
+<ul>
+<li>Duplicate or empty event <code>id</code>s.</li>
+<li>Choices whose <code>target_event</code> is null AND <code>continue_to_pool</code> false AND no consequences → likely a dead/unfinished node (warn).</li>
+<li>Conditions/consequences referencing resource keys with no <code>JourneyResourceDef</code> (warn — catches typos).</li>
+<li>Resource defs with <code>min &gt; max</code> or <code>default</code> outside bounds (error).</li>
+<li><code>start_event</code> null (error).</li>
+</ul>
+<p><strong>[Studio]</strong> This same validator is what Studio will run on save; defining it in the core means Studio reuses it rather than reimplementing rules, keeping the two in lockstep.</p>
+<h3 id="82-test-strategy">8.2 Test strategy<a class="headerlink" href="#82-test-strategy" title="Permanent link">&para;</a></h3>
+<p>Pure helpers (Evaluator, Mutator, weighted-pick, migration ladder) are unit-tested headlessly with constructed Blackboards and resources — no SceneTree, no Autoload. Targets:</p>
+<ul>
+<li>Every condition operator incl. missing-key policy (§4.3).</li>
+<li>Clamping + bottom/top-out enqueue ordering with simultaneous triggers (§4.4).</li>
+<li>Routing precedence matrix (forced/target/pool/end) (§5.1).</li>
+<li>Deterministic pull reproducibility under fixed seed; empty-pool error.</li>
+<li>Save→load round-trip equality, incl. rng-stream continuity (make N pulls, save, reload, make N more, compare against a no-save control run).</li>
+<li><strong>Export smoke test:</strong> pool index build under a Web/WASM export (§6.1), run in CI if feasible, else a documented manual checklist.</li>
+</ul>
+<p>Recommended harness: GUT (Godot Unit Test) — pure GDScript, CI-friendly. Kept as a dev dependency, not shipped in the MIT package.</p>
+<hr />
+<h2 id="9-public-api-summary-game-facing">9. Public API Summary (game-facing)<a class="headerlink" href="#9-public-api-summary-game-facing" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a># Lifecycle
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>JourneyRuntime.start_new_journey(config: JourneyConfig, seed := 0) -&gt; void
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>JourneyRuntime.process_choice(choice: JourneyChoice) -&gt; void
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a># State access (read-only helpers; mutation only via consequences)
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>JourneyRuntime.get_resource(key: String) -&gt; float
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>JourneyRuntime.has_flag(key: String) -&gt; bool
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>JourneyRuntime.get_metadata(key: String) -&gt; Variant
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a># Persistence
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>JourneyRuntime.save_game(slot := &quot;savegame&quot;) -&gt; Error
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>JourneyRuntime.load_game(slot := &quot;savegame&quot;) -&gt; Error
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a># Dev
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a>JourneyRuntime.validate(config: JourneyConfig) -&gt; Array[String]   # messages; empty = clean
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a>JourneyRuntime.rebuild_pool() -&gt; void                              # [Studio]/editor
+<a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a>
+<a id="__codelineno-15-18" name="__codelineno-15-18" href="#__codelineno-15-18"></a># Signals: event_changed, resource_changed, flag_changed,
+<a id="__codelineno-15-19" name="__codelineno-15-19" href="#__codelineno-15-19"></a>#          journey_started, journey_ended, journey_error
+</code></pre></div>
+<p>Game code never writes the Blackboard directly. All mutation flows through consequences applied by <code>process_choice</code>, so every state change passes clamping, bottom-out checks, and signal emission uniformly. This is the single most important API invariant: <strong>there is exactly one mutation path.</strong></p>
+<hr />
+<h2 id="10-open-questions-future-hooks">10. Open Questions &amp; Future Hooks<a class="headerlink" href="#10-open-questions-future-hooks" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Config split (§3.7):</strong> if <code>JourneyConfig</code> accretes more subsystems, split save settings into <code>JourneySaveConfig</code>. Forward-compatible via an optional <code>@export var save_config</code> that falls back to inline fields.</li>
+<li><strong>History buffer size:</strong> unbounded history bloats saves over long playthroughs. v1 caps <code>history</code> at a configurable ring buffer (default 200) and stores <code>turn_counter</code> separately for true length. Confirm the cap doesn't break any intended "review my whole journey" feature; if it does, history becomes opt-in unbounded.</li>
+<li><strong>Localization:</strong> narrative text is authored inline on events. If i18n is needed, the forward-compatible path is to treat <code>narrative_text</code> as a key into Godot's translation system rather than literal text — no schema change required, only an author convention plus a <code>tr()</code> call in the (developer's) UI. Documented so we don't paint ourselves out of it.</li>
+<li><strong>[Studio] Computed weights / nested conditions:</strong> both were deferred (PRD §6, §3.3). The resource model leaves room for both as additive fields; revisit only when a shipping game demands them, and weigh the Studio-UI cost first.</li>
+<li><strong>Concurrent forced routes:</strong> current rule fires one bottom-out per choice batch (lowest def index). If games need <em>all</em> triggered endings to compose (rare), this becomes a documented limitation rather than a silent one.</li>
+</ol>
+<hr />
+<h2 id="11-build-order-implementation-sequence">11. Build Order (implementation sequence)<a class="headerlink" href="#11-build-order-implementation-sequence" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Resource classes: <code>JourneyCondition</code> → <code>JourneyConsequence</code> → <code>JourneyConditionGroup</code> → <code>JourneyChoice</code> → <code>JourneyEvent</code> → <code>JourneyResourceDef</code> → <code>JourneyConfig</code>.</li>
+<li><code>Blackboard</code> + initialization.</li>
+<li><code>Evaluator</code> (conditions) and <code>Mutator</code> (consequences) as pure helpers + their unit tests.</li>
+<li><code>SequenceManager</code> deterministic routing + <code>_enter_event</code> + signals; minimal test scene proving the loop end-to-end.</li>
+<li><code>PoolIndex</code> + stochastic pull + weighted pick + tests.</li>
+<li><code>SaveManager</code> + versioning + round-trip tests.</li>
+<li><code>validate()</code> utility.</li>
+<li>Export smoke test (Web/WASM) and a small sample game exercising every feature.</li>
+</ol>
+<p>Each step is independently testable and leaves the engine in a runnable state, so the sample game can grow alongside the engine rather than waiting for the end.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
