@@ -42,7 +42,13 @@ func _finish() -> void:
 		print("[test_save_load] PASS (all checks)")
 	else:
 		print("[test_save_load] FAIL: %d check(s) failed" % _failures)
-	get_tree().quit()
+	# Intentionally do NOT call get_tree().quit() — on this editor setup the
+	# child process terminates before the debugger drains stdout, so an auto-
+	# quit eats all the per-check prints in the Output panel. Match the
+	# test_blackboard/test_eval_mutate pattern: the user closes the window
+	# when they're done reading. (Step-8 discovery; PROGRESS-log claims of
+	# verified passes prior to this point should be re-verified now that
+	# output is actually visible.)
 
 func _expect(cond: bool, msg: String) -> void:
 	if cond:

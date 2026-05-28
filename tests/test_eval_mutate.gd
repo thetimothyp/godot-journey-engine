@@ -143,9 +143,10 @@ func _ready() -> void:
 	_check("only sanity reported", single_keys == ["sanity"])
 
 	# Top-out symmetry: set gold's top_out_event and ADD it to max.
-	# Clear sanity's bottom_out_event and lift it off the boundary so it doesn't
-	# co-trigger from the previous batch's residue (the Mutator would correctly
-	# report any def still sitting at its bound — we want a clean top-out check).
+	# Reset sanity to 50 and clear its bottom_out_event for hygiene — strictly
+	# unnecessary after the Step-8 transition-vs-presence fix (the Mutator now
+	# reports only TRANSITIONS, so a residue value sitting at its bound across
+	# batches is silently ignored), but cheap defense-in-depth.
 	sanity_def.bottom_out_event = null
 	bb.resources["sanity"] = 50.0
 	gold_def.top_out_event = test_event
@@ -163,6 +164,53 @@ func _ready() -> void:
 	# Restore the in-memory config so we leave no surprise state for sibling tests.
 	sanity_def.bottom_out_event = null
 	rations_def.bottom_out_event = null
+	gold_def.top_out_event = null
+
+	# -------------------- 4b. Mutator: transition vs presence (Step-8 regression) --------------------
+	# Spec §4.4 / §5.1 specify the forced route fires when the CLAMPED RESULT
+	# of a batch transitions to a boundary. A no-op choice on a value already
+	# sitting at the boundary must NOT re-trigger, or the bottom_out_event
+	# loops forever when its own choices don't lift the value. Regression
+	# from Step 8 sample-game playthrough: evt_madness → "Stumble forward"
+	# (no consequences) re-triggered sanity bottom_out indefinitely.
+	print("\n--- Mutator: transition vs presence (loop guard) ---")
+	sanity_def.bottom_out_event = test_event
+	# (1) Pre = boundary, no consequences → NO trigger.
+	bb.resources["sanity"] = 0.0
+	var noop_batch: Array[JourneyConsequence] = []
+	var noop_triggered: Array[JourneyResourceDef] = JourneyMutator.apply_batch(noop_batch, bb, config)
+	_check("pre=0 + no-op batch → no trigger (the loop guard)", noop_triggered.is_empty())
+	# (2) Pre = boundary, SUBTRACT (stays clamped at 0) → NO trigger.
+	bb.resources["sanity"] = 0.0
+	var stay_at_zero_batch: Array[JourneyConsequence] = [
+		_con_num(JourneyConsequence.Operation.SUBTRACT, "sanity", 5.0),
+	]
+	var stay_triggered: Array[JourneyResourceDef] = JourneyMutator.apply_batch(stay_at_zero_batch, bb, config)
+	_check("pre=0 + SUBTRACT clamps to 0 → no trigger", stay_triggered.is_empty())
+	# (3) Pre = boundary, ADD lifts off boundary → NO trigger (leaving, not entering).
+	bb.resources["sanity"] = 0.0
+	var lift_batch: Array[JourneyConsequence] = [
+		_con_num(JourneyConsequence.Operation.ADD, "sanity", 10.0),
+	]
+	var lift_triggered: Array[JourneyResourceDef] = JourneyMutator.apply_batch(lift_batch, bb, config)
+	_check("pre=0 + ADD lifts off → no trigger", lift_triggered.is_empty())
+	_check("(post-lift) sanity == 10", bb.resources["sanity"] == 10.0)
+	# (4) Pre = OFF boundary, SUBTRACT reaches it → trigger (the original transition case still works).
+	bb.resources["sanity"] = 10.0
+	var enter_batch: Array[JourneyConsequence] = [
+		_con_num(JourneyConsequence.Operation.SUBTRACT, "sanity", 10.0),
+	]
+	var enter_triggered: Array[JourneyResourceDef] = JourneyMutator.apply_batch(enter_batch, bb, config)
+	_check("pre=10 + SUBTRACT 10 → sanity bottom_out triggers (transition case)",
+		enter_triggered.size() == 1 and enter_triggered[0].key == "sanity")
+	# Top-out symmetry: pre=max, no-op → no re-trigger.
+	gold_def.top_out_event = test_event
+	bb.resources["gold"] = gold_def.max_value
+	var noop_top_batch: Array[JourneyConsequence] = []
+	var noop_top_triggered: Array[JourneyResourceDef] = JourneyMutator.apply_batch(noop_top_batch, bb, config)
+	_check("pre=max + no-op → no top-out re-trigger", noop_top_triggered.is_empty())
+	# Clean up: clear the boundary events again so we leave no surprise state.
+	sanity_def.bottom_out_event = null
 	gold_def.top_out_event = null
 
 	print("\n=== Step 3 manual test done ===")

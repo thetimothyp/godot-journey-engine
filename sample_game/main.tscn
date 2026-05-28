@@ -1,0 +1,154 @@
+[gd_scene format=3 uid="uid://wuns1gjyd5eq"]
+
+[ext_resource type="Script" uid="uid://dq04jv0crk6o5" path="res://sample_game/main.gd" id="1_main"]
+
+[node name="Main" type="Control" unique_id=171494260]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="Layout" type="VBoxContainer" parent="." unique_id=1493722086]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="Hud" type="HBoxContainer" parent="Layout" unique_id=1220665351]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Gold" type="Label" parent="Layout/Hud" unique_id=544291233]
+layout_mode = 2
+text = "Gold: --"
+
+[node name="Sanity" type="Label" parent="Layout/Hud" unique_id=448880997]
+layout_mode = 2
+text = "Sanity: --"
+
+[node name="Rations" type="Label" parent="Layout/Hud" unique_id=1343493164]
+layout_mode = 2
+text = "Rations: --"
+
+[node name="Turn" type="Label" parent="Layout/Hud" unique_id=1786813073]
+layout_mode = 2
+text = "Turn: 0"
+
+[node name="Spacer" type="Control" parent="Layout/Hud" unique_id=1622194317]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SaveBtn" type="Button" parent="Layout/Hud" unique_id=788153334]
+layout_mode = 2
+text = "Save"
+
+[node name="LoadBtn" type="Button" parent="Layout/Hud" unique_id=1994916066]
+layout_mode = 2
+text = "Load"
+
+[node name="RestartBtn" type="Button" parent="Layout/Hud" unique_id=370103345]
+layout_mode = 2
+text = "Restart"
+
+[node name="Body" type="HBoxContainer" parent="Layout" unique_id=841803703]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="NarrativePanel" type="PanelContainer" parent="Layout/Body" unique_id=1210925775]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="Margin" type="MarginContainer" parent="Layout/Body/NarrativePanel" unique_id=705184205]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Narrative" type="RichTextLabel" parent="Layout/Body/NarrativePanel/Margin" unique_id=1135570776]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = true
+
+[node name="ChoicesPanel" type="PanelContainer" parent="Layout/Body" unique_id=654921916]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ChoicesMargin" type="MarginContainer" parent="Layout/Body/ChoicesPanel" unique_id=824608235]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Choices" type="VBoxContainer" parent="Layout/Body/ChoicesPanel/ChoicesMargin" unique_id=1632971927]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="EndingOverlay" type="Panel" parent="." unique_id=1715672289]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="EndingLabel" type="RichTextLabel" parent="EndingOverlay" unique_id=739742893]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 64.0
+offset_top = 80.0
+offset_right = -64.0
+offset_bottom = -120.0
+grow_horizontal = 2
+grow_vertical = 2
+bbcode_enabled = true
+fit_content = true
+
+[node name="RestartBtn" type="Button" parent="EndingOverlay" unique_id=73099731]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -80.0
+offset_right = 80.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Begin again"
+
+[node name="Toast" type="Label" parent="." unique_id=304420753]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -56.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 0
+horizontal_alignment = 1
+
+[node name="Timer" type="Timer" parent="Toast" unique_id=1013954078]
+one_shot = true

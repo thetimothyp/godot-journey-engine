@@ -38,12 +38,23 @@ static func apply_consequence(con: JourneyConsequence, bb: Blackboard, config: J
 			bb.resources[con.key] = clamp(raw, def.min_value, def.max_value)
 
 ## Apply an ordered batch of consequences, then detect (don't route) any
-## resource defs that ended sitting at a boundary with a forced-route event
-## configured. Per §4.4:
+## resource defs that **transitioned** to a boundary with a forced-route event
+## configured. Per §4.4 / §5.1:
 ##  - Apply EVERY consequence first (batch completes before any forced route).
-##  - Scan resource_defs in DEFINITION ORDER for clamped value == min_value with
-##    a bottom_out_event set, or == max_value with a top_out_event set.
+##  - Scan resource_defs in DEFINITION ORDER for clamped *result* == min_value
+##    with bottom_out_event set, or == max_value with top_out_event set, AND
+##    where the pre-batch value was OFF the boundary.
 ##  - Return the triggered defs in definition order.
+##
+## TRANSITION, not presence (the §4.4 line 257 "if clamped RESULT == min_value"
+## clause refers to the result of THIS batch, not "any time a value sits at
+## the boundary"). If a value was already at the boundary when the batch
+## began, do NOT re-trigger — otherwise a no-op choice on a value already at
+## min_value loops the player back to the bottom_out_event forever (a real
+## defect surfaced by Step-8 sample-game playthrough, where evt_madness fired,
+## the player's "Stumble forward" choice had no consequences, and sanity
+## stayed at 0 — re-triggering bottom_out_event every click). The pre-batch
+## snapshot below is the infinite-loop guard.
 ##
 ## The Step 4 SequenceManager will route to the FIRST returned def's event
 ## (lowest def index) and ignore the rest — that's the deterministic rule for
@@ -54,6 +65,14 @@ static func apply_consequence(con: JourneyConsequence, bb: Blackboard, config: J
 ## def.max_value directly. clamp() forces an exact assignment to the bound, so
 ## the stored value is bit-identical to the bound; no epsilon needed.
 static func apply_batch(consequences: Array[JourneyConsequence], bb: Blackboard, config: JourneyConfig) -> Array[JourneyResourceDef]:
+	# Pre-batch snapshot for transition detection. Only track defs with a
+	# boundary route configured — the rest can't trigger anyway, so paying for
+	# the dict entry is wasted.
+	var pre: Dictionary = {}
+	for def in config.resource_defs:
+		if def.bottom_out_event != null or def.top_out_event != null:
+			pre[def.key] = bb.resources.get(def.key, 0.0)
+
 	for con in consequences:
 		apply_consequence(con, bb, config)
 
@@ -62,9 +81,11 @@ static func apply_batch(consequences: Array[JourneyConsequence], bb: Blackboard,
 		if not bb.resources.has(def.key):
 			continue
 		var v: float = bb.resources[def.key]
-		if v == def.min_value and def.bottom_out_event != null:
+		var pre_v: float = pre.get(def.key, v)
+		# Transition guard (pre_v != boundary) — see docstring above.
+		if v == def.min_value and def.bottom_out_event != null and pre_v != def.min_value:
 			triggered.append(def)
-		elif v == def.max_value and def.top_out_event != null:
+		elif v == def.max_value and def.top_out_event != null and pre_v != def.max_value:
 			triggered.append(def)
 	return triggered
 

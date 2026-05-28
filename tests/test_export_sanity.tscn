@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://wun05qpdbueq"]
+
+[ext_resource type="Script" path="res://tests/test_export_sanity.gd" id="1_script"]
+
+[node name="TestExportSanity" type="Node"]
+script = ExtResource("1_script")

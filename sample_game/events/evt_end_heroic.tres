@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="JourneyEvent" format=3 uid="uid://jfet4fap1mpq"]
+
+[ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://journey_core/journey_event.gd" id="1_event"]
+[ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://journey_core/journey_choice.gd" id="2_choice"]
+[ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://journey_core/journey_consequence.gd" id="3_conseq"]
+
+[sub_resource type="Resource" id="Conseq_end_heroic_marker"]
+script = ExtResource("3_conseq")
+operation = 3
+key = "ending_heroic"
+metadata/_custom_type_script = "uid://i001tv2xcpdh"
+
+[sub_resource type="Resource" id="Choice_end_heroic_close"]
+script = ExtResource("2_choice")
+button_text = "Close the book."
+consequences = Array[ExtResource("3_conseq")]([SubResource("Conseq_end_heroic_marker")])
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[resource]
+script = ExtResource("1_event")
+narrative_text = "You arrive whole. The roads you walked are quieter now, and somewhere a stranger you helped tells a story about you. A heroic ending."
+id = &"evt_end_heroic"
+choices = Array[ExtResource("2_choice")]([SubResource("Choice_end_heroic_close")])
+metadata/_custom_type_script = "uid://cd45ite7r06rf"

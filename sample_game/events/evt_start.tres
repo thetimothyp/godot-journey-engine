@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="JourneyEvent" format=3 uid="uid://sg0evstartdet01"]
+
+[ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://journey_core/journey_event.gd" id="1_event"]
+[ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://journey_core/journey_choice.gd" id="2_choice"]
+[ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://journey_core/journey_consequence.gd" id="3_conseq"]
+[ext_resource type="Resource" uid="uid://sg0evroadbegin1" path="res://sample_game/events/evt_road_begins.tres" id="4_begins"]
+
+[sub_resource type="Resource" id="Conseq_start_helped"]
+script = ExtResource("3_conseq")
+operation = 3
+key = "helped_stranger"
+metadata/_custom_type_script = "uid://i001tv2xcpdh"
+
+[sub_resource type="Resource" id="Choice_start_help"]
+script = ExtResource("2_choice")
+button_text = "Help the stranger fix their wagon."
+consequences = Array[ExtResource("3_conseq")]([SubResource("Conseq_start_helped")])
+target_event = ExtResource("4_begins")
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[sub_resource type="Resource" id="Conseq_start_alone_sanity"]
+script = ExtResource("3_conseq")
+operation = 1
+key = "sanity"
+value = 8.0
+metadata/_custom_type_script = "uid://i001tv2xcpdh"
+
+[sub_resource type="Resource" id="Choice_start_walk"]
+script = ExtResource("2_choice")
+button_text = "Walk past, head down (-8 sanity)."
+consequences = Array[ExtResource("3_conseq")]([SubResource("Conseq_start_alone_sanity")])
+target_event = ExtResource("4_begins")
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[resource]
+script = ExtResource("1_event")
+narrative_text = "A traveler stands beside a broken wagon at the crossroads. They look up as you approach."
+id = &"evt_start"
+choices = Array[ExtResource("2_choice")]([SubResource("Choice_start_help"), SubResource("Choice_start_walk")])
+metadata/_custom_type_script = "uid://cd45ite7r06rf"

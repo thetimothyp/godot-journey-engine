@@ -1,0 +1,49 @@
+[gd_resource type="Resource" script_class="JourneyEvent" format=3 uid="uid://jfpvgi7k25eq"]
+
+[ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://journey_core/journey_event.gd" id="1_event"]
+[ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://journey_core/journey_choice.gd" id="2_choice"]
+[ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://journey_core/journey_consequence.gd" id="3_conseq"]
+
+[sub_resource type="Resource" id="Conseq_camp_sanity"]
+script = ExtResource("3_conseq")
+key = "sanity"
+value = 8.0
+metadata/_custom_type_script = "uid://i001tv2xcpdh"
+
+[sub_resource type="Resource" id="Conseq_camp_rations"]
+script = ExtResource("3_conseq")
+operation = 1
+key = "rations"
+value = 10.0
+metadata/_custom_type_script = "uid://i001tv2xcpdh"
+
+[sub_resource type="Resource" id="Conseq_camp_progress"]
+script = ExtResource("3_conseq")
+key = "road_progress"
+value = 10.0
+metadata/_custom_type_script = "uid://i001tv2xcpdh"
+
+[sub_resource type="Resource" id="Choice_camp_rest"]
+script = ExtResource("2_choice")
+button_text = "Rest for the night (+8 sanity, -10 rations)."
+consequences = Array[ExtResource("3_conseq")]([SubResource("Conseq_camp_sanity"), SubResource("Conseq_camp_rations"), SubResource("Conseq_camp_progress")])
+continue_to_pool = true
+pool_tags_filter = Array[String](["road"])
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[sub_resource type="Resource" id="Choice_camp_push"]
+script = ExtResource("2_choice")
+button_text = "Push on through the dark."
+consequences = Array[ExtResource("3_conseq")]([SubResource("Conseq_camp_progress")])
+continue_to_pool = true
+pool_tags_filter = Array[String](["road"])
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[resource]
+script = ExtResource("1_event")
+narrative_text = "A clearing opens beside the road. Good ground for a fire."
+id = &"evt_road_camp"
+event_tags = Array[String](["road"])
+repeatable = true
+choices = Array[ExtResource("2_choice")]([SubResource("Choice_camp_rest"), SubResource("Choice_camp_push")])
+metadata/_custom_type_script = "uid://cd45ite7r06rf"

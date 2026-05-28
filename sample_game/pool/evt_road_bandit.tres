@@ -1,0 +1,66 @@
+[gd_resource type="Resource" script_class="JourneyEvent" format=3 uid="uid://jfpvgi6lp5eq"]
+
+[ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://journey_core/journey_event.gd" id="1_event"]
+[ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://journey_core/journey_choice.gd" id="2_choice"]
+[ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://journey_core/journey_consequence.gd" id="3_conseq"]
+[ext_resource type="Script" uid="uid://k60namdri10y" path="res://journey_core/journey_condition.gd" id="4_cond"]
+[ext_resource type="Script" uid="uid://bwkdyqkiuostq" path="res://journey_core/journey_condition_group.gd" id="5_group"]
+
+[sub_resource type="Resource" id="Conseq_bandit_pay_gold"]
+script = ExtResource("3_conseq")
+operation = 1
+key = "gold"
+value = 30.0
+metadata/_custom_type_script = "uid://i001tv2xcpdh"
+
+[sub_resource type="Resource" id="Conseq_bandit_progress"]
+script = ExtResource("3_conseq")
+key = "road_progress"
+value = 10.0
+metadata/_custom_type_script = "uid://i001tv2xcpdh"
+
+[sub_resource type="Resource" id="Cond_bandit_can_afford"]
+script = ExtResource("4_cond")
+key = "gold"
+op = 1
+value = 30.0
+metadata/_custom_type_script = "uid://k60namdri10y"
+
+[sub_resource type="Resource" id="Group_bandit_can_afford"]
+script = ExtResource("5_group")
+conditions = Array[ExtResource("4_cond")]([SubResource("Cond_bandit_can_afford")])
+metadata/_custom_type_script = "uid://bwkdyqkiuostq"
+
+[sub_resource type="Resource" id="Choice_bandit_pay"]
+script = ExtResource("2_choice")
+button_text = "Pay them off (-30 gold)."
+visibility = SubResource("Group_bandit_can_afford")
+consequences = Array[ExtResource("3_conseq")]([SubResource("Conseq_bandit_pay_gold"), SubResource("Conseq_bandit_progress")])
+continue_to_pool = true
+pool_tags_filter = Array[String](["road"])
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[sub_resource type="Resource" id="Conseq_bandit_fight_sanity"]
+script = ExtResource("3_conseq")
+operation = 1
+key = "sanity"
+value = 15.0
+metadata/_custom_type_script = "uid://i001tv2xcpdh"
+
+[sub_resource type="Resource" id="Choice_bandit_fight"]
+script = ExtResource("2_choice")
+button_text = "Fight them off (-15 sanity)."
+consequences = Array[ExtResource("3_conseq")]([SubResource("Conseq_bandit_fight_sanity"), SubResource("Conseq_bandit_progress")])
+continue_to_pool = true
+pool_tags_filter = Array[String](["road"])
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[resource]
+script = ExtResource("1_event")
+narrative_text = "Two bandits step out from the trees, knives drawn."
+id = &"evt_road_bandit"
+event_tags = Array[String](["road", "danger"])
+weight = 200
+repeatable = true
+choices = Array[ExtResource("2_choice")]([SubResource("Choice_bandit_pay"), SubResource("Choice_bandit_fight")])
+metadata/_custom_type_script = "uid://cd45ite7r06rf"

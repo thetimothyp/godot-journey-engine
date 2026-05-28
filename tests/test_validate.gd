@@ -47,13 +47,11 @@ func _finish() -> void:
 		print("[test_validate] PASS (all checks)")
 	else:
 		print("[test_validate] FAIL: %d check(s) failed" % _failures)
-	# Yield a couple of frames so the editor's stdout pipe drains before the
-	# process exits — without this, F6 in the editor sometimes shows only the
-	# boot banner because the quit() races the pipe flush. Headless runs are
-	# unaffected (the engine still ticks frames and then quits cleanly).
-	await get_tree().process_frame
-	await get_tree().process_frame
-	get_tree().quit()
+	# Intentionally do NOT call get_tree().quit() — even with a few
+	# process_frame yields, the child process terminates before the editor's
+	# debugger drains stdout, so prints get eaten. Match the
+	# test_blackboard/test_eval_mutate pattern: user closes the window when
+	# they're done reading. (Step-8 discovery applied to all three tests.)
 
 func _expect(cond: bool, msg: String) -> void:
 	if cond:
