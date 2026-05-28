@@ -9,6 +9,15 @@ All signatures below are verified against
 `addons/journey_engine_core/journey_runtime.gd`; the [accuracy checklist](#accuracy-checklist)
 at the end maps each entry to its source line.
 
+## Constants
+
+### `VERSION: String`
+
+The engine version, [SemVer](https://semver.org)-formatted (currently `"0.1.0"`).
+Read `JourneyRuntime.VERSION` to assert compatibility at runtime. It is
+independent of [`JourneyConfig.save_version`](../guides/save-and-load.md#versioning-migration),
+which tracks only the on-disk save format.
+
 ## Properties
 
 ### `blackboard: Blackboard`
@@ -202,22 +211,23 @@ verified against. Spot-check any row against the code.
 
 | Symbol | Source | Line |
 | --- | --- | --- |
-| `blackboard: Blackboard` | `addons/journey_engine_core/journey_runtime.gd` | 31 |
-| `start_new_journey(config, seed=0)` | `addons/journey_engine_core/journey_runtime.gd` | 40 |
-| `process_choice(choice)` | `addons/journey_engine_core/journey_runtime.gd` | 47 |
-| `get_resource(key)` | `addons/journey_engine_core/journey_runtime.gd` | 58 |
-| `has_flag(key)` | `addons/journey_engine_core/journey_runtime.gd` | 61 |
-| `get_metadata(key)` | `addons/journey_engine_core/journey_runtime.gd` | 64 |
-| `save_game(slot="savegame")` | `addons/journey_engine_core/journey_runtime.gd` | 73 |
-| `load_game(slot="savegame")` | `addons/journey_engine_core/journey_runtime.gd` | 101 |
-| `validate(config)` | `addons/journey_engine_core/journey_runtime.gd` | 157 |
-| `rebuild_pool()` | `addons/journey_engine_core/journey_runtime.gd` | 172 |
-| `signal event_changed(event, choices)` | `addons/journey_engine_core/journey_runtime.gd` | 20 |
-| `signal resource_changed(key, old_value, new_value)` | `addons/journey_engine_core/journey_runtime.gd` | 21 |
-| `signal flag_changed(key, value)` | `addons/journey_engine_core/journey_runtime.gd` | 22 |
-| `signal journey_started()` | `addons/journey_engine_core/journey_runtime.gd` | 23 |
-| `signal journey_ended(ending_event)` | `addons/journey_engine_core/journey_runtime.gd` | 24 |
-| `signal journey_error(message)` | `addons/journey_engine_core/journey_runtime.gd` | 25 |
+| `VERSION` | `addons/journey_engine_core/journey_runtime.gd` | 23 |
+| `blackboard: Blackboard` | `addons/journey_engine_core/journey_runtime.gd` | 37 |
+| `start_new_journey(config, seed=0)` | `addons/journey_engine_core/journey_runtime.gd` | 46 |
+| `process_choice(choice)` | `addons/journey_engine_core/journey_runtime.gd` | 53 |
+| `get_resource(key)` | `addons/journey_engine_core/journey_runtime.gd` | 64 |
+| `has_flag(key)` | `addons/journey_engine_core/journey_runtime.gd` | 67 |
+| `get_metadata(key)` | `addons/journey_engine_core/journey_runtime.gd` | 70 |
+| `save_game(slot="savegame")` | `addons/journey_engine_core/journey_runtime.gd` | 79 |
+| `load_game(slot="savegame")` | `addons/journey_engine_core/journey_runtime.gd` | 107 |
+| `validate(config)` | `addons/journey_engine_core/journey_runtime.gd` | 163 |
+| `rebuild_pool()` | `addons/journey_engine_core/journey_runtime.gd` | 178 |
+| `signal event_changed(event, choices)` | `addons/journey_engine_core/journey_runtime.gd` | 26 |
+| `signal resource_changed(key, old_value, new_value)` | `addons/journey_engine_core/journey_runtime.gd` | 27 |
+| `signal flag_changed(key, value)` | `addons/journey_engine_core/journey_runtime.gd` | 28 |
+| `signal journey_started()` | `addons/journey_engine_core/journey_runtime.gd` | 29 |
+| `signal journey_ended(ending_event)` | `addons/journey_engine_core/journey_runtime.gd` | 30 |
+| `signal journey_error(message)` | `addons/journey_engine_core/journey_runtime.gd` | 31 |
 | `Blackboard` fields (resources/flags/metadata/rng) | `addons/journey_engine_core/blackboard.gd` | 11–25 |
 | `JourneyCondition.Op` enum | `addons/journey_engine_core/journey_condition.gd` | 6 |
 | `JourneyConsequence.Operation` enum | `addons/journey_engine_core/journey_consequence.gd` | 6 |

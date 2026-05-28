@@ -16,6 +16,12 @@ extends Node
 ## SceneTree. Reactive output is signals only; data inside those signals is
 ## inert (events, choice arrays, primitives).
 
+## Engine version, SemVer (https://semver.org). Bump on release and keep in sync
+## with addons/journey_engine_core/plugin.cfg. Games can read JourneyRuntime.VERSION
+## to assert compatibility at runtime. Independent of JourneyConfig.save_version,
+## which only tracks the on-disk save format.
+const VERSION := "0.1.0"
+
 # --- Signals (§5.3) — declare exactly these. ---
 signal event_changed(event: JourneyEvent, choices: Array[JourneyChoice])
 signal resource_changed(key: String, old_value: float, new_value: float)

@@ -1,11 +1,12 @@
 # Changelog
 
-No tagged releases yet. This page is a stub — populate it when you cut the first
-release.
+This project follows [Keep a Changelog](https://keepachangelog.com/) conventions
+and [Semantic Versioning](https://semver.org/). The engine version is exposed at
+runtime as `JourneyRuntime.VERSION`.
 
-## Unreleased
+## 0.1.0 — 2026-05-28
 
-The core runtime is feature-complete. Implemented capabilities:
+Initial release. The core runtime is feature-complete:
 
 - **Resource model** — `JourneyConfig`, `JourneyEvent`, `JourneyChoice`,
   `JourneyCondition`, `JourneyConditionGroup`, `JourneyConsequence`,
@@ -23,6 +24,6 @@ The core runtime is feature-complete. Implemented capabilities:
 - **Validation** — pure-inspection authoring checks (`validate()`).
 - **Sample game** — a complete playable journey exercising every feature,
   verified in the editor and as a Web/WASM export.
-
-When you tag a release, follow [Keep a Changelog](https://keepachangelog.com/)
-conventions and a versioning scheme (e.g. [SemVer](https://semver.org/)).
+- **Packaging** — shipped as the `addons/journey_engine_core/` Godot addon with
+  an editor plugin that registers the `JourneyRuntime` autoload on enable.
+- **Documentation** — full MkDocs + Material site under `docs/`.
