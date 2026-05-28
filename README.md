@@ -112,6 +112,11 @@ mkdocs.yml                   # docs site config
 The bundled `sample_game/` consumes only the public API and is the reference
 implementation of the [Dumb-UI / presentation contract](docs/concepts/presentation-contract.md).
 
+## Releasing
+
+Maintainers: see [RELEASING.md](RELEASING.md) for the version-bump, GitHub
+Release, GitHub Pages, and Asset Library procedures.
+
 ## License
 
 [MIT](LICENSE).

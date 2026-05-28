@@ -6,6 +6,9 @@ site_description: >-
 
 repo_url: https://github.com/thetimothyp/godot-journey-engine-core
 repo_name: godot-journey-engine-core
+# Canonical URL for the published site (GitHub Pages). Drives the sitemap and
+# absolute links; see RELEASING.md for the `mkdocs gh-deploy` flow.
+site_url: https://thetimothyp.github.io/godot-journey-engine-core/
 
 # README.md is the human-facing "how to build the docs" note (not a site page);
 # PROGRESS.md is the internal implementation log. Neither belongs in the built
