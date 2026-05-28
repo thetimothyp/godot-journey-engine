@@ -78,5 +78,11 @@ func validate(_config: JourneyConfig) -> Array[String]:
 	push_warning("JourneyRuntime.validate: not implemented until Step 7")
 	return []
 
+## [Studio]/editor hot-reload hook (§9 / §3.7). Forwards to the SequenceManager,
+## which owns the pool index. Safe to call before the first pool pull; the
+## index itself is rebuilt against config.event_pool_dir.
 func rebuild_pool() -> void:
-	push_warning("JourneyRuntime.rebuild_pool: not implemented until Step 5")
+	if _seq == null:
+		push_warning("JourneyRuntime.rebuild_pool: runtime not ready")
+		return
+	_seq.rebuild_pool()

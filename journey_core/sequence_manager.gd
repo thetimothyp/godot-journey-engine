@@ -18,9 +18,15 @@ var _runtime: Node  # JourneyRuntime; typed loosely to avoid a circular class_na
 var _config: JourneyConfig
 ## Reference to the event most recently entered. The Blackboard only stores its
 ## id (per save-friendly §3.8), so we keep the live object here so terminal
-## choices can pass it to journey_ended without resolving through a pool index
-## that doesn't exist until Step 5.
+## choices can pass it to journey_ended without an id→event lookup.
 var _current_event: JourneyEvent
+
+## §6.1 stochastic pool. Built lazily on the first pool pull (or via the
+## public rebuild_pool() hook) — eager build at start_new_journey is also
+## permitted by §6.1, but lazy keeps games that never enter the pool from
+## paying a directory scan. The instance itself is constructed up-front so
+## rebuild_pool() can be called before any pull has happened.
+var _pool_index: JourneyPoolIndex = JourneyPoolIndex.new()
 
 func _init(runtime: Node) -> void:
 	_runtime = runtime
@@ -33,6 +39,9 @@ func start_new_journey(config: JourneyConfig, seed: int = 0) -> void:
 	if config == null:
 		_runtime.journey_error.emit("start_new_journey called with null config")
 		return
+	# Reset the pool index so a second journey with a different event_pool_dir
+	# doesn't reuse the prior config's loaded events. Lazy rebuild on first pull.
+	_pool_index = JourneyPoolIndex.new()
 	_runtime.blackboard.initialize(config, seed)
 	_runtime.journey_started.emit()
 	if config.start_event == null:
@@ -41,7 +50,7 @@ func start_new_journey(config: JourneyConfig, seed: int = 0) -> void:
 	_enter_event(config.start_event)
 
 ## §5.1 routing. Strict precedence: forced bottom/top-out > deterministic target
-## > continue_to_pool (Step 5 — currently a clean error) > end journey.
+## > continue_to_pool (Step 5: stochastic pull via JourneyPoolIndex) > end journey.
 ##
 ## Signal emission strategy for per-mutation resource_changed/flag_changed
 ## (§5.3): the Mutator stays pure (no signals), so we snapshot every key
@@ -110,7 +119,7 @@ func process_choice(choice: JourneyChoice) -> void:
 		_enter_event(choice.target_event)
 		return
 	if choice.continue_to_pool:
-		_runtime.journey_error.emit("pool routing not implemented until Step 5")
+		_route_to_pool(choice)
 		return
 
 	# Terminal choice: end on the current event so the UI gets the ending screen.
@@ -151,3 +160,27 @@ func _enter_event(event: JourneyEvent) -> void:
 
 func _end_journey(ending_event: JourneyEvent) -> void:
 	_runtime.journey_ended.emit(ending_event)
+
+## §6.2 pool pull. Lazily builds the index from config.event_pool_dir on the
+## first pull. Empty pool → journey_error per §6.4; the game does NOT crash —
+## the journey simply can't advance from this choice, which surfaces as a
+## dev-visible error rather than a hidden no-op.
+func _route_to_pool(choice: JourneyChoice) -> void:
+	if not _pool_index.is_built():
+		_pool_index.build(_config.event_pool_dir)
+	var bb: Blackboard = _runtime.blackboard
+	var seen: Array = bb.metadata.get("seen_ids", [])
+	var event: JourneyEvent = _pool_index.select(choice.pool_tags_filter, bb, seen, _config)
+	if event == null:
+		_runtime.journey_error.emit("empty pool for tags: %s" % str(choice.pool_tags_filter))
+		return
+	_enter_event(event)
+
+## [Studio]/editor hot-reload entry point (§3.7 / §6.1). Rebuilds the pool
+## index from config.event_pool_dir; safe to call before any pool pull has
+## happened.
+func rebuild_pool() -> void:
+	if _config == null:
+		push_warning("JourneySequenceManager.rebuild_pool: no active config")
+		return
+	_pool_index.rebuild(_config.event_pool_dir)

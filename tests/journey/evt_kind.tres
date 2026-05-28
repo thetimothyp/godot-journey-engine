@@ -8,7 +8,7 @@
 
 [sub_resource type="Resource" id="Cond_helped_stranger"]
 script = ExtResource("4_cond")
-key = "never_set"
+key = "helped_stranger"
 op = 6
 metadata/_custom_type_script = "uid://k60namdri10y"
 

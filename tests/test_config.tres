@@ -31,4 +31,5 @@ initial_flags = {
 "started": true
 }
 start_event = ExtResource("3_start")
+event_pool_dir = "res://tests/pool/"
 metadata/_custom_type_script = "uid://bhgg6f367cgd2"

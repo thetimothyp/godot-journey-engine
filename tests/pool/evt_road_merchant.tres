@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="JourneyEvent" format=3 uid="uid://b1evmerchroad0"]
+
+[ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://journey_core/journey_event.gd" id="1_event"]
+[ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://journey_core/journey_choice.gd" id="2_choice"]
+[ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://journey_core/journey_consequence.gd" id="3_conseq"]
+
+[sub_resource type="Resource" id="Choice_merch_continue"]
+script = ExtResource("2_choice")
+button_text = "Travel on"
+continue_to_pool = true
+pool_tags_filter = Array[String](["road"])
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[sub_resource type="Resource" id="Conseq_setrainy"]
+script = ExtResource("3_conseq")
+operation = 3
+key = "rainy_season"
+metadata/_custom_type_script = "uid://i001tv2xcpdh"
+
+[sub_resource type="Resource" id="Choice_merch_rain"]
+script = ExtResource("2_choice")
+button_text = "Bring on the rain"
+consequences = Array[ExtResource("3_conseq")]([SubResource("Conseq_setrainy")])
+continue_to_pool = true
+pool_tags_filter = Array[String](["road"])
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[resource]
+script = ExtResource("1_event")
+narrative_text = "A merchant waves you over."
+id = &"evt_road_merchant"
+event_tags = Array[String](["road", "trade"])
+choices = Array[ExtResource("2_choice")]([SubResource("Choice_merch_continue"), SubResource("Choice_merch_rain")])
+metadata/_custom_type_script = "uid://cd45ite7r06rf"

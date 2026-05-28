@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="JourneyEvent" format=3 uid="uid://b1evrepeatroad"]
+
+[ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://journey_core/journey_event.gd" id="1_event"]
+[ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://journey_core/journey_choice.gd" id="2_choice"]
+
+[sub_resource type="Resource" id="Choice_repeat_continue"]
+script = ExtResource("2_choice")
+button_text = "Travel on"
+continue_to_pool = true
+pool_tags_filter = Array[String](["road"])
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[sub_resource type="Resource" id="Choice_repeat_camp"]
+script = ExtResource("2_choice")
+button_text = "Make camp; rest here"
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[resource]
+script = ExtResource("1_event")
+narrative_text = "The road stretches on."
+id = &"evt_road_repeatable"
+event_tags = Array[String](["road"])
+repeatable = true
+choices = Array[ExtResource("2_choice")]([SubResource("Choice_repeat_continue"), SubResource("Choice_repeat_camp")])
+metadata/_custom_type_script = "uid://cd45ite7r06rf"

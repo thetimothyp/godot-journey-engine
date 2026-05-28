@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="JourneyEvent" format=3 uid="uid://b1evstormroad0"]
+
+[ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://journey_core/journey_event.gd" id="1_event"]
+[ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://journey_core/journey_choice.gd" id="2_choice"]
+[ext_resource type="Script" uid="uid://k60namdri10y" path="res://journey_core/journey_condition.gd" id="3_cond"]
+[ext_resource type="Script" uid="uid://bwkdyqkiuostq" path="res://journey_core/journey_condition_group.gd" id="4_group"]
+
+[sub_resource type="Resource" id="Cond_rainy"]
+script = ExtResource("3_cond")
+key = "rainy_season"
+op = 6
+metadata/_custom_type_script = "uid://k60namdri10y"
+
+[sub_resource type="Resource" id="Group_rainy"]
+script = ExtResource("4_group")
+conditions = Array[ExtResource("3_cond")]([SubResource("Cond_rainy")])
+metadata/_custom_type_script = "uid://bwkdyqkiuostq"
+
+[sub_resource type="Resource" id="Choice_storm_continue"]
+script = ExtResource("2_choice")
+button_text = "Travel on"
+continue_to_pool = true
+pool_tags_filter = Array[String](["road"])
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[resource]
+script = ExtResource("1_event")
+narrative_text = "A storm rolls in."
+id = &"evt_road_storm"
+event_tags = Array[String](["road", "danger"])
+weight = 50
+pool_conditions = SubResource("Group_rainy")
+choices = Array[ExtResource("2_choice")]([SubResource("Choice_storm_continue")])
+metadata/_custom_type_script = "uid://cd45ite7r06rf"
