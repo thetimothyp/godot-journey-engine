@@ -128,6 +128,20 @@ func _ingest(path: String, seen_ids: Dictionary, cache_mode: int) -> void:
 		bucket.append(event)
 		by_tag[tag] = bucket
 
+## §3.8 / §7.3 lookup. Linear scan over `all_events` matching by String(id).
+## Returns null on miss (or if the index isn't built yet). Used on save load
+## to resolve `current_event_id` back to a live JourneyEvent — events in the
+## pool dir, which is most narrative content, are reachable through here.
+## (Deterministic events reachable only via choice.target_event chains are
+## handled by the SequenceManager's broader resolver.)
+func find_by_id(id_str: String) -> JourneyEvent:
+	if not _built:
+		return null
+	for e in all_events:
+		if String(e.id) == id_str:
+			return e
+	return null
+
 ## §6.3 cumulative-weight roll over `e.weight`. Pure and static so it is
 ## unit-testable with a constructed RNG and a hand-built candidate array.
 ##

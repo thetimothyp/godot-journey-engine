@@ -128,7 +128,13 @@ func process_choice(choice: JourneyChoice) -> void:
 ## §5.2 enter. Null-route guard, metadata bookkeeping, seen marking, visible-
 ## choice filtering, event_changed emission. Visible-choice filtering lives
 ## HERE so every front end gets identical filtering (Dumb-UI contract §5.5).
-func _enter_event(event: JourneyEvent) -> void:
+##
+## `is_restore` (added in Step 6 for §7.3): when true, this is a load-driven
+## re-entry of the SAVED current event — the UI needs an event_changed signal
+## so widgets rebuild, but turn_counter / history / seen_ids must NOT advance
+## (they already reflect the saved state). Skip the bookkeeping; keep the
+## signal. Normal (non-restore) callers see IDENTICAL behavior to before.
+func _enter_event(event: JourneyEvent, is_restore: bool = false) -> void:
 	if event == null:
 		_runtime.journey_error.emit("route resolved to null")
 		return
@@ -136,20 +142,22 @@ func _enter_event(event: JourneyEvent) -> void:
 	_current_event = event
 	var bb: Blackboard = _runtime.blackboard
 	var id_str: String = String(event.id)
-	bb.metadata["current_event_id"] = id_str
-	bb.metadata["turn_counter"] = int(bb.metadata.get("turn_counter", 0)) + 1
 
-	var history: Array = bb.metadata.get("history", [])
-	history.append(id_str)
-	# Ring-buffer cap per §10.2: drop oldest beyond HISTORY_CAP.
-	while history.size() > HISTORY_CAP:
-		history.pop_front()
-	bb.metadata["history"] = history
+	if not is_restore:
+		bb.metadata["current_event_id"] = id_str
+		bb.metadata["turn_counter"] = int(bb.metadata.get("turn_counter", 0)) + 1
 
-	var seen: Array = bb.metadata.get("seen_ids", [])
-	if not seen.has(id_str):
-		seen.append(id_str)
-	bb.metadata["seen_ids"] = seen
+		var history: Array = bb.metadata.get("history", [])
+		history.append(id_str)
+		# Ring-buffer cap per §10.2: drop oldest beyond HISTORY_CAP.
+		while history.size() > HISTORY_CAP:
+			history.pop_front()
+		bb.metadata["history"] = history
+
+		var seen: Array = bb.metadata.get("seen_ids", [])
+		if not seen.has(id_str):
+			seen.append(id_str)
+		bb.metadata["seen_ids"] = seen
 
 	var visible: Array[JourneyChoice] = []
 	for choice in event.choices:
@@ -184,3 +192,81 @@ func rebuild_pool() -> void:
 		push_warning("JourneySequenceManager.rebuild_pool: no active config")
 		return
 	_pool_index.rebuild(_config.event_pool_dir)
+
+## Read-only accessor so JourneyRuntime can reach config.save_encryption_key /
+## save_version without poking _config directly. Returns null pre-start.
+func get_config() -> JourneyConfig:
+	return _config
+
+## §7.3 post-load re-entry. Caller (JourneyRuntime.load_game) has already
+## restored the Blackboard in place; we now resolve the saved
+## `current_event_id` to a live JourneyEvent and re-enter it with
+## `is_restore=true` so event_changed fires WITHOUT advancing turn state.
+##
+## Resolution: direct pool hit first, then BFS over the deterministic graph
+## reachable from start_event ∪ every pool event ∪ every bottom/top-out event
+## (see _resolve_event_id). Returns OK on success, ERR_INVALID_DATA if the
+## id can't be resolved (after emitting journey_error for dev visibility).
+func restore_after_load() -> int:
+	if _config == null:
+		push_error("JourneySequenceManager.restore_after_load: no active config")
+		return ERR_UNCONFIGURED
+	var bb: Blackboard = _runtime.blackboard
+	var id_str: String = String(bb.metadata.get("current_event_id", ""))
+	if id_str == "":
+		_runtime.journey_error.emit("save references empty event id")
+		return ERR_INVALID_DATA
+	var event: JourneyEvent = _resolve_event_id(id_str)
+	if event == null:
+		_runtime.journey_error.emit("save references unknown event id: %s" % id_str)
+		return ERR_INVALID_DATA
+	_enter_event(event, true)
+	return OK
+
+## §7.3 id → event. Build the pool index (only if event_pool_dir is set —
+## otherwise we'd spam push_error every load for legitimate pool-less games),
+## try a direct pool hit first since most narrative lives there, then BFS
+## over the deterministic graph reachable from the COMPLETE seed set:
+## start_event ∪ every pool event ∪ every bottom/top-out boundary event.
+## Without seeding from pool events, a non-pool event reachable only via a
+## pool→choice.target_event chain was unresolvable (Step-6 code review
+## finding #1); without seeding from boundary events, chains rooted at a
+## bottom_out_event were lost the same way (finding #4). Returns null on
+## genuine miss only.
+##
+## pop_back() over pop_front() — order doesn't matter for an id match, and
+## pop_front on a GDScript Array is O(n) per call (would make the BFS O(n²)).
+func _resolve_event_id(id_str: String) -> JourneyEvent:
+	if _config.event_pool_dir != "" and not _pool_index.is_built():
+		_pool_index.build(_config.event_pool_dir)
+	var via_pool: JourneyEvent = _pool_index.find_by_id(id_str)
+	if via_pool != null:
+		return via_pool
+
+	var visited: Dictionary = {}
+	var queue: Array[JourneyEvent] = []
+	if _config.start_event != null:
+		queue.append(_config.start_event)
+	for e in _pool_index.all_events:
+		queue.append(e)
+	for def in _config.resource_defs:
+		if def.bottom_out_event != null:
+			queue.append(def.bottom_out_event)
+		if def.top_out_event != null:
+			queue.append(def.top_out_event)
+
+	while not queue.is_empty():
+		var ev: JourneyEvent = queue.pop_back()
+		if ev == null:
+			continue
+		var eid: String = String(ev.id)
+		if visited.has(eid):
+			continue
+		visited[eid] = true
+		if eid == id_str:
+			return ev
+		for choice in ev.choices:
+			if choice.target_event != null:
+				queue.append(choice.target_event)
+
+	return null

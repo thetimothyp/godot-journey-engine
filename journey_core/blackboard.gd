@@ -11,8 +11,16 @@ class_name Blackboard
 var resources: Dictionary = {}
 ## String -> bool. Missing flag reads as false (§4.3).
 var flags: Dictionary = {}
-## String -> Variant. Holds turn_counter, current_event_id, rng_seed, history,
-## seen_ids, etc. Saves serialize a primitives-only subset (§7.1).
+## String -> Variant. ENGINE-OWNED keys preserved across save/load:
+##   current_event_id (String), turn_counter (int), seen_ids (Array[String]),
+##   history (Array[String]), rng_seed (int).
+## Saves serialize ONLY these (§7.1); load_into clears bb.metadata and
+## restores only these keys. Custom/runtime metadata written outside this
+## whitelist (e.g. transient breadcrumbs, debug counters) is intentionally
+## DROPPED on every load — if a game needs persistent custom state it should
+## live in resources/flags or a separate save extension (see §10.1 split
+## path). Reads via JourneyRuntime.get_metadata() still work for those keys
+## within a single session but won't survive a round-trip.
 var metadata: Dictionary = {}
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 

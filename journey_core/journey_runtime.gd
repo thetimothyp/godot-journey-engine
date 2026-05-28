@@ -64,15 +64,81 @@ func has_flag(key: String) -> bool:
 func get_metadata(key: String) -> Variant:
 	return blackboard.metadata.get(key, null)
 
-# --- Persistence + dev (§9). Stubs for now; implemented in Steps 6–7. ---
+# --- Persistence + dev (§9). ---
 
-func save_game(_slot: String = "savegame") -> int:
-	push_warning("JourneyRuntime.save_game: not implemented until Step 6")
-	return ERR_UNAVAILABLE
+## §7.2 save. Delegates to a stateless JourneySaveManager; encryption is
+## opt-in via config.save_encryption_key (empty ⇒ plaintext, PRD §5 default).
+## Requires an active journey — save_encryption_key / save_version live on
+## the config, which only exists after start_new_journey.
+func save_game(slot: String = "savegame") -> int:
+	if _seq == null or _seq.get_config() == null:
+		push_warning("JourneyRuntime.save_game: no active journey (call start_new_journey first)")
+		return ERR_UNCONFIGURED
+	var config: JourneyConfig = _seq.get_config()
+	var manager := JourneySaveManager.new()
+	return manager.save(blackboard, slot, config.save_encryption_key, config.save_version)
 
-func load_game(_slot: String = "savegame") -> int:
-	push_warning("JourneyRuntime.load_game: not implemented until Step 6")
-	return ERR_UNAVAILABLE
+## §7.3 load. Restores the Blackboard in place, then re-enters the saved
+## current event via the SequenceManager's restore path so event_changed
+## re-fires (UI rebuilds for free, no special restore code) WITHOUT advancing
+## turn_counter / history / seen_ids (those already reflect the saved state).
+## Pool index is built on demand inside restore_after_load — load may happen
+## before any pool pull, but resolution still needs the index.
+##
+## Atomicity: load_into mutates the Blackboard BEFORE restore_after_load
+## resolves the event id. If resolution fails (unknown id, finding #3 in the
+## Step-6 code review), the Blackboard would otherwise be left "data loaded,
+## no event_changed emitted" — UI shows stale event, bb holds post-load
+## state, next process_choice mutates the loaded bb against pre-load
+## semantics and produces nonsense. We snapshot the pre-load state and roll
+## it back on any failure so the runtime stays consistent on the error path.
+##
+## Resource-defs forward-compat (finding #5): after a successful load_into,
+## any resource declared in the CURRENT config but absent from the save
+## (e.g., added in a content update before its save migration ships) is
+## seeded to its clamped default — same policy Blackboard.initialize uses,
+## so post-load reads see the intended baseline instead of a missing key.
+func load_game(slot: String = "savegame") -> int:
+	if _seq == null or _seq.get_config() == null:
+		push_warning("JourneyRuntime.load_game: no active journey (call start_new_journey first)")
+		return ERR_UNCONFIGURED
+	var config: JourneyConfig = _seq.get_config()
+	var manager := JourneySaveManager.new()
+
+	# Pre-load snapshot for rollback on failure. Dict.duplicate(true) deep-
+	# copies primitives; rng.state is an int. Cheap relative to the rest of
+	# load and only paid on the load_game path.
+	var rb_resources: Dictionary = blackboard.resources.duplicate(true)
+	var rb_flags: Dictionary = blackboard.flags.duplicate(true)
+	var rb_metadata: Dictionary = blackboard.metadata.duplicate(true)
+	var rb_rng_state: int = blackboard.rng.state
+	var rb_rng_seed: int = blackboard.rng.seed
+
+	var err: int = manager.load_into(blackboard, slot, config.save_encryption_key, config.save_version)
+	if err != OK:
+		# load_into errors out BEFORE any bb mutation (file/version/precondition
+		# checks all precede the writes), so no rollback needed here.
+		return err
+
+	# Seed any config-declared resource missing from the save with its clamped
+	# default — forward-compat for content updates that add resources before a
+	# v2 migration lands.
+	for def in config.resource_defs:
+		if not blackboard.resources.has(def.key):
+			blackboard.resources[def.key] = clamp(def.default_value, def.min_value, def.max_value)
+
+	var restore_err: int = _seq.restore_after_load()
+	if restore_err != OK:
+		# Roll back: load_into already mutated bb, but the routing layer can't
+		# resolve the saved event. Restore pre-load state so the runtime/UI
+		# stays consistent and the player can retry or start a new journey.
+		blackboard.resources = rb_resources
+		blackboard.flags = rb_flags
+		blackboard.metadata = rb_metadata
+		blackboard.rng.state = rb_rng_state
+		blackboard.rng.seed = rb_rng_seed
+		return restore_err
+	return OK
 
 func validate(_config: JourneyConfig) -> Array[String]:
 	push_warning("JourneyRuntime.validate: not implemented until Step 7")
