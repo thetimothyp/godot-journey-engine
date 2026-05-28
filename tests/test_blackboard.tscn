@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://6hung7abimim"]
+
+[ext_resource type="Script" path="res://tests/test_blackboard.gd" id="1_test"]
+
+[node name="TestBlackboard" type="Node"]
+script = ExtResource("1_test")

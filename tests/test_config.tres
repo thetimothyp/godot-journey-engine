@@ -1,0 +1,47 @@
+[gd_resource type="Resource" script_class="JourneyConfig" format=3 uid="uid://dhev751xc7ts3"]
+
+[ext_resource type="Script" uid="uid://dj8boxtg50w8n" path="res://journey_core/journey_resource_def.gd" id="1_resdef"]
+[ext_resource type="Script" uid="uid://bhgg6f367cgd2" path="res://journey_core/journey_config.gd" id="2_config"]
+
+[sub_resource type="Resource" id="ResourceDef_gold"]
+script = ExtResource("1_resdef")
+key = "gold"
+default_value = 100.0
+min_value = 0.0
+max_value = 999.0
+bottom_out_event = null
+top_out_event = null
+metadata/_custom_type_script = "uid://dj8boxtg50w8n"
+
+[sub_resource type="Resource" id="ResourceDef_sanity"]
+script = ExtResource("1_resdef")
+key = "sanity"
+default_value = 50.0
+min_value = 0.0
+max_value = 100.0
+bottom_out_event = null
+top_out_event = null
+metadata/_custom_type_script = "uid://dj8boxtg50w8n"
+
+[sub_resource type="Resource" id="ResourceDef_rations"]
+script = ExtResource("1_resdef")
+key = "rations"
+default_value = 200.0
+min_value = 0.0
+max_value = 200.0
+bottom_out_event = null
+top_out_event = null
+metadata/_custom_type_script = "uid://dj8boxtg50w8n"
+
+[resource]
+script = ExtResource("2_config")
+resource_defs = Array[Resource]([SubResource("ResourceDef_gold"), SubResource("ResourceDef_sanity"), SubResource("ResourceDef_rations")])
+initial_flags = {
+"started": true
+}
+start_event = null
+event_pool_dir = "res://events/"
+rebuild_pool_in_editor = true
+save_encryption_key = ""
+save_version = 1
+metadata/_custom_type_script = "uid://bhgg6f367cgd2"

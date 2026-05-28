@@ -27,7 +27,7 @@ the two design docs to orient before doing anything.
 ## Build order & status
 - [x] **Step 1** — Resource classes: Condition, Consequence, ConditionGroup, Choice,
       Event, ResourceDef, Config
-- [ ] **Step 2** — Blackboard + initialization
+- [x] **Step 2** — Blackboard + initialization
 - [ ] **Step 3** — Evaluator (conditions) + Mutator (consequences), as pure helpers + tests
 - [ ] **Step 4** — SequenceManager deterministic routing + `_enter_event` + signals;
       minimal test scene proving the loop end-to-end
@@ -39,3 +39,4 @@ the two design docs to orient before doing anything.
 ## Session log (append one line per completed step)
 <!-- e.g. "2026-05-28 — Step 1 complete. 7 resource classes in journey_core/. Tested via inspector." -->
 2026-05-28 — Step 1 complete. Created 7 resource classes in journey_core/ (JourneyCondition, JourneyConsequence, JourneyConditionGroup, JourneyChoice, JourneyEvent, JourneyResourceDef, JourneyConfig) matching eng design §3.2–§3.7. Pure data, no methods. Manual inspector verification passed: project loads error-free, all 7 types appear in New Resource dialog, enums render as dropdowns, test_condition.tres and test_event.tres saved.
+2026-05-28 — Step 2 complete. Added journey_core/blackboard.gd as a RefCounted (class_name Blackboard) matching eng design §4.1 fields (resources, flags, metadata, rng) and §4.2 init (clamped defaults, copied initial_flags, deterministic-or-randomized rng with stored seed, turn_counter/current_event_id/history/seen_ids primed). No mutation/evaluation/signal logic — those land in Steps 3–4. NOTE comment flags that Step 4 may relocate the call site to JourneyRuntime, keeping the logic itself on Blackboard. Test scaffolding in tests/ (test_config.tres, test_blackboard.gd, test_blackboard.tscn) — manual run pending user verification.
