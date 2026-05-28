@@ -2,11 +2,11 @@
 
 The public API is the **`JourneyRuntime`** Autoload. Everything game code needs —
 lifecycle, state reads, persistence, validation — is on this one object. The
-other `journey_core/` classes are internal machinery the runtime drives; they're
+other `addons/journey_engine_core/` classes are internal machinery the runtime drives; they're
 documented at the bottom as [advanced surface](#advanced-internal-surface).
 
 All signatures below are verified against
-`journey_core/journey_runtime.gd`; the [accuracy checklist](#accuracy-checklist)
+`addons/journey_engine_core/journey_runtime.gd`; the [accuracy checklist](#accuracy-checklist)
 at the end maps each entry to its source line.
 
 ## Properties
@@ -174,7 +174,7 @@ field and enum reference is on
 
 ## Advanced / internal surface
 
-These classes live in `journey_core/` and are driven by the runtime. Game code
+These classes live in `addons/journey_engine_core/` and are driven by the runtime. Game code
 normally never touches them — they're listed so you know what's internal and what
 the few directly-useful entry points are.
 
@@ -202,25 +202,25 @@ verified against. Spot-check any row against the code.
 
 | Symbol | Source | Line |
 | --- | --- | --- |
-| `blackboard: Blackboard` | `journey_core/journey_runtime.gd` | 31 |
-| `start_new_journey(config, seed=0)` | `journey_core/journey_runtime.gd` | 40 |
-| `process_choice(choice)` | `journey_core/journey_runtime.gd` | 47 |
-| `get_resource(key)` | `journey_core/journey_runtime.gd` | 58 |
-| `has_flag(key)` | `journey_core/journey_runtime.gd` | 61 |
-| `get_metadata(key)` | `journey_core/journey_runtime.gd` | 64 |
-| `save_game(slot="savegame")` | `journey_core/journey_runtime.gd` | 73 |
-| `load_game(slot="savegame")` | `journey_core/journey_runtime.gd` | 101 |
-| `validate(config)` | `journey_core/journey_runtime.gd` | 157 |
-| `rebuild_pool()` | `journey_core/journey_runtime.gd` | 172 |
-| `signal event_changed(event, choices)` | `journey_core/journey_runtime.gd` | 20 |
-| `signal resource_changed(key, old_value, new_value)` | `journey_core/journey_runtime.gd` | 21 |
-| `signal flag_changed(key, value)` | `journey_core/journey_runtime.gd` | 22 |
-| `signal journey_started()` | `journey_core/journey_runtime.gd` | 23 |
-| `signal journey_ended(ending_event)` | `journey_core/journey_runtime.gd` | 24 |
-| `signal journey_error(message)` | `journey_core/journey_runtime.gd` | 25 |
-| `Blackboard` fields (resources/flags/metadata/rng) | `journey_core/blackboard.gd` | 11–25 |
-| `JourneyCondition.Op` enum | `journey_core/journey_condition.gd` | 6 |
-| `JourneyConsequence.Operation` enum | `journey_core/journey_consequence.gd` | 6 |
-| `JourneyConditionGroup.Logic` enum | `journey_core/journey_condition_group.gd` | 7 |
-| `JourneyValidator.validate(config, pool_index=null)` | `journey_core/validator.gd` | 29 |
-| `JourneyPoolIndex.find_by_id(id_str)` | `journey_core/pool_index.gd` | 137 |
+| `blackboard: Blackboard` | `addons/journey_engine_core/journey_runtime.gd` | 31 |
+| `start_new_journey(config, seed=0)` | `addons/journey_engine_core/journey_runtime.gd` | 40 |
+| `process_choice(choice)` | `addons/journey_engine_core/journey_runtime.gd` | 47 |
+| `get_resource(key)` | `addons/journey_engine_core/journey_runtime.gd` | 58 |
+| `has_flag(key)` | `addons/journey_engine_core/journey_runtime.gd` | 61 |
+| `get_metadata(key)` | `addons/journey_engine_core/journey_runtime.gd` | 64 |
+| `save_game(slot="savegame")` | `addons/journey_engine_core/journey_runtime.gd` | 73 |
+| `load_game(slot="savegame")` | `addons/journey_engine_core/journey_runtime.gd` | 101 |
+| `validate(config)` | `addons/journey_engine_core/journey_runtime.gd` | 157 |
+| `rebuild_pool()` | `addons/journey_engine_core/journey_runtime.gd` | 172 |
+| `signal event_changed(event, choices)` | `addons/journey_engine_core/journey_runtime.gd` | 20 |
+| `signal resource_changed(key, old_value, new_value)` | `addons/journey_engine_core/journey_runtime.gd` | 21 |
+| `signal flag_changed(key, value)` | `addons/journey_engine_core/journey_runtime.gd` | 22 |
+| `signal journey_started()` | `addons/journey_engine_core/journey_runtime.gd` | 23 |
+| `signal journey_ended(ending_event)` | `addons/journey_engine_core/journey_runtime.gd` | 24 |
+| `signal journey_error(message)` | `addons/journey_engine_core/journey_runtime.gd` | 25 |
+| `Blackboard` fields (resources/flags/metadata/rng) | `addons/journey_engine_core/blackboard.gd` | 11–25 |
+| `JourneyCondition.Op` enum | `addons/journey_engine_core/journey_condition.gd` | 6 |
+| `JourneyConsequence.Operation` enum | `addons/journey_engine_core/journey_consequence.gd` | 6 |
+| `JourneyConditionGroup.Logic` enum | `addons/journey_engine_core/journey_condition_group.gd` | 7 |
+| `JourneyValidator.validate(config, pool_index=null)` | `addons/journey_engine_core/validator.gd` | 29 |
+| `JourneyPoolIndex.find_by_id(id_str)` | `addons/journey_engine_core/pool_index.gd` | 137 |

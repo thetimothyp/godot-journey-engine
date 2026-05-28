@@ -5,11 +5,12 @@ Common issues, what causes them, and where to read more.
 ## Setup
 
 ??? question "`Invalid call. Nonexistent function 'start_new_journey' in base 'null instance'` (or `JourneyRuntime` is null)"
-    The Autoload isn't registered, or not under the exact name `JourneyRuntime`.
-    Game code reaches the engine through that global identifier. Re-check
-    [Installation → Register the Autoload](../getting-started/installation.md#2-register-the-autoload).
-    The path must be `res://journey_core/journey_runtime.gd` and the node name
-    exactly `JourneyRuntime`.
+    The autoload isn't registered. Easiest fix: enable **Journey Engine Core** in
+    **Project Settings → Plugins** — the plugin registers the `JourneyRuntime`
+    autoload for you. If you registered it by hand instead, check the path is
+    `res://addons/journey_engine_core/journey_runtime.gd` and the node name is
+    exactly `JourneyRuntime`. See
+    [Installation → Enable the plugin](../getting-started/installation.md#2-enable-the-plugin).
 
 ??? question "`Class 'JourneyRuntime' hides an autoload singleton`"
     Something added a `class_name JourneyRuntime`. The runtime script

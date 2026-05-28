@@ -4,7 +4,7 @@
     This PRD captures product intent and rationale. For accurate, current API and
     behavior details, prefer the [API Reference](../api.md) and
     [Concepts](../../concepts/overview.md) — they're verified against the shipped
-    code in `journey_core/`. Where this document and the code disagree, the code
+    code in `addons/journey_engine_core/`. Where this document and the code disagree, the code
     wins; see the divergence notes on the
     [Engineering Design](engineering-design.md) page.
 

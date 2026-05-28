@@ -82,7 +82,7 @@ These invariants hold at every step and explain a lot of the engine's behavior:
 - **Deterministic.** A fixed RNG seed plus identical state always produces
   identical stochastic results. This is what makes [save/load](../guides/save-and-load.md)
   resume the *exact* run.
-- **Presentation-agnostic core.** Nothing in `journey_core/` instantiates a Node
+- **Presentation-agnostic core.** Nothing in `addons/journey_engine_core/` instantiates a Node
   or assumes a UI. The runtime is a Node only because Autoloads must be.
 - **Loud about author mistakes.** Missing keys, undeclared resources, and empty
   pools surface as warnings/errors rather than silent no-ops. The

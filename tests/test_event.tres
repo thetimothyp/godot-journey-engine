@@ -1,8 +1,8 @@
 [gd_resource type="Resource" script_class="JourneyEvent" format=3 uid="uid://fhgtc5t7cmfn"]
 
-[ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://journey_core/journey_choice.gd" id="1_g84oo"]
-[ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://journey_core/journey_event.gd" id="2_kdssd"]
-[ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://journey_core/journey_consequence.gd" id="2_x4sbb"]
+[ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://addons/journey_engine_core/journey_choice.gd" id="1_g84oo"]
+[ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://addons/journey_engine_core/journey_event.gd" id="2_kdssd"]
+[ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://addons/journey_engine_core/journey_consequence.gd" id="2_x4sbb"]
 
 [sub_resource type="Resource" id="Resource_n1jr3"]
 script = ExtResource("1_g84oo")

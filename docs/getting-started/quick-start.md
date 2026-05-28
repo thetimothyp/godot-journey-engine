@@ -8,7 +8,7 @@ in a real game you'd author the same data as `.tres` resources in the inspector
 
 !!! note "Before you start"
     Complete [Installation](installation.md) first — in particular, the
-    `journey_core/` files must be in your project and the **`JourneyRuntime`**
+    `addons/journey_engine_core/` files must be in your project and the **`JourneyRuntime`**
     Autoload must be registered. Nothing below works without that Autoload.
 
 ## The plan

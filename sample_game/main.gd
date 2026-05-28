@@ -2,7 +2,7 @@ extends Control
 
 ## Sample-game Dumb-UI front end. Subscribes to JourneyRuntime signals (§4.1)
 ## and calls the public API only — never reads or writes the Blackboard, never
-## reaches into journey_core internals. Three independent listeners share the
+## reaches into the engine's internals. Three independent listeners share the
 ## scene tree (narrative, HUD, choices) so a future swap to a different UI
 ## skin requires touching only one of them.
 ##

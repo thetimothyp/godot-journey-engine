@@ -17,7 +17,11 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-JourneyRuntime="*res://journey_core/journey_runtime.gd"
+JourneyRuntime="*res://addons/journey_engine_core/journey_runtime.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/journey_engine_core/plugin.cfg")
 
 [physics]
 

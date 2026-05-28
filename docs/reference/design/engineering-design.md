@@ -5,18 +5,18 @@
     rationale, design philosophy). For accurate, current API details always
     prefer the [API Reference](../api.md) and the
     [Concepts](../../concepts/overview.md) section — they're verified against
-    `journey_core/`. Known places where the shipped code diverges from this
+    `addons/journey_engine_core/`. Known places where the shipped code diverges from this
     document:
 
     - **`JourneyRuntime` has no `class_name`.** It's reached through the Autoload
       global of the same name; a `class_name` would collide with it. (See
-      [Installation](../../getting-started/installation.md#2-register-the-autoload).)
+      [Installation](../../getting-started/installation.md#2-enable-the-plugin).)
     - **Boundary routes fire on *transition*, not presence.** §4.4/§5.1's "if
       clamped result == min_value" is implemented as a true transition
       (off-boundary → on-boundary) to avoid an infinite re-trigger loop on a
       value already sitting at the bound. (See
       [Routing → Forced boundary routes](../../concepts/routing.md#forced-boundary-routes).)
-    - **`journey_core/journey_engine_starter_ui_kit.md` was never written** — the
+    - **`docs/journey_engine_starter_ui_kit.md` was never written** — the
       [Starter UI Kit page](starter-ui-kit.md) is a stub.
 
 **Author:** AI Collaborator

@@ -12,16 +12,18 @@ runs Godot 4.6, it can run Journey Engine.
 | Language | GDScript only |
 | Renderer | Compatibility (the engine is renderer-agnostic; the sample game targets Compatibility for Web export) |
 
-The core runtime lives entirely in `journey_core/`. It is **presentation-agnostic**:
+The core runtime lives entirely in `addons/journey_engine_core/`. It is **presentation-agnostic**:
 no class in that folder instantiates a Node, touches the SceneTree, or assumes a
 UI exists. See the [Presentation Contract](../concepts/presentation-contract.md).
 
-## 1. Add the engine files
+## 1. Add the addon files
 
-Copy the `journey_core/` folder into your project (anywhere under `res://`). It
-contains the runtime and the resource classes you author against:
+Copy the `addons/journey_engine_core/` folder into your project's `addons/`
+directory. It contains the runtime, the resource classes you author against, and
+the small editor plugin that wires everything up:
 
-- `journey_runtime.gd` — the single public API (registered as an Autoload).
+- `plugin.cfg` / `plugin.gd` — the editor plugin (registers the autoload on enable).
+- `journey_runtime.gd` — the single public API (the autoload).
 - `blackboard.gd`, `sequence_manager.gd`, `pool_index.gd`, `save_manager.gd`,
   `validator.gd`, `evaluator.gd`, `mutator.gd` — the internals.
 - `journey_*.gd` — the authorable resource types
@@ -31,38 +33,43 @@ contains the runtime and the resource classes you author against:
 Each resource class declares a `class_name`, so once the files are in your
 project they appear automatically in the editor's **Create New Resource** dialog.
 
-## 2. Register the Autoload
+## 2. Enable the plugin
 
-The runtime must be registered as an Autoload named **`JourneyRuntime`**. This is
-the one setup step you cannot skip.
+Open **Project → Project Settings → Plugins** and toggle **Journey Engine Core**
+on. That's it — the plugin registers the **`JourneyRuntime`** autoload for you, so
+there's no manual setup step.
 
-!!! warning "The Autoload name must be exactly `JourneyRuntime`"
+!!! warning "The autoload name is always `JourneyRuntime`"
     Game code calls the engine through the global `JourneyRuntime` identifier.
-    The script intentionally has **no** `class_name` — that would collide with
-    the Autoload's auto-registered global (`Class 'JourneyRuntime' hides an
-    autoload singleton`). Register it under this exact name and reach it through
-    the Autoload, not as a class.
+    The runtime script intentionally has **no** `class_name` — that would collide
+    with the autoload's auto-registered global (`Class 'JourneyRuntime' hides an
+    autoload singleton`). Always reach it through the autoload, not as a class.
 
-=== "Editor"
+??? note "Prefer to register the autoload by hand?"
+    You can skip the plugin and add the autoload yourself — the runtime is plain
+    GDScript with no editor dependency.
 
-    **Project → Project Settings → Globals → Autoload**, then:
+    === "Editor"
 
-    - **Path:** `res://journey_core/journey_runtime.gd`
-    - **Node Name:** `JourneyRuntime`
-    - Leave **Enable** (the global singleton) checked.
+        **Project → Project Settings → Globals → Autoload**, then:
 
-=== "project.godot"
+        - **Path:** `res://addons/journey_engine_core/journey_runtime.gd`
+        - **Node Name:** `JourneyRuntime`
+        - Leave **Enable** (the global singleton) checked.
 
-    Add the entry directly under the `[autoload]` section:
+    === "project.godot"
 
-    ```ini
-    [autoload]
+        Add the entry directly under the `[autoload]` section:
 
-    JourneyRuntime="*res://journey_core/journey_runtime.gd"
-    ```
+        ```ini
+        [autoload]
 
-    The leading `*` enables the singleton global. This is exactly how the bundled
-    sample game registers it.
+        JourneyRuntime="*res://addons/journey_engine_core/journey_runtime.gd"
+        ```
+
+        The leading `*` enables the singleton global. (The bundled sample game
+        ships this entry *and* enables the plugin; the plugin detects the existing
+        autoload and leaves it alone, so the two never conflict.)
 
 ## 3. Verify
 

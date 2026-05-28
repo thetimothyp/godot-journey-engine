@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="JourneyCondition" format=3 uid="uid://d3r7udqb4odgc"]
 
-[ext_resource type="Script" uid="uid://k60namdri10y" path="res://journey_core/journey_condition.gd" id="1_usmd8"]
+[ext_resource type="Script" uid="uid://k60namdri10y" path="res://addons/journey_engine_core/journey_condition.gd" id="1_usmd8"]
 
 [resource]
 script = ExtResource("1_usmd8")

@@ -1,6 +1,6 @@
 # The Presentation Contract
 
-Journey Engine's core is **presentation-agnostic**. No class in `journey_core/`
+Journey Engine's core is **presentation-agnostic**. No class in `addons/journey_engine_core/`
 instantiates a Node, adds children, touches the SceneTree, or assumes a UI
 exists. This is a hard invariant, and it shapes how you integrate the engine.
 

@@ -44,21 +44,19 @@ including the random stream. Your UI just listens to signals.
 
 ## Install
 
-1. Copy the `journey_core/` folder into your project (anywhere under `res://`).
-2. Register the runtime as an **Autoload** named exactly **`JourneyRuntime`**:
+1. Copy the `addons/journey_engine_core/` folder into your project's `addons/`
+   directory.
+2. Enable **Journey Engine Core** in **Project → Project Settings → Plugins**.
+   The plugin registers the **`JourneyRuntime`** autoload for you — that's the
+   whole setup.
 
-   ```ini
-   # project.godot
-   [autoload]
-   JourneyRuntime="*res://journey_core/journey_runtime.gd"
-   ```
+> Prefer to wire it by hand? Skip the plugin and add the autoload yourself
+> (Node Name `JourneyRuntime`, path
+> `res://addons/journey_engine_core/journey_runtime.gd`). The runtime script
+> intentionally has **no** `class_name` — that would collide with the autoload's
+> global — so always reach it through the `JourneyRuntime` identifier.
 
-   > The runtime script intentionally has **no** `class_name` — that would
-   > collide with the Autoload's global. Reach it through the `JourneyRuntime`
-   > identifier.
-
-That's the only setup step. See
-[Installation](docs/getting-started/installation.md) for the editor walkthrough.
+See [Installation](docs/getting-started/installation.md) for the full walkthrough.
 
 ## Quick taste
 
@@ -104,11 +102,11 @@ Highlights: [Concepts](docs/concepts/overview.md) ·
 ## Project layout
 
 ```text
-journey_core/        # the engine: runtime + resource types (copy this into your game)
-sample_game/         # a complete playable journey exercising every feature
-tests/               # headless + manual test scenes
-docs/                # MkDocs documentation source
-mkdocs.yml           # docs site config
+addons/journey_engine_core/  # the engine: plugin + runtime + resource types (copy into your game)
+sample_game/                 # a complete playable journey exercising every feature
+tests/                       # headless + manual test scenes
+docs/                        # MkDocs documentation source
+mkdocs.yml                   # docs site config
 ```
 
 The bundled `sample_game/` consumes only the public API and is the reference
