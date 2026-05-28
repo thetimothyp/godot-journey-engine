@@ -9,9 +9,11 @@ per-event background and audio payloads the core has always carried, and animate
 the transitions between events.
 
 !!! abstract "What the kit gives you"
-    - A one-line **`JourneyView`** that assembles every component and starts a journey.
+    - Two one-line assembled schemes — **`JourneyView`** (text-forward reading layout)
+      and **`JourneyStageView`** (visual-first, Sort-the-Court style) — built from the
+      same components.
     - Independent, reusable `Control` components (narrative, choices, HUD, save/load,
-      ending, background, audio, transition).
+      ending, background, foreground sprites, audio, transition).
     - Client-side **animation** — text reveal, entrance/exit, idle motion, and scene
       transitions — that never makes the engine wait.
     - A default **Theme** and **placeholder assets** so it looks decent immediately,
@@ -41,5 +43,7 @@ architectural rule:
 - [Components](components.md) — what each piece does and its exported knobs.
 - [Animations](animations.md) — the entrance/exit/idle/transition model and how it
   sequences against `process_choice`.
+- [Stage view](stage-view.md) — the visual-first scheme (background + character
+  sprite focus) and the stage book that maps events to sprites/speakers.
 - [Assets & customization](assets-customization.md) — swap in your backgrounds,
   audio, theme, and icons without ever editing the addon.

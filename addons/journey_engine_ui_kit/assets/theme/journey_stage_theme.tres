@@ -1,0 +1,79 @@
+[gd_resource type="Theme" format=3 uid="uid://cjkitstagetheme1"]
+
+; Stage theme for the visual-first scheme. Text gets a dark OUTLINE and panels a
+; translucent SCRIM so narrative/choices stay readable on top of arbitrary art.
+; To restyle YOUR game, DUPLICATE this into res://<your_game>/ui/ and assign it to
+; JourneyStageView.theme — don't edit this addon copy.
+
+[sub_resource type="StyleBoxFlat" id="sb_scrim"]
+bg_color = Color(0.03, 0.03, 0.05, 0.62)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 16.0
+content_margin_top = 14.0
+content_margin_right = 16.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxFlat" id="sb_btn_normal"]
+bg_color = Color(0.12, 0.13, 0.2, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxFlat" id="sb_btn_hover"]
+bg_color = Color(0.22, 0.25, 0.4, 0.92)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxFlat" id="sb_btn_pressed"]
+bg_color = Color(0.09, 0.1, 0.16, 0.95)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxFlat" id="sb_btn_disabled"]
+bg_color = Color(0.1, 0.1, 0.14, 0.5)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+
+[resource]
+default_font_size = 18
+Button/colors/font_color = Color(0.94, 0.95, 0.99, 1)
+Button/colors/font_hover_color = Color(1, 1, 1, 1)
+Button/colors/font_outline_color = Color(0, 0, 0, 0.85)
+Button/constants/outline_size = 4
+Button/styles/normal = SubResource("sb_btn_normal")
+Button/styles/hover = SubResource("sb_btn_hover")
+Button/styles/pressed = SubResource("sb_btn_pressed")
+Button/styles/disabled = SubResource("sb_btn_disabled")
+Label/colors/font_color = Color(0.96, 0.97, 1, 1)
+Label/colors/font_outline_color = Color(0, 0, 0, 0.85)
+Label/constants/outline_size = 4
+RichTextLabel/colors/default_color = Color(0.96, 0.97, 1, 1)
+RichTextLabel/colors/font_outline_color = Color(0, 0, 0, 0.85)
+RichTextLabel/constants/outline_size = 4
+PanelContainer/styles/panel = SubResource("sb_scrim")

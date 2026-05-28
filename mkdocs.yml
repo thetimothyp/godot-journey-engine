@@ -102,6 +102,7 @@ nav:
       - ui-kit/install.md
       - ui-kit/components.md
       - ui-kit/animations.md
+      - ui-kit/stage-view.md
       - ui-kit/assets-customization.md
   - Reference:
       - reference/api.md

@@ -1,4 +1,4 @@
-extends VBoxContainer
+extends BoxContainer
 class_name JourneyChoiceList
 
 ## Renders the already-filtered choices from event_changed and is the ONLY caller
@@ -16,6 +16,11 @@ class_name JourneyChoiceList
 ##   → await transition.play_in() → entrance animation → unlock.
 ## transition_layer / audio_layer are optional collaborators; with neither set it
 ## degrades to lock → process_choice → entrance → unlock.
+
+## Stack choices vertically (reading layout, default) or in a horizontal row of
+## buttons (stage layout). Extending BoxContainer instead of VBoxContainer lets the
+## same component do both; true keeps the original VBox behavior.
+@export var vertical_layout: bool = true
 
 @export_group("Entrance")
 @export var entrance_duration: float = 0.25
@@ -37,6 +42,7 @@ var _transitioning: bool = false
 var _entrance_tween: Tween
 
 func _ready() -> void:
+	vertical = vertical_layout
 	if transition_layer == null and not transition_layer_path.is_empty():
 		transition_layer = get_node_or_null(transition_layer_path) as JourneyTransitionLayer
 	if audio_layer == null and not audio_layer_path.is_empty():

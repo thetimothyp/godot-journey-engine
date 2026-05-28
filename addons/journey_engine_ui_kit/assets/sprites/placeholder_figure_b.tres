@@ -1,0 +1,15 @@
+[gd_resource type="GradientTexture2D" format=3 uid="uid://cjkitfig0b0001"]
+
+; PLACEHOLDER foreground figure (generated vertical gradient, not real art).
+; See placeholder_figure_a.tres.
+
+[sub_resource type="Gradient" id="Gradient_fig_b"]
+offsets = PackedFloat32Array(0, 0.2, 1)
+colors = PackedColorArray(0.8, 0.78, 0.7, 1, 0.25, 0.35, 0.5, 1, 0.1, 0.15, 0.25, 1)
+
+[resource]
+gradient = SubResource("Gradient_fig_b")
+width = 240
+height = 560
+fill_from = Vector2(0, 0)
+fill_to = Vector2(0, 1)

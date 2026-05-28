@@ -16,9 +16,16 @@ runtime as `JourneyRuntime.VERSION`.
   and a fade/wipe transition layer), assembled into a one-line **`JourneyView`** with
   a default Theme and placeholder assets. Strict one-way dependency on the core; no
   autoload or plugin to enable. See the [UI Kit](../ui-kit/overview.md) docs.
+- **Stage presentation scheme** — a second assembled view, **`JourneyStageView`**
+  (visual-first, *Sort the Court* style: full-screen background + foreground character
+  sprite as the focus, slim resource bar, short dialogue strip, horizontal choice
+  row). Adds `JourneyForegroundLayer` and a kit-side **`JourneyStageBook`** (maps
+  `event.id` → sprite[s]/speaker, no core change), a stage theme with outlined text +
+  scrims, placeholder figures, and a `journey_stage_demo.tscn` (now the project's main
+  scene). `JourneyChoiceList` gained a `vertical_layout` toggle (horizontal button
+  rows) — backward-compatible. See [UI Kit → Stage view](../ui-kit/stage-view.md).
 - A `JourneyView` demo (`sample_game/journey_view_demo.tscn`) wired to the sample
-  config, now the project's main scene; the original Dumb-UI sample remains at
-  `sample_game/main.tscn`.
+  config; the original Dumb-UI sample remains at `sample_game/main.tscn`.
 
 ## 0.1.0 — 2026-05-28
 

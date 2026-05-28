@@ -7,9 +7,10 @@ hooks noted below, which `JourneyView` wires for you.
 
 | Class | Base | Subscribes to |
 | --- | --- | --- |
-| `JourneyView` | `Control` | *(assembler; starts the journey)* |
+| `JourneyView` / `JourneyStageView` | `Control` | *(assemblers; start the journey)* |
 | `JourneyNarrativePanel` | `PanelContainer` | `event_changed` |
-| `JourneyChoiceList` | `VBoxContainer` | `event_changed`, `journey_ended` |
+| `JourneyChoiceList` | `BoxContainer` | `event_changed`, `journey_ended` |
+| `JourneyForegroundLayer` | `Control` | `event_changed` |
 | `JourneyResourceHud` | `HBoxContainer` | `journey_started`, `resource_changed`, `event_changed` |
 | `JourneySaveLoadBar` | `HBoxContainer` | *(button-driven)* |
 | `JourneyEndingOverlay` | `Control` | `journey_ended`, `journey_started` |
@@ -33,7 +34,9 @@ Builds a `Button` per choice from the **already-filtered** `choices` array and i
 transition.
 
 - `entrance_duration`, `entrance_stagger` — staggered fade-in of the buttons.
-- Collaborators (set by `JourneyView` or via `NodePath`): `transition_layer`,
+- `vertical_layout` — stack choices vertically (default; reading layout) or lay them
+  out as a horizontal button row (`false`; stage layout).
+- Collaborators (set by an assembler or via `NodePath`): `transition_layer`,
   `audio_layer`.
 - On press it runs the [transition sequence](animations.md#sequencing-against-process_choice);
   on `journey_ended` it clears and locks.
@@ -73,6 +76,16 @@ crossfades to `default_texture` (a placeholder ships with the kit). Optional **i
 motion** — a slow looping zoom/drift (`idle_zoom`, `idle_drift`, `idle_period`) — keeps
 a static image alive.
 
+## JourneyForegroundLayer
+
+Stages foreground character sprite(s) in front of the background — the visual focus
+of the [stage view](stage-view.md). On `event_changed` it resolves staging for the
+event from a `JourneyStageBook` (sprite[s], anchors, speaker, entrance), animates the
+sprite(s) in (`FADE`/`SLIDE_UP`/`SLIDE_SIDE`), and applies a subtle idle bob. No
+staging entry → no sprite. Emits `staged(speaker)` so the view can show a speaker
+line. Reads only the inert event payload. See [Stage view](stage-view.md) for the
+data shape.
+
 ## JourneyAudioLayer
 
 Plays `event.ambient_audio` **looped** with a crossfade between events, and exposes
@@ -86,9 +99,15 @@ A full-view scene transition — `FADE` (through a color), `WIPE`, or `NONE` —
 two await-able halves, `play_out()` and `play_in()`. `ChoiceList` drives these around
 the `process_choice` call; see [Animations](animations.md).
 
-## JourneyView
+## JourneyView / JourneyStageView
 
-Instantiates and lays out all of the above, applies a default `Theme` (cascades to
-every child), forwards its exported config/animation/SFX values, wires the
-collaborator references, and — with `autostart` — calls `start_new_journey`. This is
-the **only** place components reference one another.
+The assemblers. Each instantiates and lays out the components above, applies a default
+`Theme` (cascades to every child), forwards its exported config/animation/SFX values,
+wires the collaborator references, and — with `autostart` — calls `start_new_journey`.
+These are the **only** places components reference one another.
+
+- **`JourneyView`** — the text-forward *reading* layout (narrative column + side
+  choices).
+- **`JourneyStageView`** — the visual-first layout (background + foreground sprite
+  focus; HUD bar, dialogue strip, horizontal choice row). Adds a `stage_book` export.
+  See [Stage view](stage-view.md).

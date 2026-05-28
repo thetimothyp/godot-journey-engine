@@ -1,0 +1,77 @@
+[gd_resource type="Resource" script_class="JourneyStageBook" format=3 uid="uid://sg0stagebook001"]
+
+; Sample staging for the stage-view demo: maps a few event ids to placeholder
+; figures + speakers. Demonstrates CENTER/LEFT/RIGHT anchors, flip_h, and speaker
+; lines. Events with no entry here simply show no foreground sprite.
+
+[ext_resource type="Script" uid="uid://35auf3rj0oo" path="res://addons/journey_engine_ui_kit/staging/stage_book.gd" id="1_book"]
+[ext_resource type="Script" uid="uid://beijdkg8fiuic" path="res://addons/journey_engine_ui_kit/staging/stage_entry.gd" id="2_entry"]
+[ext_resource type="Script" uid="uid://ce7qx87ehhrqd" path="res://addons/journey_engine_ui_kit/staging/sprite_placement.gd" id="3_place"]
+[ext_resource type="Texture2D" uid="uid://cjkitfig0a0001" path="res://addons/journey_engine_ui_kit/assets/sprites/placeholder_figure_a.tres" id="4_fig_a"]
+[ext_resource type="Texture2D" uid="uid://cjkitfig0b0001" path="res://addons/journey_engine_ui_kit/assets/sprites/placeholder_figure_b.tres" id="5_fig_b"]
+
+[sub_resource type="Resource" id="place_start"]
+script = ExtResource("3_place")
+texture = ExtResource("4_fig_a")
+anchor = 0
+enter = 1
+height_ratio = 0.72
+metadata/_custom_type_script = "uid://ce7qx87ehhrqd"
+
+[sub_resource type="Resource" id="entry_start"]
+script = ExtResource("2_entry")
+event_id = &"evt_start"
+speaker = "Traveler"
+sprites = Array[ExtResource("3_place")]([SubResource("place_start")])
+metadata/_custom_type_script = "uid://beijdkg8fiuic"
+
+[sub_resource type="Resource" id="place_merchant"]
+script = ExtResource("3_place")
+texture = ExtResource("5_fig_b")
+anchor = 2
+enter = 2
+height_ratio = 0.68
+metadata/_custom_type_script = "uid://ce7qx87ehhrqd"
+
+[sub_resource type="Resource" id="entry_merchant"]
+script = ExtResource("2_entry")
+event_id = &"evt_road_merchant"
+speaker = "Merchant"
+sprites = Array[ExtResource("3_place")]([SubResource("place_merchant")])
+metadata/_custom_type_script = "uid://beijdkg8fiuic"
+
+[sub_resource type="Resource" id="place_bandit"]
+script = ExtResource("3_place")
+texture = ExtResource("4_fig_a")
+anchor = 1
+enter = 2
+flip_h = true
+height_ratio = 0.7
+metadata/_custom_type_script = "uid://ce7qx87ehhrqd"
+
+[sub_resource type="Resource" id="entry_bandit"]
+script = ExtResource("2_entry")
+event_id = &"evt_road_bandit"
+speaker = "Bandit"
+sprites = Array[ExtResource("3_place")]([SubResource("place_bandit")])
+metadata/_custom_type_script = "uid://beijdkg8fiuic"
+
+[sub_resource type="Resource" id="place_ally"]
+script = ExtResource("3_place")
+texture = ExtResource("5_fig_b")
+anchor = 1
+enter = 1
+height_ratio = 0.7
+metadata/_custom_type_script = "uid://ce7qx87ehhrqd"
+
+[sub_resource type="Resource" id="entry_ally"]
+script = ExtResource("2_entry")
+event_id = &"evt_road_ally"
+speaker = "Companion"
+sprites = Array[ExtResource("3_place")]([SubResource("place_ally")])
+metadata/_custom_type_script = "uid://beijdkg8fiuic"
+
+[resource]
+script = ExtResource("1_book")
+entries = Array[ExtResource("2_entry")]([SubResource("entry_start"), SubResource("entry_merchant"), SubResource("entry_bandit"), SubResource("entry_ally")])
+metadata/_custom_type_script = "uid://35auf3rj0oo"

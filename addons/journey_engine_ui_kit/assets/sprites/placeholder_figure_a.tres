@@ -1,0 +1,16 @@
+[gd_resource type="GradientTexture2D" format=3 uid="uid://cjkitfig0a0001"]
+
+; PLACEHOLDER foreground figure (generated vertical gradient — NOT real character
+; art). Replace with your own Texture2D referenced from a JourneyStageBook entry.
+; Original / CC0, MIT-safe. Tall + narrow so KEEP_ASPECT staging reads as a "figure".
+
+[sub_resource type="Gradient" id="Gradient_fig_a"]
+offsets = PackedFloat32Array(0, 0.18, 1)
+colors = PackedColorArray(0.86, 0.72, 0.6, 1, 0.5, 0.3, 0.25, 1, 0.22, 0.13, 0.12, 1)
+
+[resource]
+gradient = SubResource("Gradient_fig_a")
+width = 240
+height = 560
+fill_from = Vector2(0, 0)
+fill_to = Vector2(0, 1)
