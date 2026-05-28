@@ -198,6 +198,17 @@ func rebuild_pool() -> void:
 func get_config() -> JourneyConfig:
 	return _config
 
+## Read-only accessor used by JourneyRuntime.validate() (§8.1) so the
+## validator can include pool events without forcing a directory scan.
+## Returns the index ONLY if it's already built (a journey was started or
+## rebuild_pool was called); null otherwise. The validator must not trigger
+## a build because the author may be inspecting a config whose
+## event_pool_dir isn't valid yet.
+func get_pool_index() -> JourneyPoolIndex:
+	if _pool_index != null and _pool_index.is_built():
+		return _pool_index
+	return null
+
 ## §7.3 post-load re-entry. Caller (JourneyRuntime.load_game) has already
 ## restored the Blackboard in place; we now resolve the saved
 ## `current_event_id` to a live JourneyEvent and re-enter it with

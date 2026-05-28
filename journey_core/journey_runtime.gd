@@ -140,9 +140,31 @@ func load_game(slot: String = "savegame") -> int:
 		return restore_err
 	return OK
 
-func validate(_config: JourneyConfig) -> Array[String]:
-	push_warning("JourneyRuntime.validate: not implemented until Step 7")
-	return []
+## §8.1 dev-only authoring validator. Per §9 the public surface returns
+## flattened [ERROR]/[WARNING]-prefixed strings (empty = clean). Internally
+## defers to JourneyValidator.validate(config, pool) — the richer typed form
+## that Studio calls directly on save (§8.1 [Studio]), so the same rules
+## govern both. If a journey is active and the runtime's pool index is
+## already built, it's passed through so pool events are validated too;
+## otherwise the validator notes that pool wasn't checked instead of
+## forcing a directory scan just for validation.
+##
+## NOTE: §8.1 intends games to invoke this in _ready under
+## OS.is_debug_build() — shipping builds should not pay the walk cost.
+## Studio (separate plugin) calls JourneyValidator.validate directly to get
+## the typed dicts; this wrapper exists for games that want a plain string
+## list to drop into a debug log.
+func validate(config: JourneyConfig) -> Array[String]:
+	var pool: JourneyPoolIndex = null
+	if _seq != null:
+		pool = _seq.get_pool_index()
+	var typed: Array = JourneyValidator.validate(config, pool)
+	var out: Array[String] = []
+	for m in typed:
+		var sev: String = String(m.get("severity", ""))
+		var prefix: String = "[ERROR] " if sev == JourneyValidator.SEVERITY_ERROR else "[WARNING] "
+		out.append(prefix + String(m.get("message", "")))
+	return out
 
 ## [Studio]/editor hot-reload hook (§9 / §3.7). Forwards to the SequenceManager,
 ## which owns the pool index. Safe to call before the first pool pull; the
