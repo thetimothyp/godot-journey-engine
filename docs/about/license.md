@@ -4,7 +4,7 @@ Journey Engine is released under the **MIT License** — a permissive license th
 lets you use, modify, and distribute the engine (including in commercial games)
 as long as the copyright notice and license text are preserved.
 
-The authoritative copy is the [`LICENSE`](https://github.com/thetimothyp/godot-journey-engine-core/blob/main/LICENSE)
+The authoritative copy is the [`LICENSE`](https://github.com/thetimothyp/godot-journey-engine/blob/main/LICENSE)
 file at the repository root.
 
 The documentation toolchain (Material for MkDocs) is separately MIT-licensed;

@@ -4,7 +4,7 @@ Maintainer playbook for cutting a release, publishing the docs, and listing on
 the Godot Asset Library. This file is for maintainers — it is **not** part of the
 published documentation site.
 
-Repo: <https://github.com/thetimothyp/godot-journey-engine-core>
+Repo: <https://github.com/thetimothyp/godot-journey-engine>
 
 The flow, in order:
 
@@ -134,7 +134,7 @@ needed at runtime. Keep the `.uid` files in; Godot 4 uses them.)
 === "With the web UI"
 
     1. Go to **Releases → Draft a new release**:
-       <https://github.com/thetimothyp/godot-journey-engine-core/releases/new>
+       <https://github.com/thetimothyp/godot-journey-engine/releases/new>
     2. Choose the existing tag `vX.Y.Z`.
     3. Title `vX.Y.Z`; paste the matching section from
        [`docs/about/changelog.md`](docs/about/changelog.md) as the notes.
@@ -147,7 +147,7 @@ needed at runtime. Keep the `.uid` files in; Godot 4 uses them.)
 
 The docs build into a static site that `mkdocs gh-deploy` pushes to a `gh-pages`
 branch. The canonical URL is already set as `site_url` in `mkdocs.yml`:
-<https://thetimothyp.github.io/godot-journey-engine-core/>.
+<https://thetimothyp.github.io/godot-journey-engine/>.
 
 ### First time only — enable Pages
 
