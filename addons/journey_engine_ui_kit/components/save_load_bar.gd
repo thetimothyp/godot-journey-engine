@@ -20,7 +20,7 @@ class_name JourneySaveLoadBar
 @export var show_load: bool = true
 @export var show_restart: bool = true
 
-## Optional SFX collaborator (set by JourneyView or via the NodePath).
+## Optional SFX collaborator (set by JourneyStageView or via the NodePath).
 @export var audio_layer_path: NodePath
 var audio_layer: JourneyAudioLayer
 

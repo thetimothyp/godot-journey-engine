@@ -1,13 +1,13 @@
 # UI Kit — Stage view (visual-first scheme)
 
-The kit ships two assembled presentation schemes built from the **same** components:
+The kit's assembled view is **`JourneyStageView`** — a *visual-first* layout, à la
+**Sort the Court**: a full-screen background + a foreground character sprite are the
+focus, with the narrative and choices **present but subordinate** — a slim resource
+bar on top, a short dialogue strip and a row of choice buttons along the bottom.
 
-- **`JourneyView`** — the *reading* layout: narrative in a wide column, choices in a
-  side panel. Text-forward. (See [Install](install.md).)
-- **`JourneyStageView`** — the *visual-first* layout, à la **Sort the Court**: a
-  full-screen background + a foreground character sprite are the focus, with the
-  narrative and choices **present but subordinate** — a slim resource bar on top, a
-  short dialogue strip and a row of choice buttons along the bottom.
+It's built entirely from the kit's [components](components.md), which are independent
+and layout-agnostic — so if the stage scheme isn't your style, arrange the same
+components in your own root scene.
 
 ```text
 ┌───────────────────────────────┐
@@ -24,8 +24,8 @@ The kit ships two assembled presentation schemes built from the **same** compone
 └───────────────────────────────┘
 ```
 
-Both honor the [Presentation Contract](../concepts/presentation-contract.md)
-identically — `JourneyChoiceList` is the sole `process_choice` caller, reads go
+It honors the [Presentation Contract](../concepts/presentation-contract.md) like any
+kit front end — `JourneyChoiceList` is the sole `process_choice` caller, reads go
 through the accessors, and animation is sequenced client-side so the engine never
 waits.
 
@@ -34,7 +34,7 @@ waits.
 Instance **`res://addons/journey_engine_ui_kit/JourneyStageView.tscn`**, then in the
 Inspector set:
 
-1. **`config`** — your `JourneyConfig` (same as the reading view).
+1. **`config`** — your `JourneyConfig`.
 2. **`hud_bindings`** — your resource read-out ([details](install.md#hud-bindings)).
 3. **`stage_book`** — a `JourneyStageBook` mapping events to sprites/speakers (below).
 
@@ -71,6 +71,21 @@ scenes) without any data change; the default uses a single figure.
     engine ever adds a `foreground_texture` field for author convenience, it works with
     no kit change — while richer staging (speaker, anchors, multiple sprites,
     choreography) stays in the book where it belongs.
+
+## Locked choices
+
+The stage view shows **locked choices** by default (`show_locked_choices`): a choice
+whose visibility fails right now appears as a **disabled, greyed** button instead of
+vanishing — e.g. the sample's *"Pay them off (-30 gold)"* renders locked when you
+can't afford it. The kit knows which to lock by diffing the visibility-passing subset
+against the full `event.choices` (both arrive in `event_changed`) — it never
+re-evaluates visibility, so the engine stays the single source of truth. Set
+`show_locked_choices = false` to hide unavailable choices instead.
+
+A human-readable *reason* ("needs 30 gold") is **not** shown — that would require a
+core field on the choice or introspecting its condition group; the locked button just
+carries the choice's own text, greyed. See the
+[design note](../reference/design/starter-ui-kit.md).
 
 ## Readability over art
 

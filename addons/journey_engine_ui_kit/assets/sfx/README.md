@@ -8,7 +8,7 @@ wired at all. This folder is where *you* put your sounds.
 
 1. Drop your `.wav` / `.ogg` files into your **own game folder** (recommended) or
    here. Keeping them in your game folder means a kit update never clobbers them.
-2. Assign each stream to the matching exported slot on your `JourneyView` node
+2. Assign each stream to the matching exported slot on your `JourneyStageView` node
    (Inspector → **SFX** group), or on `JourneyAudioLayer` directly:
 
    | Slot | Fires when |

@@ -9,11 +9,12 @@ per-event background and audio payloads the core has always carried, and animate
 the transitions between events.
 
 !!! abstract "What the kit gives you"
-    - Two one-line assembled schemes — **`JourneyView`** (text-forward reading layout)
-      and **`JourneyStageView`** (visual-first, Sort-the-Court style) — built from the
-      same components.
-    - Independent, reusable `Control` components (narrative, choices, HUD, save/load,
-      ending, background, foreground sprites, audio, transition).
+    - A one-line assembled view — **`JourneyStageView`** (visual-first, Sort-the-Court
+      style: a background + character sprite are the focus) — that starts a journey
+      from your config.
+    - Independent, reusable, layout-agnostic `Control` components (background,
+      foreground sprites, narrative, choices, HUD, save/load, ending, audio,
+      transition) — arrange your own layout if the stage scheme isn't your style.
     - Client-side **animation** — text reveal, entrance/exit, idle motion, and scene
       transitions — that never makes the engine wait.
     - A default **Theme** and **placeholder assets** so it looks decent immediately,
@@ -32,14 +33,16 @@ architectural rule:
     - **`process_choice` is the single write.** Only `JourneyChoiceList` calls it.
     - **Reads go through accessors** — `get_resource` / `has_flag` / `get_metadata`.
       The kit never touches `JourneyRuntime.blackboard`.
-    - **Choices arrive pre-filtered.** The kit renders exactly the choices
-      `event_changed` hands it and never re-checks visibility.
+    - **Choices arrive pre-filtered.** The kit renders the choices `event_changed`
+      hands it and never re-checks visibility. (It can optionally also show the
+      *filtered-out* choices greyed/locked — by diffing against the full
+      `event.choices`, not by re-evaluating anything. See [Components](components.md).)
     - **The kit owns pacing.** The engine advances only on `process_choice` and never
       blocks; all animation is sequenced client-side.
 
 ## Where to go next
 
-- [Install](install.md) — get a `JourneyView` on screen.
+- [Install](install.md) — get a `JourneyStageView` on screen.
 - [Components](components.md) — what each piece does and its exported knobs.
 - [Animations](animations.md) — the entrance/exit/idle/transition model and how it
   sequences against `process_choice`.

@@ -6,9 +6,10 @@ class_name JourneyStageView
 ## present but subordinate — a slim resource bar on top, a short dialogue strip and a
 ## row of choice buttons along the bottom.
 ##
-## It reuses every kit component; only the ARRANGEMENT differs from JourneyView (the
-## reading layout). Same contract holds: JourneyChoiceList is the sole process_choice
-## caller, reads go through accessors, the engine is never made to wait. Staging
+## It reuses every kit component, each subscribing to JourneyRuntime independently;
+## this assembler only arranges them and wires the few collaborator references. Same
+## contract holds: JourneyChoiceList is the sole process_choice caller, reads go
+## through accessors, the engine is never made to wait. Staging
 ## (which sprite/speaker per event) comes from an assigned JourneyStageBook — see
 ## JourneyForegroundLayer. Set `config` and `stage_book` and run.
 
@@ -30,6 +31,11 @@ class_name JourneyStageView
 
 @export_group("HUD")
 @export var hud_bindings: Array[JourneyHudBinding] = []
+
+@export_group("Choices")
+## Show choices that fail their visibility as disabled (greyed) buttons rather than
+## hiding them (e.g. a "Pay 30 gold" choice locked when you can't afford it).
+@export var show_locked_choices: bool = true
 
 @export_group("Narrative")
 @export var reveal_mode: JourneyNarrativePanel.Reveal = JourneyNarrativePanel.Reveal.TYPEWRITER
@@ -155,6 +161,7 @@ func _build() -> void:
 
 	choices = JourneyChoiceList.new()
 	choices.vertical_layout = false  # horizontal row of buttons
+	choices.show_locked_choices = show_locked_choices
 	choices.add_theme_constant_override("separation", 12)
 	choices.transition_layer = transition
 	choices.audio_layer = audio

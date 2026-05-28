@@ -26,7 +26,7 @@ enum Kind {
 @export var easing: Tween.EaseType = Tween.EASE_IN_OUT
 @export var transition: Tween.TransitionType = Tween.TRANS_SINE
 ## When true, automatically play_in on event_changed. Leave false when a host
-## (JourneyView/ChoiceList) drives the out→process_choice→in sequence itself.
+## (JourneyStageView/ChoiceList) drives the out→process_choice→in sequence itself.
 @export var auto_reveal: bool = false
 
 var _cover: ColorRect

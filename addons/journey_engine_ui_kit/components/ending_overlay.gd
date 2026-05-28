@@ -9,14 +9,14 @@ class_name JourneyEndingOverlay
 ## it also emits `restart_requested` so a host can drive the restart instead. The
 ## ending event is the inert payload from the signal — no Blackboard access.
 
-## Optional — assign to let the overlay restart on its own. JourneyView sets this.
+## Optional — assign to let the overlay restart on its own. JourneyStageView sets this.
 @export var config: JourneyConfig
 @export var seed: int = 0
 @export var fade_duration: float = 0.4
 @export var dim_color: Color = Color(0.04, 0.04, 0.06, 0.92)
 @export var begin_again_text: String = "Begin again"
 
-## Optional SFX collaborator (set by JourneyView). Plays sfx_ending on journey end.
+## Optional SFX collaborator (set by JourneyStageView). Plays sfx_ending on journey end.
 var audio_layer: JourneyAudioLayer
 
 signal restart_requested()

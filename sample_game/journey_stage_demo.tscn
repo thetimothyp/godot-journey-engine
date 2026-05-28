@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://sg0stagedemo001"]
+[gd_scene format=3 uid="uid://xdam5bak15eq"]
 
 [ext_resource type="PackedScene" uid="uid://cjkitstageview01" path="res://addons/journey_engine_ui_kit/JourneyStageView.tscn" id="1_view"]
 [ext_resource type="Resource" uid="uid://sg0cfgmain00001" path="res://sample_game/config.tres" id="2_config"]

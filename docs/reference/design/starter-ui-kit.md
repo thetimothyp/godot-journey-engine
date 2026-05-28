@@ -12,8 +12,9 @@ components that consume the Journey Engine the "right" way: independent signal
 subscribers for narrative, HUD, choices, background, audio, and transitions, with
 `process_choice` as the single write into the engine and reads only through the
 public accessors. It adds a background/audio/animation layer that finally presents
-the `JourneyEvent.background_texture` / `ambient_audio` payloads, and assembles
-everything into a one-line `JourneyView`.
+the `JourneyEvent.background_texture` / `ambient_audio` payloads plus per-event
+foreground sprites (a kit-side stage book), and assembles everything into a one-line
+`JourneyStageView` (a visual-first, Sort-the-Court-style layout).
 
 ## Design notes
 
@@ -27,20 +28,23 @@ everything into a one-line `JourneyView`.
   Theme ship in the addon; real backgrounds/audio/theme/icons live in the user's
   folders and are wired via exported properties or `JourneyEvent` fields.
 
-## Open Presentation-Contract questions surfaced while building it
+## Presentation-Contract questions surfaced while building it
 
 Building a real animated UI is the best way to find gaps in the
-[Presentation Contract](../../concepts/presentation-contract.md). Two surfaced; both
-are **proposals for discussion**, not implemented (the core remains frozen):
+[Presentation Contract](../../concepts/presentation-contract.md). Building the kit
+surfaced these (the core remains frozen throughout):
 
-1. **Disabled-vs-hidden choices.** `event_changed` delivers only the
-   visibility-*passing* choices, and there is no public "would this choice be
-   visible?" read. So a front end **cannot** show a greyed-out *"Pay 30 gold
-   (locked)"* affordance — a common narrative-UI idiom. Options to weigh: an optional
-   second channel carrying the failing choices (with the reason), or a public
-   `evaluate_visibility(choice) -> bool` accessor. Either must preserve "filtering
-   lives in the engine" — the UI still wouldn't decide visibility, only render the
-   locked state the engine reports.
+1. **Disabled-vs-hidden choices — RESOLVED kit-side, no core change.** The worry was
+   that `event_changed` delivers only the visibility-*passing* choices, so a front
+   end couldn't show a greyed-out *"Pay 30 gold (locked)"* affordance. But the signal
+   *also* carries the event, and the engine builds its visible subset from the **same
+   `JourneyChoice` instances** in `event.choices`. So the kit renders the full
+   `event.choices` and disables those **not** in the visible subset — a pure identity
+   diff, never a visibility re-evaluation (the engine stays the single source of
+   truth). This shipped as `JourneyChoiceList.show_locked_choices`. **Residual gap:**
+   the engine exposes no human-readable *reason* a choice is locked ("needs 30 gold");
+   surfacing one would need a core field on `JourneyChoice` (e.g. `locked_hint`) or
+   the UI introspecting the condition group — left for discussion, not implemented.
 2. **No pre-transition / "about to leave event" signal.** Only the `process_choice`
    caller knows a change is imminent, so non-orchestrating components (background,
    audio) can't independently play an *exit* before the swap. The kit works around it

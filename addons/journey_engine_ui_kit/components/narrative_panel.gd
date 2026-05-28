@@ -8,7 +8,7 @@ class_name JourneyNarrativePanel
 ## advanced by the time event_changed fires. Subscribes to event_changed only and
 ## reads nothing from the Blackboard (the event payload carries the text).
 ##
-## Drop this script on a PanelContainer, or let JourneyView build it. It wires its
+## Drop this script on a PanelContainer, or let JourneyStageView build it. It wires its
 ## own RichTextLabel child on _ready, so it works standalone.
 
 ## How the narrative appears on each event.

@@ -15,8 +15,9 @@ The guiding principle:
 addons/journey_engine_ui_kit/assets/
   backgrounds/   placeholder_dawn|dusk|night.tres   (generated gradients — not art)
   sprites/       placeholder_icon.tres              (generated radial gradient)
+                 placeholder_figure_a|b.tres        (generated stand-in figures)
   sfx/           README.md                          (NO audio ships; empty slots)
-  theme/         journey_default_theme.tres         (default Theme)
+  theme/         journey_stage_theme.tres           (default stage Theme)
 ```
 
 Everything bundled is **original / CC0** and clearly named `placeholder_*`. The kit
@@ -40,16 +41,17 @@ it looped and crossfades between events. Enable looping in the file's import set
 
 ### UI chrome (theme)
 
-**Duplicate** `assets/theme/journey_default_theme.tres` into your own folder (e.g.
-`res://my_game/ui/`), restyle it, and assign it to **`JourneyView.theme`**. Because
-the theme is applied at the `JourneyView` root, it cascades to every component. Do
-**not** edit the addon's copy — a kit update would overwrite it.
+**Duplicate** `assets/theme/journey_stage_theme.tres` into your own folder (e.g.
+`res://my_game/ui/`), restyle it, and assign it to **`JourneyStageView.theme`**.
+Because the theme is applied at the `JourneyStageView` root, it cascades to every
+component. Do **not** edit the addon's copy — a kit update would overwrite it.
 
 ### UI SFX
 
-Drop your `.wav`/`.ogg` files in your game folder and assign them to `JourneyView`'s
-exported SFX slots (`sfx_button_hover`, `sfx_button_press`, `sfx_choice_confirm`,
-`sfx_save`, `sfx_load`, `sfx_ending`). Empty slots stay silent. Details in
+Drop your `.wav`/`.ogg` files in your game folder and assign them to
+`JourneyStageView`'s exported SFX slots (`sfx_button_hover`, `sfx_button_press`,
+`sfx_choice_confirm`, `sfx_save`, `sfx_load`, `sfx_ending`). Empty slots stay silent.
+Details in
 `addons/journey_engine_ui_kit/assets/sfx/README.md`.
 
 ### Resource icons

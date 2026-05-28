@@ -1,13 +1,13 @@
 # UI Kit — Components
 
 Every component is an independent `Control`/`Node` that connects to `JourneyRuntime`
-signals in its own `_ready()`. You can use any one alone, or let `JourneyView`
+signals in its own `_ready()`. You can use any one alone, or let `JourneyStageView`
 assemble them. They never reference each other except for the few collaborator
-hooks noted below, which `JourneyView` wires for you.
+hooks noted below, which `JourneyStageView` wires for you.
 
 | Class | Base | Subscribes to |
 | --- | --- | --- |
-| `JourneyView` / `JourneyStageView` | `Control` | *(assemblers; start the journey)* |
+| `JourneyStageView` | `Control` | *(assembler; starts the journey)* |
 | `JourneyNarrativePanel` | `PanelContainer` | `event_changed` |
 | `JourneyChoiceList` | `BoxContainer` | `event_changed`, `journey_ended` |
 | `JourneyForegroundLayer` | `Control` | `event_changed` |
@@ -34,9 +34,15 @@ Builds a `Button` per choice from the **already-filtered** `choices` array and i
 transition.
 
 - `entrance_duration`, `entrance_stagger` — staggered fade-in of the buttons.
-- `vertical_layout` — stack choices vertically (default; reading layout) or lay them
-  out as a horizontal button row (`false`; stage layout).
-- Collaborators (set by an assembler or via `NodePath`): `transition_layer`,
+- `vertical_layout` — stack choices vertically (default) or lay them out as a
+  horizontal button row (`false`; what the stage view uses).
+- `show_locked_choices` — also render the choices that *fail* their visibility right
+  now, as disabled/greyed buttons (e.g. a "Pay 30 gold" choice shown locked when you
+  can't afford it). It learns which are locked by diffing the visible subset against
+  the full `event.choices` — a pure identity diff, **not** a visibility re-evaluation
+  (the engine still decides; this only renders the verdict). Off ⇒ locked choices are
+  hidden (the default). A human-readable *reason* isn't available without a core field.
+- Collaborators (set by the assembler or via `NodePath`): `transition_layer`,
   `audio_layer`.
 - On press it runs the [transition sequence](animations.md#sequencing-against-process_choice);
   on `journey_ended` it clears and locks.
@@ -61,7 +67,7 @@ Save / Load / Restart buttons calling `save_game` / `load_game` /
   bulk-restores the Blackboard and fires **no** `resource_changed` signals (see
   [Save & Load](../guides/save-and-load.md)). `event_changed` *does* re-fire, so
   narrative, choices, and background rebuild for free.
-- Emits `status(message)` for an optional toast (`JourneyView` shows one).
+- Emits `status(message)` for an optional toast (`JourneyStageView` shows one).
 
 ## JourneyEndingOverlay
 
@@ -99,15 +105,14 @@ A full-view scene transition — `FADE` (through a color), `WIPE`, or `NONE` —
 two await-able halves, `play_out()` and `play_in()`. `ChoiceList` drives these around
 the `process_choice` call; see [Animations](animations.md).
 
-## JourneyView / JourneyStageView
+## JourneyStageView
 
-The assemblers. Each instantiates and lays out the components above, applies a default
-`Theme` (cascades to every child), forwards its exported config/animation/SFX values,
-wires the collaborator references, and — with `autostart` — calls `start_new_journey`.
-These are the **only** places components reference one another.
+The assembler. It instantiates and lays out the components above in the visual-first
+layout (background + foreground sprite focus; HUD bar, dialogue strip, horizontal
+choice row), applies a default `Theme` (cascades to every child), forwards its
+exported config/animation/SFX values + the `stage_book`, wires the collaborator
+references, and — with `autostart` — calls `start_new_journey`. This is the **only**
+place components reference one another. See [Stage view](stage-view.md).
 
-- **`JourneyView`** — the text-forward *reading* layout (narrative column + side
-  choices).
-- **`JourneyStageView`** — the visual-first layout (background + foreground sprite
-  focus; HUD bar, dialogue strip, horizontal choice row). Adds a `stage_book` export.
-  See [Stage view](stage-view.md).
+Prefer a different layout? Arrange the same components in your own root scene —
+they're independent signal subscribers, so nothing forces the stage arrangement.

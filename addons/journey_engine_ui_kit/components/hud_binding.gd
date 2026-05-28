@@ -4,7 +4,7 @@ class_name JourneyHudBinding
 ## One row of the ResourceHud: which Blackboard value to show and how to label it.
 ##
 ## The kit never hardcodes gold/sanity/rations — a game declares its HUD as an
-## Array[JourneyHudBinding] on JourneyView / JourneyResourceHud, so the same widget
+## Array[JourneyHudBinding] on JourneyStageView / JourneyResourceHud, so the same widget
 ## drives any resource schema. Values are read through the public accessors
 ## (get_resource / get_metadata) — never the Blackboard directly.
 

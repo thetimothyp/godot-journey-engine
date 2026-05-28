@@ -13,7 +13,10 @@ attribute:
   replaced (set `JourneyEvent.background_texture`).
 - `assets/sprites/placeholder_icon.tres` — **placeholder** HUD icon, a generated
   radial gradient.
-- `assets/theme/journey_default_theme.tres` — default `Theme` built from Godot
+- `assets/sprites/placeholder_figure_a.tres` / `_b.tres` — **placeholder** foreground
+  figures, generated vertical gradients. Not character art; intended to be replaced
+  (reference your own `Texture2D` from a `JourneyStageBook` entry).
+- `assets/theme/journey_stage_theme.tres` — default stage `Theme` built from Godot
   `StyleBoxFlat` resources.
 
 ## Audio

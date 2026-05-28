@@ -10,7 +10,7 @@ class_name JourneyAudioLayer
 ## Reads only the event payload (ambient_audio) handed in by event_changed — no
 ## Blackboard access.
 
-## UI SFX slots — assign AudioStreams in the inspector / via JourneyView. Empty ⇒ silent.
+## UI SFX slots — assign AudioStreams in the inspector / via JourneyStageView. Empty ⇒ silent.
 @export_group("SFX slots")
 @export var sfx_button_hover: AudioStream
 @export var sfx_button_press: AudioStream

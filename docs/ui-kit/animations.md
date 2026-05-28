@@ -53,7 +53,7 @@ no orchestration — only the exit/transition ordering does, because only the
 
 ## Tuning
 
-Most knobs are exported on `JourneyView` (and on each component for standalone use):
+Most knobs are exported on `JourneyStageView` (and on each component for standalone use):
 
 - **Reveal** — `reveal_mode` (`INSTANT`/`FADE`/`TYPEWRITER`), `reveal_duration`.
 - **Transition** — `transition_kind` (`FADE`/`WIPE`/`NONE`), `transition_duration`.

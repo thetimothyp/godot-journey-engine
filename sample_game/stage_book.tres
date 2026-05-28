@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="JourneyStageBook" format=3 uid="uid://sg0stagebook001"]
+[gd_resource type="Resource" script_class="JourneyStageBook" format=3 uid="uid://xdam48kmw5eq"]
 
 ; Sample staging for the stage-view demo: maps a few event ids to placeholder
 ; figures + speakers. Demonstrates CENTER/LEFT/RIGHT anchors, flip_h, and speaker
