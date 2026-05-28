@@ -1,5 +1,13 @@
 # Project Name: Journey Engine
 
+!!! note "Product requirements doc — for the *why*, not the API"
+    This PRD captures product intent and rationale. For accurate, current API and
+    behavior details, prefer the [API Reference](../api.md) and
+    [Concepts](../../concepts/overview.md) — they're verified against the shipped
+    code in `journey_core/`. Where this document and the code disagree, the code
+    wins; see the divergence notes on the
+    [Engineering Design](engineering-design.md) page.
+
 **Author:** AI Collaborator
 **Date:** May 27, 2026
 **Status:** Baseline Document — Revision 2

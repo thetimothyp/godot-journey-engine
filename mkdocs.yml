@@ -1,0 +1,106 @@
+site_name: Journey Engine
+site_description: >-
+  A presentation-agnostic, studio-authorable narrative-journey runtime for
+  Godot 4 / GDScript — resources, events, deterministic + stochastic routing,
+  save/load, and an authoring validator.
+
+repo_url: https://github.com/thetimothyp/godot-journey-engine-core
+repo_name: godot-journey-engine-core
+
+# README.md is the human-facing "how to build the docs" note (not a site page);
+# PROGRESS.md is the internal implementation log. Neither belongs in the built
+# site, so drop them from the build entirely — this also keeps `--strict` happy
+# (a docs_dir file that is neither in nav nor excluded is a strict error).
+exclude_docs: |
+  README.md
+  PROGRESS.md
+
+theme:
+  name: material
+  # Primary color is a muted indigo — calm, readable on long-form reference
+  # prose in both schemes, and distinct from Godot's own blue so screenshots of
+  # the editor next to the docs don't blur together.
+  palette:
+    # `media` queries make the OS preference the initial default; the icon
+    # toggle then lets a reader override per-session.
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - tables
+
+plugins:
+  - search
+
+# Promote link/anchor problems to warnings so `mkdocs build --strict` fails on a
+# broken cross-link or a stale in-page anchor (these default to INFO otherwise).
+validation:
+  links:
+    absolute_links: warn
+    unrecognized_links: warn
+    anchors: warn
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - getting-started/installation.md
+      - getting-started/quick-start.md
+  - Concepts:
+      - concepts/overview.md
+      - concepts/blackboard.md
+      - concepts/resources-and-events.md
+      - concepts/routing.md
+      - concepts/presentation-contract.md
+  - Guides:
+      - guides/authoring-content.md
+      - guides/stochastic-pool.md
+      - guides/save-and-load.md
+      - guides/validation.md
+      - guides/exporting.md
+  - Reference:
+      - reference/api.md
+      - reference/troubleshooting.md
+      - Design Docs:
+          - reference/design/prd.md
+          - reference/design/engineering-design.md
+          - reference/design/starter-ui-kit.md
+  - About:
+      - about/license.md
+      - about/changelog.md

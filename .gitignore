@@ -11,6 +11,10 @@ exports/
 *.pck
 *.zip
 
+# MkDocs static-site build output and docs virtualenv
+site/
+.venv-docs/
+
 # Mono/C# (not used here, but harmless to ignore)
 .mono/
 data_*/

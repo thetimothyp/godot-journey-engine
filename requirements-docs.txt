@@ -1,0 +1,11 @@
+# Documentation toolchain for the Journey Engine docs site.
+#
+# Pinned to the current Material for MkDocs major so future MINOR releases
+# (9.x) install cleanly but a MAJOR bump (10.x) stays opt-in — major bumps can
+# change theme defaults and config keys.
+#
+# NOTE: Material for MkDocs entered maintenance mode in early 2026 (critical
+# fixes still ship; it remains a safe choice for new projects). Its announced
+# successor, Zensical, reads the same `mkdocs.yml`, so this config ports forward
+# if/when you migrate. Until then, Material is the supported toolchain here.
+mkdocs-material>=9,<10
