@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://bps0tm5n1ueul"]
+
+[ext_resource type="Script" uid="uid://dsf6k1xt6pn46" path="res://tests/game_view.gd" id="1_view"]
+
+[node name="GameView" type="Control" unique_id=990185350]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_view")
+
+[node name="Layout" type="VBoxContainer" parent="." unique_id=1750240090]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Narrative" type="Label" parent="Layout" unique_id=1662754105]
+layout_mode = 2
+text = "…"
+autowrap_mode = 3
+
+[node name="Choices" type="VBoxContainer" parent="Layout" unique_id=2061117864]
+layout_mode = 2
+
+[node name="Log" type="Label" parent="Layout" unique_id=864967418]
+layout_mode = 2
+autowrap_mode = 3

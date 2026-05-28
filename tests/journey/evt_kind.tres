@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="JourneyEvent" format=3 uid="uid://b1evkindev001"]
+
+[ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://journey_core/journey_event.gd" id="1_event"]
+[ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://journey_core/journey_choice.gd" id="2_choice"]
+[ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://journey_core/journey_consequence.gd" id="3_conseq"]
+[ext_resource type="Script" uid="uid://k60namdri10y" path="res://journey_core/journey_condition.gd" id="4_cond"]
+[ext_resource type="Script" uid="uid://bwkdyqkiuostq" path="res://journey_core/journey_condition_group.gd" id="5_group"]
+
+[sub_resource type="Resource" id="Cond_helped_stranger"]
+script = ExtResource("4_cond")
+key = "never_set"
+op = 6
+metadata/_custom_type_script = "uid://k60namdri10y"
+
+[sub_resource type="Resource" id="Group_helped_stranger"]
+script = ExtResource("5_group")
+conditions = Array[ExtResource("4_cond")]([SubResource("Cond_helped_stranger")])
+metadata/_custom_type_script = "uid://bwkdyqkiuostq"
+
+[sub_resource type="Resource" id="Choice_kind_join"]
+script = ExtResource("2_choice")
+button_text = "They join you"
+visibility = SubResource("Group_helped_stranger")
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[sub_resource type="Resource" id="Choice_kind_moveon"]
+script = ExtResource("2_choice")
+button_text = "Move on"
+metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
+
+[resource]
+script = ExtResource("1_event")
+narrative_text = "The stranger nods gratefully."
+id = &"evt_kind"
+choices = Array[ExtResource("2_choice")]([SubResource("Choice_kind_join"), SubResource("Choice_kind_moveon")])
+metadata/_custom_type_script = "uid://cd45ite7r06rf"
