@@ -1706,6 +1706,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#030-2026-05-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.0 — 2026-05-29
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.0 — 2026-05-29">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#changed-breaking-content-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed (BREAKING — content format)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#020-2026-05-28" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1718,7 +1757,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added" class="md-nav__link">
+  <a href="#added_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Added
@@ -1787,6 +1826,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#030-2026-05-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.0 — 2026-05-29
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.0 — 2026-05-29">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#changed-breaking-content-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed (BREAKING — content format)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#020-2026-05-28" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1799,7 +1877,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added" class="md-nav__link">
+  <a href="#added_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Added
@@ -1849,8 +1927,54 @@
 <p>This project follows <a href="https://keepachangelog.com/">Keep a Changelog</a> conventions
 and <a href="https://semver.org/">Semantic Versioning</a>. The engine version is exposed at
 runtime as <code>JourneyRuntime.VERSION</code>.</p>
-<h2 id="020-2026-05-28">0.2.0 — 2026-05-28<a class="headerlink" href="#020-2026-05-28" title="Permanent link">&para;</a></h2>
+<h2 id="030-2026-05-29">0.3.0 — 2026-05-29<a class="headerlink" href="#030-2026-05-29" title="Permanent link">&para;</a></h2>
+<h3 id="changed-breaking-content-format">Changed (BREAKING — content format)<a class="headerlink" href="#changed-breaking-content-format" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Routing is now by id, not by object reference.</strong> Deterministic routes are
+  <code>StringName</code> ids resolved at runtime against a global event index, replacing
+  eager <code>JourneyEvent</code> references:<ul>
+<li><code>JourneyChoice.target_event</code> → <strong><code>target_event_id: StringName</code></strong></li>
+<li><code>JourneyConfig.start_event</code> → <strong><code>start_event_id: StringName</code></strong></li>
+<li><code>JourneyResourceDef.bottom_out_event</code> / <code>top_out_event</code> →
+  <strong><code>bottom_out_event_id</code> / <code>top_out_event_id</code></strong></li>
+<li><code>JourneyConfig.event_pool_dir</code> → <strong><code>events_dir</code></strong> — now scanned recursively
+  and indexing <strong>all</strong> events (deterministic + pool) by id.
+  This unifies identity with the already-id-based save and pool systems, makes
+  every event independently loadable, and makes routing graphs — including
+  day-loops — always serializable. It eliminates a class of unloadable content
+  (a cyclic chain of object references could pass in-memory <code>validate()</code> + the
+  smoke test yet fail to load from disk); routing <em>cycles</em> are no longer an error.
+  <strong>Migration:</strong> in each event/config <code>.tres</code>, replace the object-reference fields
+  with the <code>*_id</code> equivalents (the id the target event already has) and remove the
+  now-orphaned <code>ext_resource</code> lines; rename <code>event_pool_dir</code> → <code>events_dir</code>. Saves
+  are unaffected (they already store <code>current_event_id</code>); old saves load as long as
+  ids are unchanged.</li>
+</ul>
+</li>
+<li><strong><code>JourneyEvent.pool_eligible: bool</code></strong> (new, default <code>false</code>) — pool draws are
+  scoped by this flag, not by directory. Set it <code>true</code> on events that should
+  appear in stochastic pulls; deterministic-only events leave it <code>false</code>.</li>
+<li><strong>Renames:</strong> <code>JourneyPoolIndex</code> → <strong><code>JourneyEventIndex</code></strong> (now indexes all
+  events; <code>find_by_id</code> resolves any routing target); <code>JourneyRuntime.rebuild_pool()</code>
+  → <strong><code>rebuild_index()</code></strong>; <code>JourneyConfig.rebuild_pool_in_editor</code> →
+  <strong><code>rebuild_index_in_editor</code></strong>. The event index now builds <strong>eagerly</strong> at
+  <code>start_new_journey</code>.</li>
+</ul>
 <h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Unresolved-id validation</strong> — <code>JourneyValidator.validate(config, event_index)</code>
+  resolves every <code>start_event_id</code> / <code>target_event_id</code> / boundary id against the
+  index and reports each dangling id as an <strong>error</strong> naming the offender. This is
+  the structural guarantee that replaced the (now obsolete) reference-cycle check.
+  <code>JourneyRuntime.validate(config)</code> builds the index from <code>config.events_dir</code>.</li>
+<li><strong><code>JourneyLoadCheck</code></strong> (<code>tests/journey_load_check.gd</code>) — the canonical "would
+  this ship?" disk round-trip check. Loads a config in a fresh context
+  (<code>CACHE_MODE_IGNORE</code>), builds the event index straight from <code>events_dir</code>, and
+  asserts every event file loads and every routing id resolves. Wired into
+  <code>tests/test_export_sanity.gd</code> as a pre-export gate.</li>
+</ul>
+<h2 id="020-2026-05-28">0.2.0 — 2026-05-28<a class="headerlink" href="#020-2026-05-28" title="Permanent link">&para;</a></h2>
+<h3 id="added_1">Added<a class="headerlink" href="#added_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>UI Starter Kit</strong> (<code>addons/journey_engine_ui_kit/</code>) — an optional, themeable
   presentation layer that turns the engine's signals into a complete animated front

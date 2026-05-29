@@ -1940,6 +1940,27 @@ choice on an event reached via a bottom-out should <em>not</em> re-fire it. See
 <p>The one declared <strong>first</strong> in <code>config.resource_defs</code>. Boundary-route priority
 is declaration order; the rest are ignored for that batch.</p>
 </details>
+<details class="question">
+<summary><code>journey_error: target_event_id '…' did not resolve to an indexed event</code> (a choice goes nowhere)</summary>
+<p>The choice's <code>target_event_id</code> (or a <code>start_event_id</code> / boundary <code>*_event_id</code>)
+has <strong>no event behind it</strong> — a typo, or an event that isn't under
+<code>config.events_dir</code>, or one you deleted/renamed. Routing is by id, resolved
+against the event index built from <code>events_dir</code>; an id with no match dead-ends.
+Fix the id, or make sure the target event's <code>.tres</code> lives under <code>events_dir</code>
+(which is scanned recursively). Catch these before running:
+<a href="../../guides/validation/#the-unresolved-id-error"><code>validate()</code></a> reports every
+unresolved id as an error, and <code>JourneyLoadCheck.check()</code> confirms it from a
+fresh disk load. See
+<a href="../../concepts/routing/#routing-is-by-id-every-event-is-independently-loadable">Routing → routing is by id</a>.</p>
+</details>
+<details class="question">
+<summary>A pool event is never drawn (or a deterministic event gets pulled at random)</summary>
+<p>Pool draws are scoped by the per-event <strong><code>pool_eligible</code></strong> flag, not by which
+folder the event sits in. An event that should appear in random pulls must have
+<code>pool_eligible = true</code> (plus matching <code>event_tags</code> / <code>pool_conditions</code>); a
+deterministic-only event must leave it <code>false</code> so it's never drawn — even
+though it shares the index for routing resolution.</p>
+</details>
 <h2 id="state">State<a class="headerlink" href="#state" title="Permanent link">&para;</a></h2>
 <details class="question">
 <summary><code>condition references missing resource key '...'; treating as 0.0</code> warning</summary>
@@ -1982,11 +2003,12 @@ dropped on load — model persistent custom state as resources or flags. See
 <h2 id="exporting">Exporting<a class="headerlink" href="#exporting" title="Permanent link">&para;</a></h2>
 <details class="question">
 <summary>The pool is empty in my exported / Web build but fine in the editor</summary>
-<p>Confirm <code>config.event_pool_dir</code> points at a folder that actually contains the
-pool <code>.tres</code> files and that they were included in the export. The scan is
-export-safe (it reads the PCK's virtual filesystem and <code>.remap</code> pointers), so
-a genuine empty-in-export almost always means the directory path or export
-filter is wrong. See <a href="../../guides/exporting/">Exporting</a>.</p>
+<p>Confirm <code>config.events_dir</code> points at a folder that actually contains the
+event <code>.tres</code> files (with <code>pool_eligible = true</code> on the pool ones) and that
+they were included in the export. The scan is export-safe (it reads the PCK's
+virtual filesystem and <code>.remap</code> pointers), so a genuine empty-in-export almost
+always means the directory path or export filter is wrong. See
+<a href="../../guides/exporting/">Exporting</a>.</p>
 </details>
 <details class="question">
 <summary>The WASM build won't load from a file:// URL</summary>

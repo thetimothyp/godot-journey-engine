@@ -1068,16 +1068,38 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#the-unresolved-id-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The unresolved-id error
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-pool-isnt-validated-unless-its-built" class="md-nav__link">
+  <a href="#validate-is-not-enough-on-its-own-round-trip-from-disk" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The pool isn't validated unless it's built
+        Validate is not enough on its own — round-trip from disk
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-validation-needs-an-index-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What validation needs an index for
       
     </span>
   </a>
@@ -1844,16 +1866,38 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#the-unresolved-id-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The unresolved-id error
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-pool-isnt-validated-unless-its-built" class="md-nav__link">
+  <a href="#validate-is-not-enough-on-its-own-round-trip-from-disk" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The pool isn't validated unless it's built
+        Validate is not enough on its own — round-trip from disk
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-validation-needs-an-index-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What validation needs an index for
       
     </span>
   </a>
@@ -1921,7 +1965,7 @@ in <code>_ready()</code>.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>start_event</code> is null</td>
+<td><code>start_event_id</code> is empty</td>
 <td><strong>Error</strong></td>
 <td>A journey can't begin without one.</td>
 </tr>
@@ -1938,12 +1982,17 @@ in <code>_ready()</code>.</p>
 <tr>
 <td>Event with an empty <code>id</code></td>
 <td><strong>Error</strong></td>
-<td>Saves and the pool index need stable ids.</td>
+<td>Surfaced from the index build; every indexed event needs a stable id.</td>
 </tr>
 <tr>
-<td>Duplicate event <code>id</code> (across the reachable graph + pool)</td>
+<td>Duplicate event <code>id</code></td>
 <td><strong>Error</strong></td>
-<td>Ambiguous identity.</td>
+<td>Surfaced from the index build; ambiguous identity.</td>
+</tr>
+<tr>
+<td><strong>Unresolved routing id</strong> (<code>start_event_id</code> / <code>target_event_id</code> / boundary id)</td>
+<td><strong>Error</strong></td>
+<td>The id has no event behind it — the route dead-ends. See below.</td>
 </tr>
 <tr>
 <td>Condition/consequence references an <strong>undeclared resource key</strong></td>
@@ -1951,12 +2000,19 @@ in <code>_ready()</code>.</p>
 <td>Almost always a typo against <code>resource_defs</code>.</td>
 </tr>
 <tr>
-<td>Dead/unfinished choice (null target, no pool, no consequences)</td>
+<td>Dead/unfinished choice (no target id, no pool, no consequences)</td>
 <td><strong>Warning</strong></td>
 <td>Catches half-authored nodes; see below.</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Validation needs a built event index</p>
+<p>Routing is by id, so <code>validate(config, event_index)</code> resolves ids and runs
+per-event checks against the index. <code>JourneyRuntime.validate(config)</code> builds
+one from <code>config.events_dir</code> for you. Called with no index, only config-level
+checks (empty <code>start_event_id</code>, resource bounds) run and a note is appended.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Flag keys are never flagged</p>
 <p>Conditions and consequences that reference <em>flags</em> (<code>HAS_FLAG</code>, <code>NOT_FLAG</code>,
@@ -1965,35 +2021,57 @@ created lazily by design and have no "declared" set to check against. Only
 <em>resource</em> keys are checked against <code>resource_defs</code>.</p>
 </div>
 <h3 id="the-dead-choice-warning">The dead-choice warning<a class="headerlink" href="#the-dead-choice-warning" title="Permanent link">&para;</a></h3>
-<p>A choice with <strong>no</strong> <code>target_event</code>, <strong>no</strong> <code>continue_to_pool</code>, and <strong>no</strong>
-consequences is reported as a warning. This shape is a legitimate "bare end of
-journey" button, but it's far more often an unfinished node. The warning catches
-the unfinished case; to mark a terminal choice as deliberate, give it any
+<p>A choice with an <strong>empty</strong> <code>target_event_id</code>, <strong>no</strong> <code>continue_to_pool</code>, and
+<strong>no</strong> consequences is reported as a warning. This shape is a legitimate "bare
+end of journey" button, but it's far more often an unfinished node. The warning
+catches the unfinished case; to mark a terminal choice as deliberate, give it any
 consequence (e.g. a <code>SET_FLAG</code> recording the ending). The sample's ending events
 do this — their final "close the book" choice sets an <code>ending_*</code> flag.</p>
-<h2 id="the-pool-isnt-validated-unless-its-built">The pool isn't validated unless it's built<a class="headerlink" href="#the-pool-isnt-validated-unless-its-built" title="Permanent link">&para;</a></h2>
-<p><code>validate()</code> does <strong>not</strong> trigger a pool directory scan — the author may be
-inspecting a config whose <code>event_pool_dir</code> isn't valid yet. So:</p>
-<ul>
-<li>If a journey is active and the pool index is already built, pool events are
-  included in the walk.</li>
-<li>Otherwise, the result includes a notice: <code>pool was not validated — pass a built
-  JourneyPoolIndex to include pool events</code>.</li>
-</ul>
-<p>The sample filters that one notice out as expected noise:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">var</span><span class="w"> </span><span class="n">filtered</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">Array</span><span class="p">[</span><span class="nb nb-Type">String</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[]</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">for</span><span class="w"> </span><span class="n">line</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">issues</span><span class="p">:</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;pool was not validated&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">        </span><span class="n">filtered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">filtered</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="n">_show_toast</span><span class="p">(</span><span class="s2">&quot;validate(): </span><span class="si">%d</span><span class="s2"> issue(s) — see Output&quot;</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">filtered</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+<h3 id="the-unresolved-id-error">The unresolved-id error<a class="headerlink" href="#the-unresolved-id-error" title="Permanent link">&para;</a></h3>
+<p>Routing is id-based (see <a href="../../concepts/routing/#routing-is-by-id-every-event-is-independently-loadable">Routing</a>),
+so the one structural way a route can break is a <strong>dangling id</strong> — a
+<code>target_event_id</code>, <code>start_event_id</code>, or boundary <code>*_event_id</code> with no matching
+event in the index (a typo, or a deleted/renamed event). <code>validate()</code> resolves
+every routing id against the index and reports each miss as an <strong>error</strong> naming
+the offender:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>[ERROR] event &#39;evt_madness&#39; choice[0] target_event_id &#39;evt_ending_routr&#39; does not resolve to an indexed event
 </code></pre></div>
-<p>Note that duplicate/empty ids <em>within the pool directory itself</em> are already
-caught loudly at load time by the pool index, independent of <code>validate()</code>.</p>
+<p>Fix it by correcting the id or adding the missing event under <code>events_dir</code>.
+(Routing <em>cycles</em> are no longer an error — id-based routes are always
+serializable, so a loop-back is a supported shape.)</p>
+<h2 id="validate-is-not-enough-on-its-own-round-trip-from-disk">Validate is not enough on its own — round-trip from disk<a class="headerlink" href="#validate-is-not-enough-on-its-own-round-trip-from-disk" title="Permanent link">&para;</a></h2>
+<p><code>validate()</code> inspects events held in memory (the live or an in-memory index). The
+authoritative "would this ship?" check also proves the content survives a real
+trip to and from disk in a fresh load context — catching an unloadable event file
+or a dangling id that only an honest disk build reveals.</p>
+<p>The engine ships that check as <code>JourneyLoadCheck</code> (<code>tests/journey_load_check.gd</code>).
+It loads your config from disk with <code>CACHE_MODE_IGNORE</code> (never the cached
+in-memory instance), builds the event index straight from <code>events_dir</code>, and
+asserts every event file loads and every routing id resolves:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">var</span><span class="w"> </span><span class="n">problems</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">Array</span><span class="p">[</span><span class="nb nb-Type">String</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JourneyLoadCheck</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="s2">&quot;res://my_game/config.tres&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">problems</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">problems</span><span class="p">:</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">        </span><span class="n">push_error</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="w">   </span><span class="c1"># content is unloadable / has a dangling id — do not ship</span>
+</code></pre></div>
+<p>A pre-ship gate (or CI) should require <strong>both</strong> <code>validate()</code> <em>and</em>
+<code>JourneyLoadCheck.check()</code> to come back clean. The bundled
+<code>tests/test_export_sanity.gd</code> runs the round-trip over <code>sample_game/</code> before
+export for exactly this reason.</p>
+<h2 id="what-validation-needs-an-index-for">What validation needs an index for<a class="headerlink" href="#what-validation-needs-an-index-for" title="Permanent link">&para;</a></h2>
+<p><code>JourneyValidator.validate()</code> does <strong>not</strong> scan a directory itself — the author
+may be inspecting a config whose <code>events_dir</code> isn't valid yet. The convenient
+<code>JourneyRuntime.validate(config)</code> wrapper builds the index from <code>config.events_dir</code>
+for you (reusing the live one if a journey is active), so id resolution and
+per-event checks always run. If you call the typed <code>JourneyValidator.validate</code>
+directly with no index, only config-level checks run and the result includes the
+notice <code>events not indexed — pass a built JourneyEventIndex …</code>.</p>
+<p>Duplicate/empty-id problems are detected while the index is built (loud
+<code>push_error</code> + recorded), and <code>validate()</code> surfaces them in its typed result.</p>
 <h2 id="deterministic-output">Deterministic output<a class="headerlink" href="#deterministic-output" title="Permanent link">&para;</a></h2>
 <p>Given identical input, <code>validate()</code> returns an identical message list — resource
-defs in declaration order, events in collection order, duplicate-id messages
-sorted by id. This makes it safe to assert on in CI or diff across runs.</p>
+defs in declaration order, events id-sorted (as the index sorts them), build
+problems sorted by message. This makes it safe to assert on in CI or diff across
+runs.</p>
 <p>See also: <a href="../authoring-content/">Authoring Content</a> ·
 <a href="../../concepts/resources-and-events/">Resources &amp; Events</a> ·
 <a href="../../reference/api/#validateconfig-arraystring">API Reference</a>.</p>

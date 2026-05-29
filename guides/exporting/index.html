@@ -1898,23 +1898,24 @@ understanding is how the <a href="../stochastic-pool/">stochastic pool</a> finds
 inside an exported build.</p>
 <h2 id="why-exporting-just-works">Why exporting "just works"<a class="headerlink" href="#why-exporting-just-works" title="Permanent link">&para;</a></h2>
 <p>When Godot exports, it bakes your <code>.tres</code>/<code>.res</code> files into the PCK (or, for Web,
-into the packed data the WASM build loads). The pool index scans
-<code>config.event_pool_dir</code> using <code>DirAccess</code> over the <strong><code>res://</code> virtual
-filesystem</strong>, not the OS filesystem — and that virtual filesystem is exactly what
-the PCK exposes. The scan also recognizes the <code>.remap</code> pointer files Godot
-generates when it strips resources into the export, so it resolves them back to
-the real resource.</p>
+into the packed data the WASM build loads). The event index scans
+<code>config.events_dir</code> using <code>DirAccess</code> over the <strong><code>res://</code> virtual filesystem</strong>,
+not the OS filesystem — and that virtual filesystem is exactly what the PCK
+exposes. The scan also recognizes the <code>.remap</code> pointer files Godot generates when
+it strips resources into the export, so it resolves them back to the real
+resource.</p>
 <p>The upshot: the same directory-scan code path runs identically in the editor and
 in an exported build. The bundled sample game was verified end-to-end this way,
-including a full Web/WASM browser playthrough where the pool builds correctly
+including a full Web/WASM browser playthrough where the index builds correctly
 from the baked data.</p>
 <div class="admonition tip">
-<p class="admonition-title">Verify your pool before shipping</p>
-<p>Add a tiny headless check that builds a <code>JourneyPoolIndex</code> from your pool
-directory and asserts the expected events resolve — running it before export
-catches a misconfigured <code>event_pool_dir</code> or a stray bad <code>.tres</code> before it
-becomes a runtime <code>empty pool</code> error. The sample's <code>tests/test_export_sanity</code>
-scene is a working template.</p>
+<p class="admonition-title">Verify your content before shipping</p>
+<p>Run a headless check that builds a <code>JourneyEventIndex</code> from your <code>events_dir</code>
+and <code>JourneyLoadCheck.check(config_path)</code> to confirm every event loads and
+every routing id resolves — before export, catching a misconfigured
+<code>events_dir</code>, a dangling <code>target_event_id</code>, or a stray bad <code>.tres</code> before it
+becomes a runtime error. The sample's <code>tests/test_export_sanity</code> scene is a
+working template.</p>
 </div>
 <h2 id="web-wasm">Web / WASM<a class="headerlink" href="#web-wasm" title="Permanent link">&para;</a></h2>
 <p>The sample game targets the <strong>Compatibility renderer</strong> specifically so it Web
@@ -1953,11 +1954,11 @@ always, keep saves to natural checkpoints since a mobile app can be suspended or
 killed at any time.</p>
 <h2 id="pre-export-checklist">Pre-export checklist<a class="headerlink" href="#pre-export-checklist" title="Permanent link">&para;</a></h2>
 <ul>
-<li>[ ] <code>config.event_pool_dir</code> points at the folder your pool <code>.tres</code> files
-      actually live in.</li>
-<li>[ ] Every pool event has a unique, non-empty <code>id</code>
-      (<a href="../validation/">run the validator</a>).</li>
-<li>[ ] A headless pool-build check passes (template:
+<li>[ ] <code>config.events_dir</code> points at the tree your event <code>.tres</code> files actually
+      live in (scanned recursively).</li>
+<li>[ ] Every event has a unique, non-empty <code>id</code>, and every routing id resolves
+      (<a href="../validation/">run the validator</a> + <code>JourneyLoadCheck</code>).</li>
+<li>[ ] A headless index-build + round-trip check passes (template:
       <code>tests/test_export_sanity</code>).</li>
 <li>[ ] For Web: renderer is Compatibility, and you serve the build over HTTP.</li>
 </ul>

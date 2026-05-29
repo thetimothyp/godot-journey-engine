@@ -844,6 +844,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#routing-is-by-id-every-event-is-independently-loadable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routing is by id — every event is independently loadable
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1850,6 +1861,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#routing-is-by-id-every-event-is-independently-loadable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routing is by id — every event is independently loadable
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1937,11 +1959,11 @@
 <h2 id="routing-precedence">Routing precedence<a class="headerlink" href="#routing-precedence" title="Permanent link">&para;</a></h2>
 <p>The engine evaluates these in order and takes the <strong>first</strong> that applies:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>1. Forced boundary route   (a resource transitioned to min/max with a route set)
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>2. Deterministic target    (choice.target_event is non-null)
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>2. Deterministic target    (choice.target_event_id is non-empty)
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>3. Stochastic pool pull     (choice.continue_to_pool is true)
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>4. End the journey          (none of the above)
 </code></pre></div>
-<p>So a boundary route always wins over the choice's own <code>target_event</code>, which
+<p>So a boundary route always wins over the choice's own <code>target_event_id</code>, which
 always wins over a pool pull. If nothing routes, the journey ends on the current
 event and <code>journey_ended</code> fires.</p>
 <h3 id="deterministic-vs-stochastic-side-by-side">Deterministic vs. stochastic, side by side<a class="headerlink" href="#deterministic-vs-stochastic-side-by-side" title="Permanent link">&para;</a></h3>
@@ -1949,18 +1971,18 @@ event and <code>journey_ended</code> fires.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Deterministic route</label><label for="__tabbed_1_2">Stochastic pool pull</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Point <code>target_event</code> at a specific event. Always goes there.</p>
+<p>Set <code>target_event_id</code> to a specific event's <code>id</code>. Always goes there.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">var</span><span class="w"> </span><span class="n">choice</span><span class="w"> </span><span class="p">:</span><span class="o">=</span><span class="w"> </span><span class="n">JourneyChoice</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">choice</span><span class="o">.</span><span class="n">button_text</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Help the stranger.&quot;</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">choice</span><span class="o">.</span><span class="n">target_event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">evt_road_begins</span><span class="w">   </span><span class="c1"># always routes here</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">choice</span><span class="o">.</span><span class="n">target_event_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="s2">&quot;evt_road_begins&quot;</span><span class="w">   </span><span class="c1"># always routes here</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># continue_to_pool stays false; pool_tags_filter unused</span>
 </code></pre></div>
 <p><em>Use for:</em> authored branches, story beats, endings — anywhere you want a
 known next event.</p>
 </div>
 <div class="tabbed-block">
-<p>Leave <code>target_event</code> null and set <code>continue_to_pool = true</code>. Optionally scope
-the pull with tags.</p>
+<p>Leave <code>target_event_id</code> empty and set <code>continue_to_pool = true</code>. Optionally
+scope the pull with tags.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">var</span><span class="w"> </span><span class="n">choice</span><span class="w"> </span><span class="p">:</span><span class="o">=</span><span class="w"> </span><span class="n">JourneyChoice</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">choice</span><span class="o">.</span><span class="n">button_text</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Take to the road.&quot;</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">choice</span><span class="o">.</span><span class="n">continue_to_pool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">true</span>
@@ -1972,15 +1994,40 @@ the pull with tags.</p>
 </div>
 </div>
 <div class="admonition note">
-<p class="admonition-title"><code>target_event</code> beats <code>continue_to_pool</code></p>
-<p>If a choice has <strong>both</strong> a <code>target_event</code> and <code>continue_to_pool = true</code>, the
-deterministic target wins and the pool is never consulted. The pool branch
-only runs when <code>target_event</code> is null.</p>
+<p class="admonition-title"><code>target_event_id</code> beats <code>continue_to_pool</code></p>
+<p>If a choice has <strong>both</strong> a non-empty <code>target_event_id</code> and
+<code>continue_to_pool = true</code>, the deterministic target wins and the pool is never
+consulted. The pool branch only runs when <code>target_event_id</code> is empty.</p>
+</div>
+<h3 id="routing-is-by-id-every-event-is-independently-loadable">Routing is by id — every event is independently loadable<a class="headerlink" href="#routing-is-by-id-every-event-is-independently-loadable" title="Permanent link">&para;</a></h3>
+<p>All routes are <strong><code>StringName</code> ids</strong>, not object references: <code>target_event_id</code>,
+<code>config.start_event_id</code>, and the boundary <code>*_event_id</code> fields are resolved at
+runtime against the <strong>event index</strong> (every event under <code>config.events_dir</code>,
+keyed by <code>id</code>). Because no event holds a hard pointer to another, each event
+<code>.tres</code> loads independently, and routing graphs — including loops — are always
+serializable. (Game-id routing is the norm for narrative engines for exactly
+this reason; it's also why saves and the pool already resolve by id.)</p>
+<div class="admonition tip">
+<p class="admonition-title">Loops are fine</p>
+<p>A day-loop or return-to-hub is a normal, supported shape: an event can route
+back to an earlier one by id, or loop through the pool with <code>continue_to_pool</code>
+(a plain bool). There is no serialization hazard to avoid. Use
+<code>continue_to_pool</code> + <code>pool_conditions</code> when you want the loop-back to draw a
+<em>varied</em> next event, and a direct <code>target_event_id</code> when you want a <em>fixed</em> one.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">A dangling id dead-ends</p>
+<p>The one way id routing breaks is a <code>target_event_id</code> (or start/boundary id)
+with <strong>no event behind it</strong> — a typo, or an event you deleted/renamed. At
+runtime the engine emits <code>journey_error("… did not resolve to an indexed
+event")</code> and does not advance. Catch these before running:
+<a href="../../guides/validation/"><code>validate()</code></a> reports every unresolved id as an
+error, and <code>JourneyLoadCheck</code> confirms it from a fresh disk load.</p>
 </div>
 <h2 id="forced-boundary-routes">Forced boundary routes<a class="headerlink" href="#forced-boundary-routes" title="Permanent link">&para;</a></h2>
-<p>Each <code>JourneyResourceDef</code> can name a <code>bottom_out_event</code> (fired at <code>min_value</code>)
-and a <code>top_out_event</code> (fired at <code>max_value</code>). These <strong>override</strong> the choice's own
-routing — the classic use is "sanity reaches 0 → forced madness event".</p>
+<p>Each <code>JourneyResourceDef</code> can name a <code>bottom_out_event_id</code> (fired at <code>min_value</code>)
+and a <code>top_out_event_id</code> (fired at <code>max_value</code>). These <strong>override</strong> the choice's
+own routing — the classic use is "sanity reaches 0 → forced madness event".</p>
 <div class="admonition warning">
 <p class="admonition-title">Boundary routes fire on <em>transition</em>, not presence</p>
 <p>A boundary route fires only when this batch of consequences <strong>moves</strong> the
@@ -2033,8 +2080,8 @@ fires the route of the <strong>first</strong> one in <code>resource_defs</code> 
 ignores the rest. So the order you list resources in the config is also their
 boundary-route priority.</p>
 <h2 id="ending-a-journey">Ending a journey<a class="headerlink" href="#ending-a-journey" title="Permanent link">&para;</a></h2>
-<p>A journey ends when a processed choice has no forced route, no <code>target_event</code>,
-and <code>continue_to_pool</code> is false. The engine emits <code>journey_ended(ending_event)</code>
+<p>A journey ends when a processed choice has no forced route, an empty
+<code>target_event_id</code>, and <code>continue_to_pool</code> false. The engine emits <code>journey_ended(ending_event)</code>
 where <code>ending_event</code> is the event the terminal choice belonged to — your UI uses
 it to show an ending screen.</p>
 <h2 id="when-routing-cant-resolve">When routing can't resolve<a class="headerlink" href="#when-routing-cant-resolve" title="Permanent link">&para;</a></h2>
@@ -2043,6 +2090,10 @@ it to show an ending screen.</p>
   candidate emits <code>journey_error("empty pool for tags: …")</code> and does <strong>not</strong>
   advance — the journey simply stays put rather than crashing. See
   <a href="../../guides/stochastic-pool/#empty-pools">Stochastic Pool</a>.</li>
+<li><strong>Unresolved id.</strong> A <code>target_event_id</code> / <code>start_event_id</code> / boundary id with no
+  matching event in the index emits <code>journey_error("… did not resolve to an
+  indexed event")</code> and does <strong>not</strong> advance. <a href="../../guides/validation/"><code>validate()</code></a>
+  catches these before you run.</li>
 <li><strong>Null route.</strong> A route resolving to a null event emits
   <code>journey_error("route resolved to null")</code>.</li>
 </ul>

@@ -1023,6 +1023,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#routing-a-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routing a loop
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#author-time-safety-net" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1905,6 +1916,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#routing-a-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routing a loop
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#author-time-safety-net" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1947,17 +1969,21 @@ Engine type is a <code>Resource</code> with a <code>class_name</code>, so they a
 <ol>
 <li>
 <p>Create a folder layout (a common one):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>res://my_game/
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>res://my_game/        # events_dir points at this tree (scanned recursively)
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── config.tres
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── events/        # deterministic, hand-linked events
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└── pool/          # stochastic pool events (event_pool_dir points here)
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── events/        # deterministic, id-linked events
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└── pool/          # stochastic pool events (pool_eligible = true)
 </code></pre></div>
+<p><code>events_dir</code> is scanned <strong>recursively</strong> and indexes every <code>JourneyEvent</code>
+under it by <code>id</code>; the <code>events/</code> vs <code>pool/</code> split is just for your own
+organization — whether an event can be drawn at random is the per-event
+<code>pool_eligible</code> flag, not its folder.</p>
 </li>
 <li>
-<p>Create events as <code>.tres</code> files.</p>
+<p>Create events as <code>.tres</code> files, each with a unique <code>id</code>.</p>
 </li>
-<li>Create one <code>JourneyConfig</code> declaring resources and pointing at the start event
-   and the pool directory.</li>
+<li>Create one <code>JourneyConfig</code> declaring resources, the <code>start_event_id</code>, and the
+   <code>events_dir</code>.</li>
 <li><a href="../validation/">Validate</a> and run.</li>
 </ol>
 <h2 id="creating-an-event">Creating an event<a class="headerlink" href="#creating-an-event" title="Permanent link">&para;</a></h2>
@@ -1966,8 +1992,9 @@ Engine type is a <code>Resource</code> with a <code>class_name</code>, so they a
 <ul>
 <li><strong>Presentation:</strong> write <code>narrative_text</code>; optionally set <code>background_texture</code> /
   <code>ambient_audio</code> (the engine just carries these — your UI displays them).</li>
-<li><strong>System:</strong> set a unique, non-empty <code>id</code> (e.g. <code>evt_start</code>). Add <code>event_tags</code>,
-  <code>weight</code>, <code>repeatable</code>, and <code>pool_conditions</code> if it's a pool event (see the
+<li><strong>System:</strong> set a unique, non-empty <code>id</code> (e.g. <code>evt_start</code>) — every routing
+  target is referenced by this id. For a pool event, tick <code>pool_eligible</code> and add
+  <code>event_tags</code>, <code>weight</code>, <code>repeatable</code>, and <code>pool_conditions</code> (see the
   <a href="../stochastic-pool/">Stochastic Pool guide</a>).</li>
 <li><strong>Choices:</strong> size the <code>choices</code> array and create a <code>JourneyChoice</code> in each slot.</li>
 </ul>
@@ -1984,7 +2011,7 @@ choice sets a flag and routes to the next event:</p>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">var</span><span class="w"> </span><span class="n">choice</span><span class="w"> </span><span class="p">:</span><span class="o">=</span><span class="w"> </span><span class="n">JourneyChoice</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">choice</span><span class="o">.</span><span class="n">button_text</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Help the stranger fix their wagon.&quot;</span>
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="n">choice</span><span class="o">.</span><span class="n">consequences</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">conseq</span><span class="p">]</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">choice</span><span class="o">.</span><span class="n">target_event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">evt_road_begins</span><span class="w">      </span><span class="c1"># deterministic route</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">choice</span><span class="o">.</span><span class="n">target_event_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="s2">&quot;evt_road_begins&quot;</span><span class="w">   </span><span class="c1"># deterministic route, by id</span>
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Enum fields show as dropdowns</p>
@@ -2018,11 +2045,11 @@ the <code>event_changed</code> choice list — your UI never sees it.</p>
 <p>Create one <code>JourneyConfig</code> resource. Adapted from <code>sample_game/config.tres</code>:</p>
 <ul>
 <li><strong><code>resource_defs</code></strong> — one <code>JourneyResourceDef</code> per number. The sample declares
-  <code>gold</code> (0–999, default 50), <code>sanity</code> (0–100, default 50, <code>bottom_out_event =
-  evt_madness</code>), <code>rations</code> (0–200, default 100), and <code>road_progress</code> (0–100).</li>
+  <code>gold</code> (0–999, default 50), <code>sanity</code> (0–100, default 50, <code>bottom_out_event_id =
+  &amp;"evt_madness"</code>), <code>rations</code> (0–200, default 100), and <code>road_progress</code> (0–100).</li>
 <li><strong><code>initial_flags</code></strong> — e.g. <code>{ "started": true }</code>.</li>
-<li><strong><code>start_event</code></strong> — the first event (<code>evt_start</code>).</li>
-<li><strong><code>event_pool_dir</code></strong> — <code>res://my_game/pool/</code>.</li>
+<li><strong><code>start_event_id</code></strong> — the first event's id (<code>&amp;"evt_start"</code>).</li>
+<li><strong><code>events_dir</code></strong> — <code>res://my_game/</code> (the tree that holds all your events).</li>
 <li><strong>Save settings</strong> — <code>save_encryption_key</code> (empty ⇒ plaintext) and
   <code>save_version</code> (start at 1).</li>
 </ul>
@@ -2032,13 +2059,13 @@ the <code>event_changed</code> choice list — your UI never sees it.</p>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">sanity</span><span class="o">.</span><span class="n">default_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">50.0</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">sanity</span><span class="o">.</span><span class="n">min_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">sanity</span><span class="o">.</span><span class="n">max_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">100.0</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">sanity</span><span class="o">.</span><span class="n">bottom_out_event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">evt_madness</span><span class="w">       </span><span class="c1"># sanity hits 0 -&gt; forced route</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">sanity</span><span class="o">.</span><span class="n">bottom_out_event_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="s2">&quot;evt_madness&quot;</span><span class="w">   </span><span class="c1"># sanity hits 0 -&gt; forced route, by id</span>
 <a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
 <a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="k">var</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="p">:</span><span class="o">=</span><span class="w"> </span><span class="n">JourneyConfig</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
 <a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="n">config</span><span class="o">.</span><span class="n">resource_defs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">gold</span><span class="p">,</span><span class="w"> </span><span class="n">sanity</span><span class="p">,</span><span class="w"> </span><span class="n">rations</span><span class="p">,</span><span class="w"> </span><span class="n">road_progress</span><span class="p">]</span>
 <a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="n">config</span><span class="o">.</span><span class="n">initial_flags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">&quot;started&quot;</span><span class="p">:</span><span class="w"> </span><span class="bp">true</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="n">config</span><span class="o">.</span><span class="n">start_event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">evt_start</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="n">config</span><span class="o">.</span><span class="n">event_pool_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;res://my_game/pool/&quot;</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="n">config</span><span class="o">.</span><span class="n">start_event_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="s2">&quot;evt_start&quot;</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="n">config</span><span class="o">.</span><span class="n">events_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;res://my_game/&quot;</span>
 </code></pre></div>
 <h2 id="flag-chains-a-later-event-paying-off-an-earlier-choice">Flag chains: a later event paying off an earlier choice<a class="headerlink" href="#flag-chains-a-later-event-paying-off-an-earlier-choice" title="Permanent link">&para;</a></h2>
 <p>A common narrative pattern is "a choice early on changes what's available later."
@@ -2053,11 +2080,24 @@ condition later. The sample does exactly this with <code>helped_stranger</code>:
 </ul>
 <p>The same flag thus gates a <em>choice</em> in one place and an <em>event's eligibility</em> in
 another — see the <a href="../stochastic-pool/">Stochastic Pool guide</a> for the latter.</p>
+<h2 id="routing-a-loop">Routing a loop<a class="headerlink" href="#routing-a-loop" title="Permanent link">&para;</a></h2>
+<p>When your story loops — a day-loop, a return-to-hub — just route back by id.
+Routes are <code>StringName</code> ids resolved against the event index, so a loop is a
+normal, supported shape with no serialization hazard: point a choice's
+<code>target_event_id</code> at an earlier event for a <em>fixed</em> loop-back, or set
+<code>continue_to_pool = true</code> (gating eligibility with <code>pool_conditions</code>) for a
+<em>varied</em> one. See <a href="../../concepts/routing/#routing-is-by-id-every-event-is-independently-loadable">Routing</a>.</p>
 <h2 id="author-time-safety-net">Author-time safety net<a class="headerlink" href="#author-time-safety-net" title="Permanent link">&para;</a></h2>
-<p>Before you run, call <a href="../validation/"><code>validate()</code></a> on your config. It catches
-null start events, bad resource bounds, duplicate/empty event ids, undeclared
-resource keys (typos), and dead/unfinished choices — pure inspection, no run
-required.</p>
+<p>Before you run, call <a href="../validation/"><code>validate()</code></a> on your config. It catches an
+empty <code>start_event_id</code>, bad resource bounds, duplicate/empty event ids,
+<strong>unresolved routing ids</strong> (a <code>target_event_id</code>/start/boundary id with no event
+behind it), undeclared resource keys (typos), and dead/unfinished choices — pure
+inspection, no run required.</p>
+<p><code>validate()</code> checks events held in memory. The authoritative "would this ship?"
+check also proves they survive a real disk load — run
+<code>JourneyLoadCheck.check("res://my_game/config.tres")</code> and require it to come
+back with zero problems alongside a clean <code>validate()</code>. See
+<a href="../validation/#validate-is-not-enough-on-its-own-round-trip-from-disk">Validation → round-trip from disk</a>.</p>
 <p>See also: <a href="../../concepts/resources-and-events/">Resources &amp; Events</a> for the full
 field reference · <a href="../validation/">Validation</a> · <a href="../../concepts/routing/">Routing</a>.</p>
 

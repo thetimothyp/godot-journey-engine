@@ -1955,12 +1955,12 @@ authoring workflow, see <a href="../../guides/authoring-content/">Authoring Cont
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>JourneyConfig
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── resource_defs: [JourneyResourceDef]      # the schema for numeric state
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── initial_flags: { String: bool }
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├── start_event: JourneyEvent ───────────────┐
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>└── event_pool_dir: &quot;res://.../pool/&quot;         │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├── start_event_id: StringName               # resolved against the event index ┐
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>└── events_dir: &quot;res://my_game/&quot;             # scanned recursively for events    │
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                                              ▼
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                                       JourneyEvent
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                                       JourneyEvent  (one .tres per event, keyed by id)
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                                       ├── narrative_text, background_texture, ambient_audio
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>                                       ├── id, event_tags, weight, repeatable
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>                                       ├── id, event_tags, weight, repeatable, pool_eligible
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>                                       ├── pool_conditions: JourneyConditionGroup
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>                                       └── choices: [JourneyChoice]
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>                                                          │
@@ -1969,7 +1969,7 @@ authoring workflow, see <a href="../../guides/authoring-content/">Authoring Cont
 <a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>                                                   ├── button_text
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>                                                   ├── visibility: JourneyConditionGroup
 <a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>                                                   ├── consequences: [JourneyConsequence]
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>                                                   ├── target_event: JourneyEvent
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>                                                   ├── target_event_id: StringName  ── resolved against the index
 <a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>                                                   ├── continue_to_pool: bool
 <a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>                                                   └── pool_tags_filter: [String]
 </code></pre></div>
@@ -1998,17 +1998,17 @@ holds an <code>ALL</code>/<code>ANY</code> list of <code>JourneyCondition</code>
 <td>Flags set true/false at journey start.</td>
 </tr>
 <tr>
-<td><code>start_event</code></td>
-<td><code>JourneyEvent</code></td>
-<td>The first event. <strong>Required</strong> — a null start is a validation error.</td>
+<td><code>start_event_id</code></td>
+<td><code>StringName</code></td>
+<td>Id of the first event. <strong>Required</strong> — an empty start id is a validation error.</td>
 </tr>
 <tr>
-<td><code>event_pool_dir</code></td>
+<td><code>events_dir</code></td>
 <td><code>String</code></td>
-<td>Directory scanned for stochastic pool events. Default <code>res://events/</code>.</td>
+<td>Directory scanned <strong>recursively</strong> for all events (deterministic + pool), indexed by id. Default <code>res://events/</code>.</td>
 </tr>
 <tr>
-<td><code>rebuild_pool_in_editor</code></td>
+<td><code>rebuild_index_in_editor</code></td>
 <td><code>bool</code></td>
 <td>Studio hot-reload hint.</td>
 </tr>
@@ -2058,14 +2058,14 @@ clamped).</p>
 <td>Upper bound (default <code>100.0</code>).</td>
 </tr>
 <tr>
-<td><code>bottom_out_event</code></td>
-<td><code>JourneyEvent</code></td>
-<td>Forced route fired when a write <strong>transitions</strong> the value down to <code>min_value</code>.</td>
+<td><code>bottom_out_event_id</code></td>
+<td><code>StringName</code></td>
+<td>Id of the event fired when a write <strong>transitions</strong> the value down to <code>min_value</code>.</td>
 </tr>
 <tr>
-<td><code>top_out_event</code></td>
-<td><code>JourneyEvent</code></td>
-<td>Optional. Forced route fired when a write transitions up to <code>max_value</code>.</td>
+<td><code>top_out_event_id</code></td>
+<td><code>StringName</code></td>
+<td>Optional. Id of the event fired when a write transitions up to <code>max_value</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -2073,9 +2073,10 @@ clamped).</p>
 See <a href="../routing/#forced-boundary-routes">Routing</a> for the exact (transition, not
 presence) firing rule.</p>
 <h2 id="journeyevent">JourneyEvent<a class="headerlink" href="#journeyevent" title="Permanent link">&para;</a></h2>
-<p>A narrative node: what the player reads, plus the choices they can take. Events
-are reachable either deterministically (as a choice's <code>target_event</code> or a
-config's <code>start_event</code>) or by living in the pool directory.</p>
+<p>A narrative node: what the player reads, plus the choices they can take. Every
+event lives as a <code>.tres</code> under <code>events_dir</code> and is reached <strong>by id</strong> — as a
+choice's <code>target_event_id</code>, the config's <code>start_event_id</code>, a boundary route, or a
+stochastic pool pull (<code>pool_eligible</code> events).</p>
 <table>
 <thead>
 <tr>
@@ -2103,7 +2104,12 @@ config's <code>start_event</code>) or by living in the pool directory.</p>
 <tr>
 <td><code>id</code></td>
 <td><code>StringName</code></td>
-<td>Stable identity used by saves and the pool index. <strong>Must be unique and non-empty for pool events.</strong></td>
+<td>Stable identity used by saves, the event index, and all routing. <strong>Must be unique and non-empty</strong> for any routing target or pool event.</td>
+</tr>
+<tr>
+<td><code>pool_eligible</code></td>
+<td><code>bool</code></td>
+<td>If <code>true</code>, the event is a candidate for stochastic pool pulls. Deterministic-only events leave it <code>false</code>.</td>
 </tr>
 <tr>
 <td><code>event_tags</code></td>
@@ -2160,14 +2166,14 @@ applies, and how it routes.</p>
 <td>State changes applied when chosen.</td>
 </tr>
 <tr>
-<td><code>target_event</code></td>
-<td><code>JourneyEvent</code></td>
-<td>Deterministic route; takes precedence over a pool pull.</td>
+<td><code>target_event_id</code></td>
+<td><code>StringName</code></td>
+<td>Deterministic route by id; takes precedence over a pool pull.</td>
 </tr>
 <tr>
 <td><code>continue_to_pool</code></td>
 <td><code>bool</code></td>
-<td>If <code>true</code> <strong>and</strong> <code>target_event</code> is null, request a stochastic pool pull.</td>
+<td>If <code>true</code> <strong>and</strong> <code>target_event_id</code> is empty, request a stochastic pool pull.</td>
 </tr>
 <tr>
 <td><code>pool_tags_filter</code></td>
@@ -2176,7 +2182,7 @@ applies, and how it routes.</p>
 </tr>
 </tbody>
 </table>
-<p>A choice with no <code>target_event</code>, no <code>continue_to_pool</code>, and no consequences is a
+<p>A choice with an empty <code>target_event_id</code>, no <code>continue_to_pool</code>, and no consequences is a
 <strong>terminal</strong> choice — it ends the journey. (The validator warns on this shape in
 case it was unfinished; add any consequence to silence it for a deliberate "end"
 button.)</p>
@@ -2383,7 +2389,7 @@ conditions never hides content.</p>
 consequence against an undeclared key is skipped with a warning — the engine
 never auto-creates an unbounded resource.</p>
 <p>See also: <a href="../../guides/authoring-content/">Authoring Content</a> for the
-inspector workflow · <a href="../routing/">Routing</a> for how <code>target_event</code> /
+inspector workflow · <a href="../routing/">Routing</a> for how <code>target_event_id</code> /
 <code>continue_to_pool</code> / boundary routes interact.</p>
 
 

@@ -1610,10 +1610,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#rebuild_pool-void" class="md-nav__link">
+  <a href="#rebuild_index-void" class="md-nav__link">
     <span class="md-ellipsis">
       
-        rebuild_pool() -&gt; void
+        rebuild_index() -&gt; void
       
     </span>
   </a>
@@ -2227,10 +2227,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#rebuild_pool-void" class="md-nav__link">
+  <a href="#rebuild_index-void" class="md-nav__link">
     <span class="md-ellipsis">
       
-        rebuild_pool() -&gt; void
+        rebuild_index() -&gt; void
       
     </span>
   </a>
@@ -2331,8 +2331,9 @@ which tracks only the on-disk save format.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">func</span><span class="w"> </span><span class="n">start_new_journey</span><span class="p">(</span><span class="n">config</span><span class="p">:</span><span class="w"> </span><span class="n">JourneyConfig</span><span class="p">,</span><span class="w"> </span><span class="nb">seed</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">int</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nb nb-Type">void</span>
 </code></pre></div>
 <p>Begins a new run. Initializes the Blackboard from <code>config</code> (resources at clamped
-defaults, initial flags, primed metadata), seeds the RNG, emits
-<code>journey_started</code>, then enters <code>config.start_event</code> (emitting <code>event_changed</code>).</p>
+defaults, initial flags, primed metadata), seeds the RNG, builds the event index
+from <code>config.events_dir</code>, emits <code>journey_started</code>, then resolves
+<code>config.start_event_id</code> and enters that event (emitting <code>event_changed</code>).</p>
 <table>
 <thead>
 <tr>
@@ -2354,7 +2355,7 @@ defaults, initial flags, primed metadata), seeds the RNG, emits
 </tr>
 </tbody>
 </table>
-<p>Emits <code>journey_error("no start_event")</code> if <code>config.start_event</code> is null.</p>
+<p>Emits <code>journey_error("no start_event_id")</code> if it's empty, or <code>journey_error("start_event_id '…' did not resolve to an indexed event")</code> if no event under <code>events_dir</code> has that id.</p>
 <h3 id="process_choicechoice-void"><code>process_choice(choice) -&gt; void</code><a class="headerlink" href="#process_choicechoice-void" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">func</span><span class="w"> </span><span class="n">process_choice</span><span class="p">(</span><span class="n">choice</span><span class="p">:</span><span class="w"> </span><span class="n">JourneyChoice</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nb nb-Type">void</span>
 </code></pre></div>
@@ -2443,14 +2444,22 @@ manually). Atomic: rolls back on failure.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">func</span><span class="w"> </span><span class="n">validate</span><span class="p">(</span><span class="n">config</span><span class="p">:</span><span class="w"> </span><span class="n">JourneyConfig</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nb nb-Type">Array</span><span class="p">[</span><span class="nb nb-Type">String</span><span class="p">]</span>
 </code></pre></div>
 <p>Runs the authoring <a href="../../guides/validation/">validator</a> and returns a flat list
-of <code>[ERROR]</code>/<code>[WARNING]</code>-prefixed strings (empty = clean). If a journey is active
-and the pool index is built, pool events are included; otherwise the result notes
-the pool wasn't validated. Intended for <code>OS.is_debug_build()</code> use.</p>
-<h3 id="rebuild_pool-void"><code>rebuild_pool() -&gt; void</code><a class="headerlink" href="#rebuild_pool-void" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">func</span><span class="w"> </span><span class="n">rebuild_pool</span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nb nb-Type">void</span>
+of <code>[ERROR]</code>/<code>[WARNING]</code>-prefixed strings (empty = clean). Builds (or reuses) an
+event index from <code>config.events_dir</code> so id resolution and per-event checks run.
+Intended for <code>OS.is_debug_build()</code> use.</p>
+<div class="admonition warning">
+<p class="admonition-title">Pair it with a disk round-trip</p>
+<p><code>validate()</code> checks events held in memory. Before shipping, also run
+<code>JourneyLoadCheck.check("res://…/config.tres")</code> (<code>tests/journey_load_check.gd</code>)
+and require zero problems — it proves every event file loads from a fresh disk
+context and every routing id resolves. See
+<a href="../../guides/validation/#validate-is-not-enough-on-its-own-round-trip-from-disk">Validation → round-trip from disk</a>.</p>
+</div>
+<h3 id="rebuild_index-void"><code>rebuild_index() -&gt; void</code><a class="headerlink" href="#rebuild_index-void" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">func</span><span class="w"> </span><span class="n">rebuild_index</span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nb nb-Type">void</span>
 </code></pre></div>
-<p>Rebuilds the stochastic pool index from <code>config.event_pool_dir</code>, re-reading from
-disk (editor/Studio hot-reload hook). Safe to call before the first pool pull.</p>
+<p>Rebuilds the event index from <code>config.events_dir</code>, re-reading from disk
+(editor/Studio hot-reload hook). Safe to call before the first pool pull.</p>
 <h2 id="signals">Signals<a class="headerlink" href="#signals" title="Permanent link">&para;</a></h2>
 <p>Your UI's entire view of the journey. Subscribe in <code>_ready()</code>; the data inside is
 inert.</p>
@@ -2533,8 +2542,8 @@ the few directly-useful entry points are.</p>
 <td><strong>Internal.</strong> Owned by the runtime.</td>
 </tr>
 <tr>
-<td><code>JourneyPoolIndex</code></td>
-<td>Pool scan + weighted selection</td>
+<td><code>JourneyEventIndex</code></td>
+<td>Event scan + id resolution + weighted pool selection</td>
 <td>Useful in headless export-sanity checks (build + <code>find_by_id</code>).</td>
 </tr>
 <tr>
@@ -2545,7 +2554,12 @@ the few directly-useful entry points are.</p>
 <tr>
 <td><code>JourneyValidator</code></td>
 <td>Authoring checks</td>
-<td><code>JourneyValidator.validate(config, pool)</code> returns typed <code>{severity, message}</code> dicts if you want richer output than the string list.</td>
+<td><code>JourneyValidator.validate(config, event_index)</code> returns typed <code>{severity, message}</code> dicts if you want richer output than the string list.</td>
+</tr>
+<tr>
+<td><code>JourneyLoadCheck</code></td>
+<td>Disk round-trip "would this ship?" check</td>
+<td><code>JourneyLoadCheck.check(config_path)</code> — pair with <code>validate()</code> before shipping.</td>
 </tr>
 <tr>
 <td><code>JourneyEvaluator</code></td>
@@ -2627,12 +2641,12 @@ verified against. Spot-check any row against the code.</p>
 <tr>
 <td><code>validate(config)</code></td>
 <td><code>addons/journey_engine_core/journey_runtime.gd</code></td>
-<td>163</td>
+<td>162</td>
 </tr>
 <tr>
-<td><code>rebuild_pool()</code></td>
+<td><code>rebuild_index()</code></td>
 <td><code>addons/journey_engine_core/journey_runtime.gd</code></td>
-<td>178</td>
+<td>182</td>
 </tr>
 <tr>
 <td><code>signal event_changed(event, choices)</code></td>
@@ -2685,14 +2699,19 @@ verified against. Spot-check any row against the code.</p>
 <td>7</td>
 </tr>
 <tr>
-<td><code>JourneyValidator.validate(config, pool_index=null)</code></td>
+<td><code>JourneyValidator.validate(config, event_index=null)</code></td>
 <td><code>addons/journey_engine_core/validator.gd</code></td>
-<td>29</td>
+<td>39</td>
 </tr>
 <tr>
-<td><code>JourneyPoolIndex.find_by_id(id_str)</code></td>
-<td><code>addons/journey_engine_core/pool_index.gd</code></td>
-<td>137</td>
+<td><code>JourneyEventIndex.find_by_id(id_str)</code></td>
+<td><code>addons/journey_engine_core/event_index.gd</code></td>
+<td>189</td>
+</tr>
+<tr>
+<td><code>JourneyLoadCheck.check(config_path)</code></td>
+<td><code>tests/journey_load_check.gd</code></td>
+<td>32</td>
 </tr>
 </tbody>
 </table>

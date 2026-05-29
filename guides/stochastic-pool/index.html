@@ -990,10 +990,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-pool-directory" class="md-nav__link">
+  <a href="#pool-eligibility" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The pool directory
+        Pool eligibility
       
     </span>
   </a>
@@ -1844,10 +1844,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-pool-directory" class="md-nav__link">
+  <a href="#pool-eligibility" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The pool directory
+        Pool eligibility
       
     </span>
   </a>
@@ -1944,20 +1944,23 @@ are filtered, and how selection stays deterministic.</p>
 <p>Set the choice's routing fields (see <a href="../../concepts/routing/">Routing</a>):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">var</span><span class="w"> </span><span class="n">choice</span><span class="w"> </span><span class="p">:</span><span class="o">=</span><span class="w"> </span><span class="n">JourneyChoice</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">choice</span><span class="o">.</span><span class="n">button_text</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Take to the road.&quot;</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">choice</span><span class="o">.</span><span class="n">continue_to_pool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">true</span><span class="w">          </span><span class="c1"># request a pull (target_event must be null)</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">choice</span><span class="o">.</span><span class="n">continue_to_pool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">true</span><span class="w">          </span><span class="c1"># request a pull (target_event_id must be empty)</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">choice</span><span class="o">.</span><span class="n">pool_tags_filter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;road&quot;</span><span class="p">]</span><span class="w">      </span><span class="c1"># scope: only events tagged &quot;road&quot;; empty =&gt; all</span>
 </code></pre></div>
 <p>Adapted from the sample's <code>evt_road_begins.tres</code>, this drops the player into a
 stream of random "road" encounters.</p>
-<h2 id="the-pool-directory">The pool directory<a class="headerlink" href="#the-pool-directory" title="Permanent link">&para;</a></h2>
-<p>Pool events are <code>.tres</code>/<code>.res</code> files under <code>config.event_pool_dir</code>. On the first
-pull (lazily, so a game that never enters the pool pays no cost), the engine
-recursively scans that directory and indexes every <code>JourneyEvent</code> by its tags.</p>
+<h2 id="pool-eligibility">Pool eligibility<a class="headerlink" href="#pool-eligibility" title="Permanent link">&para;</a></h2>
+<p>Pool events live alongside every other event under <code>config.events_dir</code> (scanned
+recursively and indexed by id at <code>start_new_journey</code>). What makes an event a
+<em>pool candidate</em> is the per-event <strong><code>pool_eligible</code></strong> flag — set it <code>true</code> on
+events that should appear in random pulls. The events/pool folder split is just
+organization; deterministic-only events share the index (so they're reachable by
+id) but leave <code>pool_eligible</code> <code>false</code> so they're never drawn at random.</p>
 <div class="admonition warning">
-<p class="admonition-title">Every pool event needs a unique, non-empty <code>id</code></p>
+<p class="admonition-title">Every event needs a unique, non-empty <code>id</code></p>
 <p>Duplicate ids and empty ids are <strong>skipped with a <code>push_error</code></strong> naming the
 offending file — a single bad event can't take down the build. The
-<a href="../validation/">validator</a> catches these at authoring time too.</p>
+<a href="../validation/">validator</a> surfaces these at authoring time too.</p>
 </div>
 <p>The scan is export-safe: it uses <code>DirAccess</code> on the <code>res://</code> virtual filesystem
 and understands the <code>.remap</code> pointers Godot creates when baking resources into a
@@ -1970,6 +1973,7 @@ builds. See <a href="../exporting/">Exporting</a>.</p>
    events if the filter is empty). An event with two matching tags is <strong>deduped</strong>
    so it doesn't double its odds.</li>
 <li><strong>Filter</strong> — within scope, keep an event only if:<ul>
+<li>it is <code>pool_eligible</code>; <strong>and</strong></li>
 <li>it is <code>repeatable</code>, <strong>or</strong> its <code>id</code> is not in <code>seen_ids</code>; <strong>and</strong></li>
 <li>its <code>pool_conditions</code> group passes against the current Blackboard.</li>
 </ul>
@@ -2046,8 +2050,8 @@ from this choice, which surfaces as a dev-visible error. Common causes:</p>
 <p>Design pools so at least one repeatable event always matches the tags you pull
 with, and the pool can't dead-end.</p>
 <h2 id="hot-reloading-the-pool-in-the-editor">Hot-reloading the pool in the editor<a class="headerlink" href="#hot-reloading-the-pool-in-the-editor" title="Permanent link">&para;</a></h2>
-<p>If you add or edit pool events while iterating, <code>JourneyRuntime.rebuild_pool()</code>
-rebuilds the index from <code>event_pool_dir</code>, re-reading from disk (it uses
+<p>If you add or edit events while iterating, <code>JourneyRuntime.rebuild_index()</code>
+rebuilds the event index from <code>events_dir</code>, re-reading from disk (it uses
 <code>CACHE_MODE_REPLACE</code> so stale cached resources aren't returned).</p>
 <p>See also: <a href="../../concepts/routing/">Routing</a> · <a href="../authoring-content/">Authoring Content</a>
 · <a href="../save-and-load/">Save &amp; Load</a> for how the RNG stream is preserved.</p>
