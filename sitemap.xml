@@ -2,82 +2,106 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/about/changelog/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/about/license/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/concepts/blackboard/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/concepts/overview/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/concepts/presentation-contract/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/concepts/resources-and-events/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/concepts/routing/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/getting-started/installation/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/getting-started/quick-start/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/guides/authoring-content/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/guides/exporting/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/guides/save-and-load/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/guides/stochastic-pool/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/guides/validation/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/reference/api/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/reference/troubleshooting/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/reference/design/engineering-design/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/reference/design/prd/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
     </url>
     <url>
          <loc>https://thetimothyp.github.io/godot-journey-engine/reference/design/starter-ui-kit/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-05-29</lastmod>
+    </url>
+    <url>
+         <loc>https://thetimothyp.github.io/godot-journey-engine/ui-kit/animations/</loc>
+         <lastmod>2026-05-29</lastmod>
+    </url>
+    <url>
+         <loc>https://thetimothyp.github.io/godot-journey-engine/ui-kit/assets-customization/</loc>
+         <lastmod>2026-05-29</lastmod>
+    </url>
+    <url>
+         <loc>https://thetimothyp.github.io/godot-journey-engine/ui-kit/components/</loc>
+         <lastmod>2026-05-29</lastmod>
+    </url>
+    <url>
+         <loc>https://thetimothyp.github.io/godot-journey-engine/ui-kit/install/</loc>
+         <lastmod>2026-05-29</lastmod>
+    </url>
+    <url>
+         <loc>https://thetimothyp.github.io/godot-journey-engine/ui-kit/overview/</loc>
+         <lastmod>2026-05-29</lastmod>
+    </url>
+    <url>
+         <loc>https://thetimothyp.github.io/godot-journey-engine/ui-kit/stage-view/</loc>
+         <lastmod>2026-05-29</lastmod>
     </url>
 </urlset>

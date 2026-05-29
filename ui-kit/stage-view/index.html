@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://thetimothyp.github.io/godot-journey-engine/concepts/overview/">
+        <link rel="canonical" href="https://thetimothyp.github.io/godot-journey-engine/ui-kit/stage-view/">
       
       
-        <link rel="prev" href="../../getting-started/quick-start/">
+        <link rel="prev" href="../animations/">
       
       
-        <link rel="next" href="../blackboard/">
+        <link rel="next" href="../assets-customization/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Concepts Overview - Journey Engine</title>
+        <title>UI Kit — Stage view (visual-first scheme) - Journey Engine</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#concepts-overview" class="md-skip">
+        <a href="#ui-kit-stage-view-visual-first-scheme" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Concepts Overview
+              UI Kit — Stage view (visual-first scheme)
             
           </span>
         </div>
@@ -269,13 +269,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../concepts/overview/" class="md-tabs__link">
           
   
   
@@ -315,11 +313,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../ui-kit/overview/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../overview/" class="md-tabs__link">
           
   
   
@@ -576,10 +576,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -597,22 +595,21 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   
@@ -630,7 +627,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -645,37 +642,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Concepts Overview
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../concepts/overview/" class="md-nav__link">
         
   
   
@@ -691,59 +661,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#the-mental-model" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The mental model
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-data-flow-loop" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The data-flow loop
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#design-principles-youll-feel" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Design principles you'll feel
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -756,7 +673,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../blackboard/" class="md-nav__link">
+      <a href="../../concepts/blackboard/" class="md-nav__link">
         
   
   
@@ -784,7 +701,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../resources-and-events/" class="md-nav__link">
+      <a href="../../concepts/resources-and-events/" class="md-nav__link">
         
   
   
@@ -812,7 +729,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../routing/" class="md-nav__link">
+      <a href="../../concepts/routing/" class="md-nav__link">
         
   
   
@@ -840,7 +757,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../presentation-contract/" class="md-nav__link">
+      <a href="../../concepts/presentation-contract/" class="md-nav__link">
         
   
   
@@ -1085,8 +1002,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -1106,21 +1025,22 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -1138,7 +1058,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1156,7 +1076,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ui-kit/overview/" class="md-nav__link">
+      <a href="../overview/" class="md-nav__link">
         
   
   
@@ -1184,7 +1104,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ui-kit/install/" class="md-nav__link">
+      <a href="../install/" class="md-nav__link">
         
   
   
@@ -1212,7 +1132,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ui-kit/components/" class="md-nav__link">
+      <a href="../components/" class="md-nav__link">
         
   
   
@@ -1240,7 +1160,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ui-kit/animations/" class="md-nav__link">
+      <a href="../animations/" class="md-nav__link">
         
   
   
@@ -1265,10 +1185,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../ui-kit/stage-view/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Kit — Stage view (visual-first scheme)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1284,6 +1231,81 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#use-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use it
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#staging-events-the-stage-book" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Staging events: the stage book
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#locked-choices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Locked choices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#readability-over-art" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Readability over art
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whats-deferred" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's deferred
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1296,7 +1318,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ui-kit/assets-customization/" class="md-nav__link">
+      <a href="../assets-customization/" class="md-nav__link">
         
   
   
@@ -1753,10 +1775,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-mental-model" class="md-nav__link">
+  <a href="#use-it" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The mental model
+        Use it
       
     </span>
   </a>
@@ -1764,10 +1786,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-data-flow-loop" class="md-nav__link">
+  <a href="#staging-events-the-stage-book" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The data-flow loop
+        Staging events: the stage book
       
     </span>
   </a>
@@ -1775,10 +1797,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#design-principles-youll-feel" class="md-nav__link">
+  <a href="#locked-choices" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Design principles you'll feel
+        Locked choices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#readability-over-art" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Readability over art
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whats-deferred" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's deferred
       
     </span>
   </a>
@@ -1805,89 +1849,109 @@
   
 
 
-<h1 id="concepts-overview">Concepts Overview<a class="headerlink" href="#concepts-overview" title="Permanent link">&para;</a></h1>
-<p>Journey Engine models a <strong>run</strong>: a player moving from event to event, making
-choices that change a small bundle of state, until the journey ends. This page
-gives you the mental model and the data-flow loop; the rest of this section
-drills into each piece.</p>
-<h2 id="the-mental-model">The mental model<a class="headerlink" href="#the-mental-model" title="Permanent link">&para;</a></h2>
-<p>Five ideas carry the whole engine:</p>
-<ul>
-<li><strong><a href="../blackboard/">Blackboard</a></strong> — all mutable run state in one object: numeric
-  resources, boolean flags, free-form metadata, and a seeded RNG.</li>
-<li><strong><a href="../resources-and-events/">Resources &amp; Events</a></strong> — the authorable data.
-  <code>JourneyResourceDef</code> declares a bounded number (gold, sanity…); <code>JourneyEvent</code>
-  is a narrative node with <code>JourneyChoice</code>s; conditions gate, consequences mutate.</li>
-<li><strong><a href="../routing/">Routing</a></strong> — how a choice decides the next event: forced
-  boundary routes, then deterministic targets, then a stochastic pool pull, then
-  end-of-journey.</li>
-<li><strong>Single mutation path</strong> — game code <em>never</em> writes the Blackboard directly.
-  Every state change flows through a choice's consequences applied by the runtime.</li>
-<li><strong><a href="../presentation-contract/">Presentation contract</a></strong> — the core never touches
-  your UI. It emits signals; your UI listens. You own all rendering and pacing.</li>
-</ul>
-<h2 id="the-data-flow-loop">The data-flow loop<a class="headerlink" href="#the-data-flow-loop" title="Permanent link">&para;</a></h2>
-<p>Everything the engine does is this loop. The player sees an event, picks a
-choice, the engine mutates state and routes, and a new event is emitted.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>                    start_new_journey(config, seed)
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                                 │
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                                 ▼
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>                      ┌────────────────────┐
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                      │  Blackboard.init   │  resources@defaults, flags,
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                      │  (clamped, seeded) │  rng seeded, metadata primed
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                      └────────────────────┘
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                                 │
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>              ┌──────────────────┴───────────────────────┐
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>              │              _enter_event                 │
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>              │  • bump turn / history / seen_ids         │
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>              │  • filter choices by visibility           │
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>              └──────────────────┬───────────────────────┘
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>                                 │ emits
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>                                 ▼
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>                   ◇ signal: event_changed(event, visible_choices)
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>                                 │
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>                    ┌────────────┴────────────┐
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>                    │  YOUR UI (signals only)  │  renders narrative + buttons,
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>                    │  owns all pacing         │  owns reveal timing / input lock
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>                    └────────────┬────────────┘
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>                                 │ player clicks a choice
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>                                 ▼
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>                    JourneyRuntime.process_choice(choice)
-<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>                                 │
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>              ┌──────────────────┴───────────────────────┐
-<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>              │   apply consequences (Mutator, clamped)   │
-<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>              │   ◇ resource_changed / flag_changed       │  (per actual change,
-<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>              │   detect boundary transitions             │   post-clamp values)
-<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>              └──────────────────┬───────────────────────┘
-<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>                                 │ routing precedence (§ Routing)
-<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>                                 ▼
-<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>        forced boundary route ? ──▶ deterministic target ? ──▶ pool pull ? ──▶ end
-<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>                                 │                                              │
-<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>                                 └───────────────▶ _enter_event ◀──────────────┘
-<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>                                                       │
-<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>                                                       ▼
-<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>                                  (loop) OR ◇ signal: journey_ended(ending_event)
+<h1 id="ui-kit-stage-view-visual-first-scheme">UI Kit — Stage view (visual-first scheme)<a class="headerlink" href="#ui-kit-stage-view-visual-first-scheme" title="Permanent link">&para;</a></h1>
+<p>The kit's assembled view is <strong><code>JourneyStageView</code></strong> — a <em>visual-first</em> layout, à la
+<strong>Sort the Court</strong>: a full-screen background + a foreground character sprite are the
+focus, with the narrative and choices <strong>present but subordinate</strong> — a slim resource
+bar on top, a short dialogue strip and a row of choice buttons along the bottom.</p>
+<p>It's built entirely from the kit's <a href="../components/">components</a>, which are independent
+and layout-agnostic — so if the stage scheme isn't your style, arrange the same
+components in your own root scene.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌───────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│ ♦12  ♥8  ⚑5         [S][L][R] │  slim resource bar
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│                               │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│            ╱▔▔▔╲              │
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│           (  ◕  )   sprite     │  background + foreground
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│            ╲___╱    over bg    │  are the focus
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│ Traveler:                     │  speaker (from the stage book)
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│ ┌───────────────────────────┐ │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│ │ &quot;The bridge is out ahead.&quot; │ │  short narrative strip
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│ └───────────────────────────┘ │
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│ [ Ford the river ][ Turn back ]│  choices as a button row
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>└───────────────────────────────┘
 </code></pre></div>
-<p>Read it as a cycle: each <code>event_changed</code> waits for your UI to call
-<code>process_choice</code>, which applies state changes and decides where to go next —
-either re-entering the loop with a new <code>event_changed</code>, or emitting
-<code>journey_ended</code>.</p>
-<h2 id="design-principles-youll-feel">Design principles you'll feel<a class="headerlink" href="#design-principles-youll-feel" title="Permanent link">&para;</a></h2>
-<p>These invariants hold at every step and explain a lot of the engine's behavior:</p>
-<ul>
-<li><strong>Studio-authorable.</strong> Every data type is a Godot <code>Resource</code> fully editable in
-  the inspector — no code required to write content.</li>
-<li><strong>Deterministic.</strong> A fixed RNG seed plus identical state always produces
-  identical stochastic results. This is what makes <a href="../../guides/save-and-load/">save/load</a>
-  resume the <em>exact</em> run.</li>
-<li><strong>Presentation-agnostic core.</strong> Nothing in <code>addons/journey_engine_core/</code> instantiates a Node
-  or assumes a UI. The runtime is a Node only because Autoloads must be.</li>
-<li><strong>Loud about author mistakes.</strong> Missing keys, undeclared resources, and empty
-  pools surface as warnings/errors rather than silent no-ops. The
-  <a href="../../guides/validation/">validator</a> catches most of these before runtime.</li>
-</ul>
-<p>Next: start with the <a href="../blackboard/">Blackboard</a>, the state every other concept
-reads and writes.</p>
+<p>It honors the <a href="../../concepts/presentation-contract/">Presentation Contract</a> like any
+kit front end — <code>JourneyChoiceList</code> is the sole <code>process_choice</code> caller, reads go
+through the accessors, and animation is sequenced client-side so the engine never
+waits.</p>
+<h2 id="use-it">Use it<a class="headerlink" href="#use-it" title="Permanent link">&para;</a></h2>
+<p>Instance <strong><code>res://addons/journey_engine_ui_kit/JourneyStageView.tscn</code></strong>, then in the
+Inspector set:</p>
+<ol>
+<li><strong><code>config</code></strong> — your <code>JourneyConfig</code>.</li>
+<li><strong><code>hud_bindings</code></strong> — your resource read-out (<a href="../install/#hud-bindings">details</a>).</li>
+<li><strong><code>stage_book</code></strong> — a <code>JourneyStageBook</code> mapping events to sprites/speakers (below).</li>
+</ol>
+<p><code>transition_kind</code> defaults to <strong><code>NONE</code></strong> here: the background crossfade and the sprite
+restaging carry the change between events, rather than a full-screen wipe. Set it to
+<code>FADE</code>/<code>WIPE</code> for a harder cut.</p>
+<p>The bundled demo is <code>res://sample_game/journey_stage_demo.tscn</code> (the project's main
+scene — run with <strong>F5</strong>).</p>
+<h2 id="staging-events-the-stage-book">Staging events: the stage book<a class="headerlink" href="#staging-events-the-stage-book" title="Permanent link">&para;</a></h2>
+<p>The core's <code>JourneyEvent</code> carries a <code>background_texture</code> and <code>ambient_audio</code>, but <strong>no
+foreground sprite or speaker</strong> — those are presentation/direction concerns. The kit
+keeps them out of the core in a <strong><code>JourneyStageBook</code></strong>: a resource that maps
+<code>event.id → staging</code>, assigned on the stage view (or directly on a
+<code>JourneyForegroundLayer</code>). Keying by the stable <code>event.id</code> means it never breaks saves.</p>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>JourneyStageBook</code></td>
+<td><code>entries: Array[JourneyStageEntry]</code></td>
+</tr>
+<tr>
+<td><code>JourneyStageEntry</code></td>
+<td><code>event_id</code> (matches <code>JourneyEvent.id</code>), <code>speaker</code>, <code>sprites: Array[JourneySpritePlacement]</code></td>
+</tr>
+<tr>
+<td><code>JourneySpritePlacement</code></td>
+<td><code>texture</code>, <code>anchor</code> (<code>CENTER</code>/<code>LEFT</code>/<code>RIGHT</code>), <code>offset</code>, <code>enter</code> (<code>FADE</code>/<code>SLIDE_UP</code>/<code>SLIDE_SIDE</code>), <code>flip_h</code>, <code>height_ratio</code></td>
+</tr>
+</tbody>
+</table>
+<p>An event with <strong>no entry</strong> simply shows no sprite — staging is fully optional and
+incremental. The <code>sprites</code> array supports <strong>multiple figures</strong> per event (multi-actor
+scenes) without any data change; the default uses a single figure.</p>
+<div class="admonition tip">
+<p class="admonition-title">A note on where this could live</p>
+<p>A <em>single</em> primary sprite is the same kind of payload as <code>background_texture</code>,
+which already rides on the event. <code>JourneyForegroundLayer</code> therefore reads an
+<code>event.get("foreground_texture")</code> field <strong>first if one ever exists</strong> (it doesn't
+today — <code>get()</code> returns null safely), then falls back to the stage book. So if the
+engine ever adds a <code>foreground_texture</code> field for author convenience, it works with
+no kit change — while richer staging (speaker, anchors, multiple sprites,
+choreography) stays in the book where it belongs.</p>
+</div>
+<h2 id="locked-choices">Locked choices<a class="headerlink" href="#locked-choices" title="Permanent link">&para;</a></h2>
+<p>The stage view shows <strong>locked choices</strong> by default (<code>show_locked_choices</code>): a choice
+whose visibility fails right now appears as a <strong>disabled, greyed</strong> button instead of
+vanishing — e.g. the sample's <em>"Pay them off (-30 gold)"</em> renders locked when you
+can't afford it. The kit knows which to lock by diffing the visibility-passing subset
+against the full <code>event.choices</code> (both arrive in <code>event_changed</code>) — it never
+re-evaluates visibility, so the engine stays the single source of truth. Set
+<code>show_locked_choices = false</code> to hide unavailable choices instead.</p>
+<p>A human-readable <em>reason</em> ("needs 30 gold") is <strong>not</strong> shown — that would require a
+core field on the choice or introspecting its condition group; the locked button just
+carries the choice's own text, greyed. See the
+<a href="../../reference/design/starter-ui-kit/">design note</a>.</p>
+<h2 id="readability-over-art">Readability over art<a class="headerlink" href="#readability-over-art" title="Permanent link">&para;</a></h2>
+<p>Text sitting on top of arbitrary background art needs help to stay legible. The stage
+view applies <strong><code>journey_stage_theme.tres</code></strong> by default: outlined text
+(<code>font_outline_color</code> + <code>outline_size</code>) and translucent dark <strong>scrim</strong> panels behind
+the narrative strip. As always, <strong>duplicate the theme into your own folder</strong> to
+restyle — don't edit the addon copy. See
+<a href="../assets-customization/">Assets &amp; customization</a>.</p>
+<h2 id="whats-deferred">What's deferred<a class="headerlink" href="#whats-deferred" title="Permanent link">&para;</a></h2>
+<p>The first cut keeps choreography simple on purpose: one primary sprite, <code>CENTER</code>/
+<code>LEFT</code>/<code>RIGHT</code> anchors, <code>FADE</code>/<code>SLIDE_UP</code>/<code>SLIDE_SIDE</code> entrances, and a subtle idle
+bob. Per-character expressions, multi-sprite timing, and <em>Reigns</em>-style swipe cards are
+intentionally left for later — the data shape already accommodates multi-actor scenes.</p>
 
 
 
