@@ -53,6 +53,20 @@ Common issues, what causes them, and where to read more.
     The one declared **first** in `config.resource_defs`. Boundary-route priority
     is declaration order; the rest are ignored for that batch.
 
+??? question "My content passes `validate()` but won't load — `[ext_resource] referenced non-existent resource`"
+    You almost certainly have a **`target_event` reference cycle** (event A's
+    choice targets B, B's targets back to A, possibly through a dispatcher hub).
+    `target_event` is an eager object reference, so Godot serializes it as a hard
+    `ext_resource`/`SubResource` pointer — and a cyclic chain of those **cannot
+    be loaded from disk**, even though the in-memory graph is legal (which is why
+    `validate()` and a smoke test pass). Replace the loop-back edge with a
+    `continue_to_pool` choice (a bool — no serialized reference) and gate
+    eligibility with `pool_conditions`. A current build's `validate()` now
+    **reports the cycle as an error** naming the loop; and
+    `JourneyLoadCheck.check()` catches it via a real disk round-trip. See
+    [Routing → `target_event` cycles](../concepts/routing.md#target_event-is-an-eager-object-reference-never-form-a-cycle)
+    and [Validation → round-trip from disk](../guides/validation.md#validate-is-not-enough-on-its-own-round-trip-from-disk).
+
 ## State
 
 ??? question "`condition references missing resource key '...'; treating as 0.0` warning"

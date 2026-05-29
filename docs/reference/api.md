@@ -140,6 +140,14 @@ of `[ERROR]`/`[WARNING]`-prefixed strings (empty = clean). If a journey is activ
 and the pool index is built, pool events are included; otherwise the result notes
 the pool wasn't validated. Intended for `OS.is_debug_build()` use.
 
+!!! warning "In-memory check only — pair it with a disk round-trip"
+    `validate()` (and a runtime smoke test) inspect the **in-memory** object
+    graph and cannot detect content that fails to **load from disk** — e.g. a
+    `target_event` reference cycle is legal in memory but unserializable. Before
+    shipping, also run `JourneyLoadCheck.check("res://…/config.tres")`
+    (`tests/journey_load_check.gd`) and require zero problems. See
+    [Validation → round-trip from disk](../guides/validation.md#validate-is-not-enough-on-its-own-round-trip-from-disk).
+
 ### `rebuild_pool() -> void`
 
 ```gdscript

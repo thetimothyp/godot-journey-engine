@@ -60,6 +60,15 @@ static func validate(config: JourneyConfig, pool_index: JourneyPoolIndex = null)
 		_validate_event_conditions(event, declared_keys, messages)
 		_validate_event_choices(event, declared_keys, messages)
 
+	# §8.1 LOAD-TIME REALITY: a cycle in the choice.target_event hard-reference
+	# graph is perfectly legal in memory (which is why every other check above
+	# passes) but UNSERIALIZABLE — Godot's text resource format writes each
+	# target_event as an ext_resource/SubResource pointer, and a cyclic chain
+	# of those cannot be read back from disk. Detect it here so "validate +
+	# smoke test" can no longer bless content the engine's own load path
+	# rejects. See _detect_target_event_cycle for the algorithm and edge set.
+	_detect_target_event_cycle(config, pool_index, messages)
+
 	if pool_index == null:
 		messages.append(_warn("pool was not validated — pass a built JourneyPoolIndex to include pool events"))
 
@@ -141,6 +150,127 @@ static func _collect_events(config: JourneyConfig, pool_index: JourneyPoolIndex)
 				queue.append(choice.target_event)
 
 	return out
+
+## §8.1 unserializable-cycle detection. A directed cycle in the
+## choice.target_event graph cannot be saved/loaded by Godot's resource format
+## (verified: a single-file SubResource cycle fails to parse with
+## "[ext_resource]/[sub_resource] referenced non-existent resource"; a
+## cross-file ext_resource cycle is fragile and load-order dependent). The
+## genre's day-loop is expressible WITHOUT this hazard by using
+## `continue_to_pool` for loop-back edges (a bool — no serialized reference).
+##
+## Seed set mirrors `_resolve_event_id` / `_collect_events` EXACTLY:
+##   config.start_event ∪ every bottom_out/top_out boundary event ∪ every pool
+## event (only when a built index is supplied). Boundary ROUTES are NOT edges —
+## only `choice.target_event` is followed. `continue_to_pool` /
+## `pool_tags_filter` are NOT followed: they carry no serialized reference and
+## are the legitimate cycle-free loop-back mechanism.
+##
+## Algorithm: iterative DFS with white/grey/black coloring (no recursion — the
+## graph can be large and GDScript has a shallow stack). Nodes are keyed by
+## get_instance_id() so the duplicate-id case can't merge two distinct objects.
+## A back-edge to a GREY node (one currently on the DFS path) is a cycle; we
+## reconstruct the concrete path from the live DFS stack for the message.
+##
+## Emits at most ONE SEVERITY_ERROR (the first cycle found, in deterministic
+## root/choice order). Detecting and naming every cycle would be noisier
+## without being more actionable — one named cycle is enough to send the author
+## to the offending loop; re-running after the fix surfaces the next, if any.
+static func _detect_target_event_cycle(config: JourneyConfig, pool_index: JourneyPoolIndex, messages: Array) -> void:
+	# White = absent from `color`; values below mark in-progress / finished.
+	const GREY := 1
+	const BLACK := 2
+
+	var roots: Array[JourneyEvent] = []
+	if config.start_event != null:
+		roots.append(config.start_event)
+	for def in config.resource_defs:
+		if def == null:
+			continue
+		if def.bottom_out_event != null:
+			roots.append(def.bottom_out_event)
+		if def.top_out_event != null:
+			roots.append(def.top_out_event)
+	if pool_index != null:
+		for e in pool_index.all_events:
+			roots.append(e)
+
+	var color: Dictionary = {}  # instance_id -> GREY | BLACK
+	for root in roots:
+		if root == null:
+			continue
+		if color.get(root.get_instance_id(), 0) == BLACK:
+			continue
+		var cycle: Array[JourneyEvent] = _dfs_find_cycle(root, color, GREY, BLACK)
+		if not cycle.is_empty():
+			messages.append(_err(_format_cycle_message(cycle)))
+			return
+
+## Iterative DFS from `root` over choice.target_event edges. Returns the first
+## cycle found as the ordered list of events on it, closed (first == last):
+## e.g. [A, B, C, A]. Empty array ⇒ no cycle reachable from this root.
+## `color` is shared across roots so already-finished (BLACK) subgraphs are
+## not re-walked — overall O(V + E).
+static func _dfs_find_cycle(root: JourneyEvent, color: Dictionary, grey: int, black: int) -> Array[JourneyEvent]:
+	# Parallel stacks: the event path being explored, and per-frame the index
+	# of the NEXT choice to examine on that event.
+	var node_stack: Array[JourneyEvent] = [root]
+	var idx_stack: Array[int] = [0]
+	color[root.get_instance_id()] = grey
+
+	while not node_stack.is_empty():
+		var top: int = node_stack.size() - 1
+		var node: JourneyEvent = node_stack[top]
+		var i: int = idx_stack[top]
+
+		# Advance to the next choice that carries a target_event edge.
+		var next: JourneyEvent = null
+		while i < node.choices.size():
+			var choice: JourneyChoice = node.choices[i]
+			i += 1
+			if choice != null and choice.target_event != null:
+				next = choice.target_event
+				break
+		idx_stack[top] = i
+
+		if next == null:
+			# Fully explored this node — pop and mark BLACK.
+			color[node.get_instance_id()] = black
+			node_stack.pop_back()
+			idx_stack.pop_back()
+			continue
+
+		var nkey: int = next.get_instance_id()
+		var ncolor: int = color.get(nkey, 0)
+		if ncolor == grey:
+			# Back-edge to a node on the current path ⇒ cycle. Reconstruct it
+			# from the live stack: everything from `next`'s frame to the top,
+			# then `next` again to close the loop.
+			var cycle: Array[JourneyEvent] = []
+			var start_idx: int = node_stack.find(next)
+			for j in range(start_idx, node_stack.size()):
+				cycle.append(node_stack[j])
+			cycle.append(next)
+			return cycle
+		elif ncolor == 0:
+			color[nkey] = grey
+			node_stack.append(next)
+			idx_stack.append(0)
+		# BLACK target: already fully explored, no cycle through it — skip.
+
+	return []
+
+## Build the single SEVERITY_ERROR message for a detected target_event cycle:
+## a concrete arrow path, why it's unloadable, and the remedy.
+static func _format_cycle_message(cycle: Array[JourneyEvent]) -> String:
+	var ids: Array[String] = []
+	for ev in cycle:
+		var s: String = String(ev.id)
+		ids.append(s if s != "" else "<empty-id>")
+	var path: String = " → ".join(ids)
+	return ("target_event reference cycle: %s — a target_event reference cycle cannot be saved or loaded by Godot's resource format "
+		+ "(each target_event serializes as an ext_resource/SubResource pointer, and a cyclic chain of those fails to load from disk). "
+		+ "Break the loop with a continue_to_pool choice, or restructure so the loop-back carries no serialized reference.") % path
 
 ## §3.8 id-validity rules. RULES MUST MATCH the load-time checks in
 ## JourneyPoolIndex._ingest (empty id, duplicate id). The two implementations

@@ -23,6 +23,7 @@ extends Node
 ## (F6 with this tab focused; F5 will run the main scene instead).
 
 const POOL_DIR := "res://sample_game/pool/"
+const SAMPLE_CONFIG := "res://sample_game/config.tres"
 
 ## NOTE: bump this when you add/remove a sample-game pool event. Five pool
 ## events ship with the sample: bandit, merchant, ally, camp, inn.
@@ -64,6 +65,17 @@ func _ready() -> void:
 			ordered = false
 			break
 	_expect(ordered, "all_events sorted by String(id) for cross-platform determinism")
+
+	# Load-time reality gate (the "would this ship" check). The pool scan above
+	# proves the pool dir indexes; this proves the WHOLE sample config — start
+	# event, boundary routes, and every reachable .tres — loads non-null from a
+	# FRESH disk context (no cache reuse). An unserializable target_event cycle
+	# would fail here, which is the gap that let unloadable content pass the
+	# in-memory validate + smoke test. See tests/journey_load_check.gd.
+	print("[test_export_sanity] disk round-trip of %s" % SAMPLE_CONFIG)
+	var problems: Array[String] = JourneyLoadCheck.check(SAMPLE_CONFIG)
+	_expect(problems.is_empty(),
+		"sample config round-trips clean from disk (got %d: %s)" % [problems.size(), str(problems)])
 
 	_finish()
 

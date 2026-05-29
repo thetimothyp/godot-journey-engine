@@ -62,6 +62,47 @@ The difference is entirely in how you fill out the choice's **Routing** fields.
     deterministic target wins and the pool is never consulted. The pool branch
     only runs when `target_event` is null.
 
+### `target_event` is an eager object reference — never form a cycle
+
+`choice.target_event` is a **typed `JourneyEvent` reference**, so Godot
+serializes it as a hard pointer to that resource — an `ext_resource` (when the
+target is its own `.tres` file) or an inline `SubResource` (when it's embedded).
+That's great for static integrity, but it has one hard constraint:
+
+!!! danger "A `target_event` *cycle* cannot be saved or loaded"
+    Godot's text resource format **cannot represent a cyclic chain of resource
+    references.** If event A's choice targets B, B's targets C, and C's targets
+    back to A, the file(s) serialize but **fail to load from disk** — a
+    single-file `SubResource` cycle fails to parse outright (`referenced
+    non-existent resource`), and even a cross-file `ext_resource` cycle is
+    load-order fragile. UIDs do not help.
+
+    The trap is that the in-memory object graph is *perfectly legal* — the
+    cycle only bites when content is read back from disk. So a routing loop
+    built entirely from `target_event` edges can pass in-memory `validate()`
+    and a runtime smoke test, yet be **unloadable** in a shipped build.
+
+**Loop back with `continue_to_pool` instead.** A day-loop or return-to-hub is a
+genuine cycle in your *story*, but it does **not** need to be a cycle in the
+*reference graph*. `continue_to_pool` is a plain `bool` — it carries no
+serialized reference — so a loop-back edge expressed that way is cycle-free on
+disk:
+
+```gdscript
+# Day loop WITHOUT a serialization cycle: the "another day" choice loops back
+# into the pool rather than hard-referencing the dispatcher event.
+var another_day := JourneyChoice.new()
+another_day.button_text = "Begin another day."
+another_day.continue_to_pool = true            # no target_event => no serialized edge
+another_day.pool_tags_filter = ["day_event"]
+```
+
+Condition- or day-gated routing belongs on the **pool side** too: gate which
+events are eligible with each event's `pool_conditions` (and per-choice
+`visibility`), not by hard-wiring a `target_event` ring. The validator now
+**detects `target_event` cycles and reports them as errors** naming the loop;
+see [Validation](../guides/validation.md).
+
 ## Forced boundary routes
 
 Each `JourneyResourceDef` can name a `bottom_out_event` (fired at `min_value`)

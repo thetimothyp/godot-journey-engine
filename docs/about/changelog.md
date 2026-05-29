@@ -4,6 +4,30 @@ This project follows [Keep a Changelog](https://keepachangelog.com/) conventions
 and [Semantic Versioning](https://semver.org/). The engine version is exposed at
 runtime as `JourneyRuntime.VERSION`.
 
+## Unreleased
+
+### Added
+
+- **`target_event` cycle detection in `validate()`** — the authoring validator
+  now walks the `choice.target_event` hard-reference graph (seeded from
+  `start_event` ∪ boundary events ∪ pool events) and reports any directed cycle
+  as an **error** naming the concrete loop. A `target_event` cycle is an eager
+  object reference that Godot serializes as an `ext_resource`/`SubResource`
+  pointer, and a cyclic chain of those **cannot be loaded from disk** — yet it
+  is legal in memory, so it previously passed `validate()` and the runtime smoke
+  test while being unloadable in a shipped build. Loop-backs must use
+  `continue_to_pool` (a bool, no serialized reference); `continue_to_pool` /
+  `pool_conditions` / boundary routes are *not* treated as graph edges. Additive
+  and non-breaking — no content format change. See
+  [Validation](../guides/validation.md) and
+  [Routing](../concepts/routing.md#target_event-is-an-eager-object-reference-never-form-a-cycle).
+- **`JourneyLoadCheck`** (`tests/journey_load_check.gd`) — the canonical "would
+  this ship?" disk round-trip check. Loads a config from disk in a fresh context
+  (`CACHE_MODE_IGNORE`), walks `start_event` ∪ boundaries ∪ the pool dir, and
+  asserts every reachable resource loads non-null with no parse error — the
+  load-time companion to the in-memory `validate()`. Wired into
+  `tests/test_export_sanity.gd` as a pre-export gate.
+
 ## 0.2.0 — 2026-05-28
 
 ### Added

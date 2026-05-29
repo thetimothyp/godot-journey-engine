@@ -40,6 +40,9 @@ func _ready() -> void:
 	_test_dead_choice(clean_config)
 	_test_stable_order(clean_config)
 	_test_runtime_flattening(clean_config)
+	_test_target_event_cycle(clean_config)
+	_test_acyclic_pool_loop_validates_clean(clean_config)
+	_test_disk_round_trip_sample()
 	_finish()
 
 func _finish() -> void:
@@ -224,6 +227,76 @@ func _test_runtime_flattening(config: JourneyConfig) -> void:
 			has_error_prefix = true
 			break
 	_expect(has_error_prefix, "at least one [ERROR]-prefixed string (got: %s)" % str(msgs))
+
+func _test_target_event_cycle(config: JourneyConfig) -> void:
+	print("[9] TARGET_EVENT CYCLE → ERROR naming the cycle")
+	# Three-node loop mirroring the failing game's shape:
+	#   response → dispatcher → event → response
+	var c := JourneyConfig.new()
+	c.resource_defs = config.resource_defs
+	var response := JourneyEvent.new(); response.id = &"evt_response"
+	var dispatcher := JourneyEvent.new(); dispatcher.id = &"evt_day_dispatcher"
+	var event := JourneyEvent.new(); event.id = &"evt_event"
+
+	var c_resp := JourneyChoice.new(); c_resp.button_text = "back to dispatcher"; c_resp.target_event = dispatcher
+	response.choices = [c_resp]
+	var c_disp := JourneyChoice.new(); c_disp.button_text = "to event"; c_disp.target_event = event
+	dispatcher.choices = [c_disp]
+	var c_evt := JourneyChoice.new(); c_evt.button_text = "to response"; c_evt.target_event = response
+	event.choices = [c_evt]
+
+	c.start_event = response
+	var msgs: Array = JourneyValidator.validate(c, null)
+	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "reference cycle"),
+		"cycle produces a SEVERITY_ERROR (got: %s)" % _stringify(msgs))
+	# The message must name a concrete arrow path through the cycle members.
+	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "evt_day_dispatcher")
+			and _has_message(msgs, JourneyValidator.SEVERITY_ERROR, "→"),
+		"cycle message names a concrete arrow path")
+	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "continue_to_pool"),
+		"cycle message gives the continue_to_pool remedy")
+
+	# Self-loop (A → A) is also a cycle and must be caught.
+	var c2 := JourneyConfig.new()
+	c2.resource_defs = config.resource_defs
+	var solo := JourneyEvent.new(); solo.id = &"evt_solo"
+	var self_choice := JourneyChoice.new(); self_choice.target_event = solo
+	solo.choices = [self_choice]
+	c2.start_event = solo
+	var msgs2: Array = JourneyValidator.validate(c2, null)
+	_expect(_has_message(msgs2, JourneyValidator.SEVERITY_ERROR, "reference cycle"),
+		"self-loop A→A is detected as a cycle")
+
+func _test_acyclic_pool_loop_validates_clean(config: JourneyConfig) -> void:
+	print("[10] ACYCLIC loop-back via continue_to_pool → validator clean")
+	# A diamond that "loops" semantically but carries NO target_event cycle:
+	# start → hub; hub loops back to itself via continue_to_pool (a bool, no
+	# serialized ref). This is the cycle-free way to express a day-loop.
+	var c := JourneyConfig.new()
+	c.resource_defs = config.resource_defs
+	var start := JourneyEvent.new(); start.id = &"evt_loop_start"
+	var hub := JourneyEvent.new(); hub.id = &"evt_loop_hub"
+	var go := JourneyChoice.new(); go.button_text = "enter hub"; go.target_event = hub
+	start.choices = [go]
+	var loop := JourneyChoice.new(); loop.button_text = "another day"; loop.continue_to_pool = true
+	# A consequence so it isn't also flagged as a dead choice.
+	var con := JourneyConsequence.new()
+	con.operation = JourneyConsequence.Operation.SET_FLAG
+	con.key = "looped"
+	con.flag_value = true
+	loop.consequences = [con]
+	hub.choices = [loop]
+	c.start_event = start
+	var errs: Array = JourneyValidator.errors_only(JourneyValidator.validate(c, null))
+	_expect(errs.is_empty(), "continue_to_pool loop produces NO errors (got %d: %s)" % [errs.size(), str(errs)])
+
+func _test_disk_round_trip_sample() -> void:
+	print("[11] DISK ROUND-TRIP — sample content loads cleanly from disk")
+	# The canonical "would this ship" check. sample_game/config.tres is acyclic
+	# and loops back via continue_to_pool, so a fresh-from-disk walk of
+	# start_event + boundaries + pool must come back with zero problems.
+	var problems: Array[String] = JourneyLoadCheck.check("res://sample_game/config.tres")
+	_expect(problems.is_empty(), "sample config round-trips clean (got %d: %s)" % [problems.size(), str(problems)])
 
 # --- Utility ---
 

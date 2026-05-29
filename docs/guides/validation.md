@@ -33,6 +33,7 @@ if OS.is_debug_build():
 | Duplicate event `id` (across the reachable graph + pool) | **Error** | Ambiguous identity. |
 | Condition/consequence references an **undeclared resource key** | **Warning** | Almost always a typo against `resource_defs`. |
 | Dead/unfinished choice (null target, no pool, no consequences) | **Warning** | Catches half-authored nodes; see below. |
+| **`target_event` reference cycle** | **Error** | Unserializable — cannot be loaded from disk. See below. |
 
 !!! note "Flag keys are never flagged"
     Conditions and consequences that reference *flags* (`HAS_FLAG`, `NOT_FLAG`,
@@ -48,6 +49,58 @@ journey" button, but it's far more often an unfinished node. The warning catches
 the unfinished case; to mark a terminal choice as deliberate, give it any
 consequence (e.g. a `SET_FLAG` recording the ending). The sample's ending events
 do this — their final "close the book" choice sets an `ending_*` flag.
+
+### The `target_event` cycle error
+
+`choice.target_event` is an eager object reference that Godot serializes as a
+hard `ext_resource` / `SubResource` pointer. A **directed cycle** in that
+reference graph (A → B → C → A) cannot be saved and loaded by Godot's resource
+format — the content is **unloadable from disk** even though the in-memory
+object graph is perfectly legal (which is why every other check can pass while
+the game still can't boot). See
+[Routing → `target_event` is an eager reference](../concepts/routing.md#target_event-is-an-eager-object-reference-never-form-a-cycle).
+
+`validate()` walks the hard-reference graph — `start_event` ∪ boundary events
+∪ pool events (when a built index is supplied), following **only**
+`choice.target_event` edges — and reports the first cycle it finds as an
+**error** naming the concrete loop:
+
+```text
+[ERROR] target_event reference cycle: evt_response → evt_day_dispatcher → evt_event → evt_response
+        — a target_event reference cycle cannot be saved or loaded by Godot's
+        resource format … Break the loop with a continue_to_pool choice, or
+        restructure so the loop-back carries no serialized reference.
+```
+
+`continue_to_pool` loop-backs and `pool_conditions` / `pool_tags_filter` are
+**not** followed as edges — they carry no serialized reference and are the
+correct, cycle-free way to express a day-loop or return-to-hub. Fix a reported
+cycle by converting its loop-back edge to a `continue_to_pool` choice.
+
+## Validate is not enough on its own — round-trip from disk
+
+`validate()` inspects the **in-memory** object graph. So does the usual runtime
+smoke test (`start_new_journey` runs on objects you built in memory). Neither
+proves the content can be **read back from disk** — the exact gap a
+`target_event` cycle slips through. The canonical "would this ship?" check is a
+real disk round-trip in a fresh load context.
+
+The engine ships that check as `JourneyLoadCheck` (`tests/journey_load_check.gd`).
+It loads your config from disk with `CACHE_MODE_IGNORE` (never the cached
+in-memory instance), walks `start_event` ∪ boundaries ∪ the pool dir, and
+asserts every reachable resource loads non-null with no parse error:
+
+```gdscript
+var problems: Array[String] = JourneyLoadCheck.check("res://my_game/config.tres")
+if not problems.is_empty():
+    for p in problems:
+        push_error(p)   # content is unloadable as authored — do not ship
+```
+
+A pre-ship gate (or CI) should require **both** `validate()` *and*
+`JourneyLoadCheck.check()` to come back clean. The bundled
+`tests/test_export_sanity.gd` runs the round-trip over `sample_game/` before
+export for exactly this reason.
 
 ## The pool isn't validated unless it's built
 

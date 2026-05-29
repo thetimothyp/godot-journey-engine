@@ -132,12 +132,30 @@ condition later. The sample does exactly this with `helped_stranger`:
 The same flag thus gates a *choice* in one place and an *event's eligibility* in
 another — see the [Stochastic Pool guide](stochastic-pool.md) for the latter.
 
+## Routing a loop: use `continue_to_pool`, not a `target_event` ring
+
+When your story loops — a day-loop, a return-to-hub — express the loop-back with
+a `continue_to_pool` choice, **not** by pointing `target_event` back at an
+earlier event. `target_event` is an eager object reference that Godot serializes
+as a hard pointer, and **a cycle of those cannot be loaded from disk** (it
+passes in-memory validation and the smoke test, then fails to boot in a shipped
+build). `continue_to_pool` is a plain bool with no serialized reference, so it
+loops safely; gate which events come back with each event's `pool_conditions`.
+See [Routing](../concepts/routing.md#target_event-is-an-eager-object-reference-never-form-a-cycle).
+
 ## Author-time safety net
 
 Before you run, call [`validate()`](validation.md) on your config. It catches
 null start events, bad resource bounds, duplicate/empty event ids, undeclared
-resource keys (typos), and dead/unfinished choices — pure inspection, no run
-required.
+resource keys (typos), dead/unfinished choices, and **`target_event` reference
+cycles** (which are unloadable from disk) — pure inspection, no run required.
+
+`validate()` and the runtime smoke test both run on the **in-memory** object
+graph, so neither proves your content can be read back from disk. The
+authoritative "would this ship?" check is a real disk round-trip — run
+`JourneyLoadCheck.check("res://my_game/config.tres")` and require it to come
+back with zero problems alongside a clean `validate()`. See
+[Validation → round-trip from disk](validation.md#validate-is-not-enough-on-its-own-round-trip-from-disk).
 
 See also: [Resources & Events](../concepts/resources-and-events.md) for the full
 field reference · [Validation](validation.md) · [Routing](../concepts/routing.md).
