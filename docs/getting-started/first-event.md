@@ -110,7 +110,7 @@ Same shape, no gate: `button_text` → *"Fight them off (-15 sanity)."*, consequ
     pick `SUBTRACT`, not a number. (The raw integers only appear in the `.tres`
     text.) Full enum tables: [Resources & Events](../concepts/resources-and-events.md#journeyconsequence).
 
-How a choice decides what happens next — boundary routes, `target_event`, the
+How a choice decides what happens next — boundary routes, `target_event_id`, the
 pool, or ending — is the [Routing precedence](../concepts/routing.md#routing-precedence).
 
 ## 4. Make it a pool event
@@ -118,16 +118,17 @@ pool, or ending — is the [Routing precedence](../concepts/routing.md#routing-p
 This event has no fixed predecessor — it's pulled at random. Three things make
 that work, and you've nearly done them already:
 
-1. **Location.** The file lives under the config's `event_pool_dir`
-   (`res://sample_game/pool/`). The engine scans that folder on the first pull.
+1. **Eligibility.** Tick `pool_eligible = true`. That — not the folder — is what
+   makes an event a candidate for random pulls. (Keep the file under the config's
+   `events_dir`, which is scanned recursively; the `pool/` folder is just for tidiness.)
 2. **Tags.** Set `event_tags = ["road", "danger"]`. A `continue_to_pool` choice
    filtering on `["road"]` (like the two above) can now draw this event.
 3. **Selection knobs.** Set `weight = 200` (twice the default `100`, so bandits
    are common) and `repeatable = true` (it can recur across a run).
 
-!!! tip "Iterating on pool events"
-    Adding or editing pool files while the game runs? Call
-    `JourneyRuntime.rebuild_pool()` to re-scan from disk. The full mechanics —
+!!! tip "Iterating on events"
+    Adding or editing event files while the game runs? Call
+    `JourneyRuntime.rebuild_index()` to re-scan from disk. The full mechanics —
     candidate filtering, weighting, and determinism — are in the
     [Stochastic Pool guide](../guides/stochastic-pool.md#how-a-candidate-is-selected).
 
@@ -189,7 +190,7 @@ a bug. The kit can also show such choices **locked/greyed** instead of hidden; s
 | --- | --- |
 | narrative text, background image, ambient audio | the **`JourneyEvent`** |
 | which choices exist, what they cost, where they route | the event's **`JourneyChoice`** list |
-| whether/how the event appears at random | the event's **pool fields** + its folder (`event_pool_dir`) |
+| whether/how the event appears at random | the event's **`pool_eligible` flag** + pool fields (tags, weight, conditions) |
 | the character sprite, its position, entrance, and speaker name | the **`JourneyStageBook`** entry |
 | HUD rows, theme, transition style, SFX | the **`JourneyStageView`** in your scene ([install](../ui-kit/install.md#hud-bindings)) |
 

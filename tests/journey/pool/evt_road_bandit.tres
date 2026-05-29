@@ -15,6 +15,7 @@ metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 script = ExtResource("1_event")
 narrative_text = "Bandits block the path."
 id = &"evt_road_bandit"
+pool_eligible = true
 event_tags = Array[String](["road", "danger"])
 choices = Array[ExtResource("2_choice")]([SubResource("Choice_bandit_continue")])
 metadata/_custom_type_script = "uid://cd45ite7r06rf"

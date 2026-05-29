@@ -14,15 +14,20 @@ This guide walks the inspector workflow using content adapted from the bundled
 1. Create a folder layout (a common one):
 
     ```text
-    res://my_game/
+    res://my_game/        # events_dir points at this tree (scanned recursively)
     ├── config.tres
-    ├── events/        # deterministic, hand-linked events
-    └── pool/          # stochastic pool events (event_pool_dir points here)
+    ├── events/        # deterministic, id-linked events
+    └── pool/          # stochastic pool events (pool_eligible = true)
     ```
 
-2. Create events as `.tres` files.
-3. Create one `JourneyConfig` declaring resources and pointing at the start event
-   and the pool directory.
+    `events_dir` is scanned **recursively** and indexes every `JourneyEvent`
+    under it by `id`; the `events/` vs `pool/` split is just for your own
+    organization — whether an event can be drawn at random is the per-event
+    `pool_eligible` flag, not its folder.
+
+2. Create events as `.tres` files, each with a unique `id`.
+3. Create one `JourneyConfig` declaring resources, the `start_event_id`, and the
+   `events_dir`.
 4. [Validate](validation.md) and run.
 
 ## Creating an event
@@ -32,8 +37,9 @@ This guide walks the inspector workflow using content adapted from the bundled
 
 - **Presentation:** write `narrative_text`; optionally set `background_texture` /
   `ambient_audio` (the engine just carries these — your UI displays them).
-- **System:** set a unique, non-empty `id` (e.g. `evt_start`). Add `event_tags`,
-  `weight`, `repeatable`, and `pool_conditions` if it's a pool event (see the
+- **System:** set a unique, non-empty `id` (e.g. `evt_start`) — every routing
+  target is referenced by this id. For a pool event, tick `pool_eligible` and add
+  `event_tags`, `weight`, `repeatable`, and `pool_conditions` (see the
   [Stochastic Pool guide](stochastic-pool.md)).
 - **Choices:** size the `choices` array and create a `JourneyChoice` in each slot.
 
@@ -53,7 +59,7 @@ conseq.key = "helped_stranger"
 var choice := JourneyChoice.new()
 choice.button_text = "Help the stranger fix their wagon."
 choice.consequences = [conseq]
-choice.target_event = evt_road_begins      # deterministic route
+choice.target_event_id = &"evt_road_begins"   # deterministic route, by id
 ```
 
 !!! tip "Enum fields show as dropdowns"
@@ -93,11 +99,11 @@ the `event_changed` choice list — your UI never sees it.
 Create one `JourneyConfig` resource. Adapted from `sample_game/config.tres`:
 
 - **`resource_defs`** — one `JourneyResourceDef` per number. The sample declares
-  `gold` (0–999, default 50), `sanity` (0–100, default 50, `bottom_out_event =
-  evt_madness`), `rations` (0–200, default 100), and `road_progress` (0–100).
+  `gold` (0–999, default 50), `sanity` (0–100, default 50, `bottom_out_event_id =
+  &"evt_madness"`), `rations` (0–200, default 100), and `road_progress` (0–100).
 - **`initial_flags`** — e.g. `{ "started": true }`.
-- **`start_event`** — the first event (`evt_start`).
-- **`event_pool_dir`** — `res://my_game/pool/`.
+- **`start_event_id`** — the first event's id (`&"evt_start"`).
+- **`events_dir`** — `res://my_game/` (the tree that holds all your events).
 - **Save settings** — `save_encryption_key` (empty ⇒ plaintext) and
   `save_version` (start at 1).
 
@@ -108,13 +114,13 @@ sanity.key = "sanity"
 sanity.default_value = 50.0
 sanity.min_value = 0.0
 sanity.max_value = 100.0
-sanity.bottom_out_event = evt_madness       # sanity hits 0 -> forced route
+sanity.bottom_out_event_id = &"evt_madness"   # sanity hits 0 -> forced route, by id
 
 var config := JourneyConfig.new()
 config.resource_defs = [gold, sanity, rations, road_progress]
 config.initial_flags = { "started": true }
-config.start_event = evt_start
-config.event_pool_dir = "res://my_game/pool/"
+config.start_event_id = &"evt_start"
+config.events_dir = "res://my_game/"
 ```
 
 ## Flag chains: a later event paying off an earlier choice
@@ -132,27 +138,25 @@ condition later. The sample does exactly this with `helped_stranger`:
 The same flag thus gates a *choice* in one place and an *event's eligibility* in
 another — see the [Stochastic Pool guide](stochastic-pool.md) for the latter.
 
-## Routing a loop: use `continue_to_pool`, not a `target_event` ring
+## Routing a loop
 
-When your story loops — a day-loop, a return-to-hub — express the loop-back with
-a `continue_to_pool` choice, **not** by pointing `target_event` back at an
-earlier event. `target_event` is an eager object reference that Godot serializes
-as a hard pointer, and **a cycle of those cannot be loaded from disk** (it
-passes in-memory validation and the smoke test, then fails to boot in a shipped
-build). `continue_to_pool` is a plain bool with no serialized reference, so it
-loops safely; gate which events come back with each event's `pool_conditions`.
-See [Routing](../concepts/routing.md#target_event-is-an-eager-object-reference-never-form-a-cycle).
+When your story loops — a day-loop, a return-to-hub — just route back by id.
+Routes are `StringName` ids resolved against the event index, so a loop is a
+normal, supported shape with no serialization hazard: point a choice's
+`target_event_id` at an earlier event for a *fixed* loop-back, or set
+`continue_to_pool = true` (gating eligibility with `pool_conditions`) for a
+*varied* one. See [Routing](../concepts/routing.md#routing-is-by-id-every-event-is-independently-loadable).
 
 ## Author-time safety net
 
-Before you run, call [`validate()`](validation.md) on your config. It catches
-null start events, bad resource bounds, duplicate/empty event ids, undeclared
-resource keys (typos), dead/unfinished choices, and **`target_event` reference
-cycles** (which are unloadable from disk) — pure inspection, no run required.
+Before you run, call [`validate()`](validation.md) on your config. It catches an
+empty `start_event_id`, bad resource bounds, duplicate/empty event ids,
+**unresolved routing ids** (a `target_event_id`/start/boundary id with no event
+behind it), undeclared resource keys (typos), and dead/unfinished choices — pure
+inspection, no run required.
 
-`validate()` and the runtime smoke test both run on the **in-memory** object
-graph, so neither proves your content can be read back from disk. The
-authoritative "would this ship?" check is a real disk round-trip — run
+`validate()` checks events held in memory. The authoritative "would this ship?"
+check also proves they survive a real disk load — run
 `JourneyLoadCheck.check("res://my_game/config.tres")` and require it to come
 back with zero problems alongside a clean `validate()`. See
 [Validation → round-trip from disk](validation.md#validate-is-not-enough-on-its-own-round-trip-from-disk).

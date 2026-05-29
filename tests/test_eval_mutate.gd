@@ -7,16 +7,17 @@ extends Node
 ## warnings ("mana") are expected to appear in Output around the marked lines.
 
 const TEST_CONFIG_PATH := "res://tests/test_config.tres"
-const TEST_EVENT_PATH := "res://tests/test_event.tres"
+
+# Routing is id-based, so boundary routes are just StringName ids — the Mutator
+# only checks that the id is non-empty (it returns triggered defs; the
+# SequenceManager resolves the id). A literal id suffices here; no event object
+# needs to exist for the trigger-detection logic under test.
+const BOUNDARY_ID := &"evt_test"
 
 func _ready() -> void:
 	var config: JourneyConfig = load(TEST_CONFIG_PATH)
 	if config == null:
 		push_error("test_eval_mutate: could not load %s" % TEST_CONFIG_PATH)
-		return
-	var test_event: JourneyEvent = load(TEST_EVENT_PATH)
-	if test_event == null:
-		push_error("test_eval_mutate: could not load %s" % TEST_EVENT_PATH)
 		return
 
 	# -------------------- 1. Init --------------------
@@ -103,8 +104,8 @@ func _ready() -> void:
 	var sanity_def: JourneyResourceDef = _find_def(config, "sanity")
 	var rations_def: JourneyResourceDef = _find_def(config, "rations")
 	var gold_def: JourneyResourceDef = _find_def(config, "gold")
-	sanity_def.bottom_out_event = test_event
-	rations_def.bottom_out_event = test_event
+	sanity_def.bottom_out_event_id = BOUNDARY_ID
+	rations_def.bottom_out_event_id = BOUNDARY_ID
 
 	# Reset values so the batch is unambiguous: sanity 50 → 0 (-50), rations 200 → 0 (-200)
 	bb.resources["sanity"] = 50.0
@@ -131,7 +132,7 @@ func _ready() -> void:
 	# And the single-trigger case: drive only sanity to 0.
 	bb.resources["sanity"] = 50.0
 	bb.resources["rations"] = 200.0
-	rations_def.bottom_out_event = null # only sanity will trigger
+	rations_def.bottom_out_event_id = &"" # only sanity will trigger
 	var single_batch: Array[JourneyConsequence] = [
 		_con_num(JourneyConsequence.Operation.SUBTRACT, "sanity", 50.0),
 	]
@@ -147,9 +148,9 @@ func _ready() -> void:
 	# unnecessary after the Step-8 transition-vs-presence fix (the Mutator now
 	# reports only TRANSITIONS, so a residue value sitting at its bound across
 	# batches is silently ignored), but cheap defense-in-depth.
-	sanity_def.bottom_out_event = null
+	sanity_def.bottom_out_event_id = &""
 	bb.resources["sanity"] = 50.0
-	gold_def.top_out_event = test_event
+	gold_def.top_out_event_id = BOUNDARY_ID
 	bb.resources["gold"] = 0.0
 	var top_batch: Array[JourneyConsequence] = [
 		_con_num(JourneyConsequence.Operation.ADD, "gold", 99999.0), # clamps to 999
@@ -162,9 +163,9 @@ func _ready() -> void:
 	_check("gold top-out reported", top_keys == ["gold"])
 
 	# Restore the in-memory config so we leave no surprise state for sibling tests.
-	sanity_def.bottom_out_event = null
-	rations_def.bottom_out_event = null
-	gold_def.top_out_event = null
+	sanity_def.bottom_out_event_id = &""
+	rations_def.bottom_out_event_id = &""
+	gold_def.top_out_event_id = &""
 
 	# -------------------- 4b. Mutator: transition vs presence (Step-8 regression) --------------------
 	# Spec §4.4 / §5.1 specify the forced route fires when the CLAMPED RESULT
@@ -174,7 +175,7 @@ func _ready() -> void:
 	# from Step 8 sample-game playthrough: evt_madness → "Stumble forward"
 	# (no consequences) re-triggered sanity bottom_out indefinitely.
 	print("\n--- Mutator: transition vs presence (loop guard) ---")
-	sanity_def.bottom_out_event = test_event
+	sanity_def.bottom_out_event_id = BOUNDARY_ID
 	# (1) Pre = boundary, no consequences → NO trigger.
 	bb.resources["sanity"] = 0.0
 	var noop_batch: Array[JourneyConsequence] = []
@@ -204,14 +205,14 @@ func _ready() -> void:
 	_check("pre=10 + SUBTRACT 10 → sanity bottom_out triggers (transition case)",
 		enter_triggered.size() == 1 and enter_triggered[0].key == "sanity")
 	# Top-out symmetry: pre=max, no-op → no re-trigger.
-	gold_def.top_out_event = test_event
+	gold_def.top_out_event_id = BOUNDARY_ID
 	bb.resources["gold"] = gold_def.max_value
 	var noop_top_batch: Array[JourneyConsequence] = []
 	var noop_top_triggered: Array[JourneyResourceDef] = JourneyMutator.apply_batch(noop_top_batch, bb, config)
 	_check("pre=max + no-op → no top-out re-trigger", noop_top_triggered.is_empty())
 	# Clean up: clear the boundary events again so we leave no surprise state.
-	sanity_def.bottom_out_event = null
-	gold_def.top_out_event = null
+	sanity_def.bottom_out_event_id = &""
+	gold_def.top_out_event_id = &""
 
 	print("\n=== Step 3 manual test done ===")
 

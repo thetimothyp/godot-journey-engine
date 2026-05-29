@@ -36,15 +36,16 @@ func start_new_journey(config: JourneyConfig, seed: int = 0) -> void
 ```
 
 Begins a new run. Initializes the Blackboard from `config` (resources at clamped
-defaults, initial flags, primed metadata), seeds the RNG, emits
-`journey_started`, then enters `config.start_event` (emitting `event_changed`).
+defaults, initial flags, primed metadata), seeds the RNG, builds the event index
+from `config.events_dir`, emits `journey_started`, then resolves
+`config.start_event_id` and enters that event (emitting `event_changed`).
 
 | Param | Type | Notes |
 | --- | --- | --- |
 | `config` | `JourneyConfig` | The game config. A null config emits `journey_error`. |
 | `seed` | `int` | RNG seed. Non-zero ⇒ deterministic; `0` (default) ⇒ randomized. |
 
-Emits `journey_error("no start_event")` if `config.start_event` is null.
+Emits `journey_error("no start_event_id")` if it's empty, or `journey_error("start_event_id '…' did not resolve to an indexed event")` if no event under `events_dir` has that id.
 
 ### `process_choice(choice) -> void`
 
@@ -136,26 +137,25 @@ func validate(config: JourneyConfig) -> Array[String]
 ```
 
 Runs the authoring [validator](../guides/validation.md) and returns a flat list
-of `[ERROR]`/`[WARNING]`-prefixed strings (empty = clean). If a journey is active
-and the pool index is built, pool events are included; otherwise the result notes
-the pool wasn't validated. Intended for `OS.is_debug_build()` use.
+of `[ERROR]`/`[WARNING]`-prefixed strings (empty = clean). Builds (or reuses) an
+event index from `config.events_dir` so id resolution and per-event checks run.
+Intended for `OS.is_debug_build()` use.
 
-!!! warning "In-memory check only — pair it with a disk round-trip"
-    `validate()` (and a runtime smoke test) inspect the **in-memory** object
-    graph and cannot detect content that fails to **load from disk** — e.g. a
-    `target_event` reference cycle is legal in memory but unserializable. Before
-    shipping, also run `JourneyLoadCheck.check("res://…/config.tres")`
-    (`tests/journey_load_check.gd`) and require zero problems. See
+!!! warning "Pair it with a disk round-trip"
+    `validate()` checks events held in memory. Before shipping, also run
+    `JourneyLoadCheck.check("res://…/config.tres")` (`tests/journey_load_check.gd`)
+    and require zero problems — it proves every event file loads from a fresh disk
+    context and every routing id resolves. See
     [Validation → round-trip from disk](../guides/validation.md#validate-is-not-enough-on-its-own-round-trip-from-disk).
 
-### `rebuild_pool() -> void`
+### `rebuild_index() -> void`
 
 ```gdscript
-func rebuild_pool() -> void
+func rebuild_index() -> void
 ```
 
-Rebuilds the stochastic pool index from `config.event_pool_dir`, re-reading from
-disk (editor/Studio hot-reload hook). Safe to call before the first pool pull.
+Rebuilds the event index from `config.events_dir`, re-reading from disk
+(editor/Studio hot-reload hook). Safe to call before the first pool pull.
 
 ## Signals
 
@@ -199,9 +199,10 @@ the few directly-useful entry points are.
 | --- | --- | --- |
 | `Blackboard` | Run-state container | Read via accessors only — never write directly. |
 | `JourneySequenceManager` | Routing brain (start/process/enter/end) | **Internal.** Owned by the runtime. |
-| `JourneyPoolIndex` | Pool scan + weighted selection | Useful in headless export-sanity checks (build + `find_by_id`). |
+| `JourneyEventIndex` | Event scan + id resolution + weighted pool selection | Useful in headless export-sanity checks (build + `find_by_id`). |
 | `JourneySaveManager` | Serialize / write / read / migrate | **Internal.** Use `save_game`/`load_game`. |
-| `JourneyValidator` | Authoring checks | `JourneyValidator.validate(config, pool)` returns typed `{severity, message}` dicts if you want richer output than the string list. |
+| `JourneyValidator` | Authoring checks | `JourneyValidator.validate(config, event_index)` returns typed `{severity, message}` dicts if you want richer output than the string list. |
+| `JourneyLoadCheck` | Disk round-trip "would this ship?" check | `JourneyLoadCheck.check(config_path)` — pair with `validate()` before shipping. |
 | `JourneyEvaluator` | Pure condition evaluation (static) | **Internal.** `eval_condition` / `eval_group`. |
 | `JourneyMutator` | Pure consequence application (static) | **Internal.** The single mutation primitive. |
 
@@ -228,8 +229,8 @@ verified against. Spot-check any row against the code.
 | `get_metadata(key)` | `addons/journey_engine_core/journey_runtime.gd` | 70 |
 | `save_game(slot="savegame")` | `addons/journey_engine_core/journey_runtime.gd` | 79 |
 | `load_game(slot="savegame")` | `addons/journey_engine_core/journey_runtime.gd` | 107 |
-| `validate(config)` | `addons/journey_engine_core/journey_runtime.gd` | 163 |
-| `rebuild_pool()` | `addons/journey_engine_core/journey_runtime.gd` | 178 |
+| `validate(config)` | `addons/journey_engine_core/journey_runtime.gd` | 162 |
+| `rebuild_index()` | `addons/journey_engine_core/journey_runtime.gd` | 182 |
 | `signal event_changed(event, choices)` | `addons/journey_engine_core/journey_runtime.gd` | 26 |
 | `signal resource_changed(key, old_value, new_value)` | `addons/journey_engine_core/journey_runtime.gd` | 27 |
 | `signal flag_changed(key, value)` | `addons/journey_engine_core/journey_runtime.gd` | 28 |
@@ -240,5 +241,6 @@ verified against. Spot-check any row against the code.
 | `JourneyCondition.Op` enum | `addons/journey_engine_core/journey_condition.gd` | 6 |
 | `JourneyConsequence.Operation` enum | `addons/journey_engine_core/journey_consequence.gd` | 6 |
 | `JourneyConditionGroup.Logic` enum | `addons/journey_engine_core/journey_condition_group.gd` | 7 |
-| `JourneyValidator.validate(config, pool_index=null)` | `addons/journey_engine_core/validator.gd` | 29 |
-| `JourneyPoolIndex.find_by_id(id_str)` | `addons/journey_engine_core/pool_index.gd` | 137 |
+| `JourneyValidator.validate(config, event_index=null)` | `addons/journey_engine_core/validator.gd` | 39 |
+| `JourneyEventIndex.find_by_id(id_str)` | `addons/journey_engine_core/event_index.gd` | 189 |
+| `JourneyLoadCheck.check(config_path)` | `tests/journey_load_check.gd` | 32 |

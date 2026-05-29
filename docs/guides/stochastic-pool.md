@@ -12,23 +12,26 @@ Set the choice's routing fields (see [Routing](../concepts/routing.md)):
 ```gdscript
 var choice := JourneyChoice.new()
 choice.button_text = "Take to the road."
-choice.continue_to_pool = true          # request a pull (target_event must be null)
+choice.continue_to_pool = true          # request a pull (target_event_id must be empty)
 choice.pool_tags_filter = ["road"]      # scope: only events tagged "road"; empty => all
 ```
 
 Adapted from the sample's `evt_road_begins.tres`, this drops the player into a
 stream of random "road" encounters.
 
-## The pool directory
+## Pool eligibility
 
-Pool events are `.tres`/`.res` files under `config.event_pool_dir`. On the first
-pull (lazily, so a game that never enters the pool pays no cost), the engine
-recursively scans that directory and indexes every `JourneyEvent` by its tags.
+Pool events live alongside every other event under `config.events_dir` (scanned
+recursively and indexed by id at `start_new_journey`). What makes an event a
+*pool candidate* is the per-event **`pool_eligible`** flag — set it `true` on
+events that should appear in random pulls. The events/pool folder split is just
+organization; deterministic-only events share the index (so they're reachable by
+id) but leave `pool_eligible` `false` so they're never drawn at random.
 
-!!! warning "Every pool event needs a unique, non-empty `id`"
+!!! warning "Every event needs a unique, non-empty `id`"
     Duplicate ids and empty ids are **skipped with a `push_error`** naming the
     offending file — a single bad event can't take down the build. The
-    [validator](validation.md) catches these at authoring time too.
+    [validator](validation.md) surfaces these at authoring time too.
 
 The scan is export-safe: it uses `DirAccess` on the `res://` virtual filesystem
 and understands the `.remap` pointers Godot creates when baking resources into a
@@ -43,6 +46,7 @@ When a `continue_to_pool` choice fires, selection runs in four steps:
    events if the filter is empty). An event with two matching tags is **deduped**
    so it doesn't double its odds.
 2. **Filter** — within scope, keep an event only if:
+    - it is `pool_eligible`; **and**
     - it is `repeatable`, **or** its `id` is not in `seen_ids`; **and**
     - its `pool_conditions` group passes against the current Blackboard.
 3. **Empty?** — if no candidate survives, return nothing → `journey_error`
@@ -105,8 +109,8 @@ with, and the pool can't dead-end.
 
 ## Hot-reloading the pool in the editor
 
-If you add or edit pool events while iterating, `JourneyRuntime.rebuild_pool()`
-rebuilds the index from `event_pool_dir`, re-reading from disk (it uses
+If you add or edit events while iterating, `JourneyRuntime.rebuild_index()`
+rebuilds the event index from `events_dir`, re-reading from disk (it uses
 `CACHE_MODE_REPLACE` so stale cached resources aren't returned).
 
 See also: [Routing](../concepts/routing.md) · [Authoring Content](authoring-content.md)

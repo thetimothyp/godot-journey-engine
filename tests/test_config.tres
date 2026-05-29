@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://dj8boxtg50w8n" path="res://addons/journey_engine_core/journey_resource_def.gd" id="1_resdef"]
 [ext_resource type="Script" uid="uid://bhgg6f367cgd2" path="res://addons/journey_engine_core/journey_config.gd" id="2_config"]
-[ext_resource type="Resource" uid="uid://b1evstartev01" path="res://tests/journey/evt_start.tres" id="3_start"]
 
 [sub_resource type="Resource" id="ResourceDef_gold"]
 script = ExtResource("1_resdef")
@@ -30,6 +29,6 @@ resource_defs = Array[ExtResource("1_resdef")]([SubResource("ResourceDef_gold"),
 initial_flags = {
 "started": true
 }
-start_event = ExtResource("3_start")
-event_pool_dir = "res://tests/pool/"
+start_event_id = &"evt_start"
+events_dir = "res://tests/journey/"
 metadata/_custom_type_script = "uid://bhgg6f367cgd2"

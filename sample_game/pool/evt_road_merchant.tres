@@ -74,6 +74,7 @@ metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 script = ExtResource("1_event")
 narrative_text = "A merchant rolls his wagon to a halt and waves you down."
 id = &"evt_road_merchant"
+pool_eligible = true
 event_tags = Array[String](["road", "trade"])
 weight = 100
 choices = Array[ExtResource("2_choice")]([SubResource("Choice_merch_trade"), SubResource("Choice_merch_recommend"), SubResource("Choice_merch_pass")])

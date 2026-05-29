@@ -9,11 +9,17 @@ class_name JourneyEvent
 @export var ambient_audio: AudioStream
 
 @export_group("System")
-## Stable identity used by saves and the pool index; must be unique and non-empty for pool events.
+## Stable identity used by saves, the event index, and all routing. Must be
+## unique and non-empty for ANY event that is a routing target (start_event_id,
+## choice.target_event_id, a boundary route) or pool-eligible.
 @export var id: StringName = &""
 @export var event_tags: Array[String] = []
 ## Static selection weight for the stochastic pool.
 @export var weight: int = 100
+## If true, the event is a candidate for stochastic pool pulls. Pool draws are
+## scoped by this flag (not by directory); deterministic-only events leave it
+## false so they're never randomly selected, even though they share the index.
+@export var pool_eligible: bool = false
 ## Eligibility gate for inclusion in a stochastic pool pull.
 @export var pool_conditions: JourneyConditionGroup
 ## If false, the event is excluded from future pool pulls after being seen.

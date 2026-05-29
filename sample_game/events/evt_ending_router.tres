@@ -5,9 +5,6 @@
 [ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://addons/journey_engine_core/journey_consequence.gd" id="2_fophr"]
 [ext_resource type="Script" uid="uid://k60namdri10y" path="res://addons/journey_engine_core/journey_condition.gd" id="3_cond"]
 [ext_resource type="Script" uid="uid://bwkdyqkiuostq" path="res://addons/journey_engine_core/journey_condition_group.gd" id="4_group"]
-[ext_resource type="Resource" uid="uid://jfet4fap1mpq" path="res://sample_game/events/evt_end_heroic.tres" id="5_heroic"]
-[ext_resource type="Resource" uid="uid://jfet4rm7smpq" path="res://sample_game/events/evt_end_tragic.tres" id="6_tragic"]
-[ext_resource type="Resource" uid="uid://jfet4nm7sreq" path="res://sample_game/events/evt_end_pragmatic.tres" id="7_pragm"]
 
 [sub_resource type="Resource" id="Cond_heroic_sanity"]
 script = ExtResource("3_cond")
@@ -30,7 +27,7 @@ metadata/_custom_type_script = "uid://bwkdyqkiuostq"
 script = ExtResource("2_choice")
 button_text = "Step into the dawn — wiser, kinder."
 visibility = SubResource("Group_heroic_all")
-target_event = ExtResource("5_heroic")
+target_event_id = &"evt_end_heroic"
 metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 
 [sub_resource type="Resource" id="Cond_tragic_sanity"]
@@ -57,13 +54,13 @@ metadata/_custom_type_script = "uid://bwkdyqkiuostq"
 script = ExtResource("2_choice")
 button_text = "Stumble in — broken, broke, or both."
 visibility = SubResource("Group_tragic_any")
-target_event = ExtResource("6_tragic")
+target_event_id = &"evt_end_tragic"
 metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 
 [sub_resource type="Resource" id="Choice_router_pragmatic"]
 script = ExtResource("2_choice")
 button_text = "Walk in. Settle the bill. Sleep."
-target_event = ExtResource("7_pragm")
+target_event_id = &"evt_end_pragmatic"
 metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 
 [resource]

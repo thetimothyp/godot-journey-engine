@@ -50,6 +50,7 @@ metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 script = ExtResource("1_event")
 narrative_text = "The stranger you helped catches up on a borrowed horse. \"I owe you,\" they say, and press a small purse into your hand."
 id = &"evt_road_ally"
+pool_eligible = true
 event_tags = Array[String](["road"])
 weight = 80
 pool_conditions = SubResource("Group_ally_helped")

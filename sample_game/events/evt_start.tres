@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://addons/journey_engine_core/journey_event.gd" id="1_event"]
 [ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://addons/journey_engine_core/journey_choice.gd" id="2_choice"]
 [ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://addons/journey_engine_core/journey_consequence.gd" id="3_conseq"]
-[ext_resource type="Resource" uid="uid://sg0evroadbegin1" path="res://sample_game/events/evt_road_begins.tres" id="4_begins"]
 [ext_resource type="Texture2D" uid="uid://cjkitbg0dawn01" path="res://addons/journey_engine_ui_kit/assets/backgrounds/placeholder_dawn.tres" id="5_bg"]
 
 [sub_resource type="Resource" id="Conseq_start_helped"]
@@ -16,7 +15,7 @@ metadata/_custom_type_script = "uid://i001tv2xcpdh"
 script = ExtResource("2_choice")
 button_text = "Help the stranger fix their wagon."
 consequences = Array[ExtResource("3_conseq")]([SubResource("Conseq_start_helped")])
-target_event = ExtResource("4_begins")
+target_event_id = &"evt_road_begins"
 metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 
 [sub_resource type="Resource" id="Conseq_start_alone_sanity"]
@@ -30,7 +29,7 @@ metadata/_custom_type_script = "uid://i001tv2xcpdh"
 script = ExtResource("2_choice")
 button_text = "Walk past, head down (-8 sanity)."
 consequences = Array[ExtResource("3_conseq")]([SubResource("Conseq_start_alone_sanity")])
-target_event = ExtResource("4_begins")
+target_event_id = &"evt_road_begins"
 metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 
 [resource]

@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://addons/journey_engine_core/journey_event.gd" id="1_event"]
 [ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://addons/journey_engine_core/journey_choice.gd" id="2_choice"]
 [ext_resource type="Script" uid="uid://i001tv2xcpdh" path="res://addons/journey_engine_core/journey_consequence.gd" id="3_conseq"]
-[ext_resource type="Resource" uid="uid://b1evkindev001" path="res://tests/journey/evt_kind.tres" id="5_kind"]
 
 [sub_resource type="Resource" id="Conseq_addgold"]
 script = ExtResource("3_conseq")
@@ -29,7 +28,7 @@ metadata/_custom_type_script = "uid://i001tv2xcpdh"
 script = ExtResource("2_choice")
 button_text = "Help the stranger"
 consequences = Array[ExtResource("3_conseq")]([SubResource("Conseq_sethelped")])
-target_event = ExtResource("5_kind")
+target_event_id = &"evt_kind"
 metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 
 [resource]

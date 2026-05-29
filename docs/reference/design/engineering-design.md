@@ -18,6 +18,17 @@
       [Routing → Forced boundary routes](../../concepts/routing.md#forced-boundary-routes).)
     - **`docs/journey_engine_starter_ui_kit.md` was never written** — the
       [Starter UI Kit page](starter-ui-kit.md) is a stub.
+    - **Routing is by id, not object reference (0.3.0).** This document describes
+      deterministic routing via eager `JourneyEvent` references
+      (`choice.target_event`, `config.start_event`, `bottom_out_event` /
+      `top_out_event`). The shipped engine routes by `StringName` id resolved
+      against a global event index (`target_event_id`, `start_event_id`,
+      `*_event_id`; `event_pool_dir` → `events_dir`, indexing all events, with a
+      per-event `pool_eligible` flag scoping pool draws). This makes every event
+      independently loadable and routing graphs always serializable, and unifies
+      identity with the already-id-based save and pool systems. See
+      [Routing](../../concepts/routing.md#routing-is-by-id-every-event-is-independently-loadable)
+      and the [changelog](../../about/changelog.md).
 
 **Author:** AI Collaborator
 **Date:** May 27, 2026

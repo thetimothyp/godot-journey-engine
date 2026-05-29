@@ -2,75 +2,79 @@ extends RefCounted
 class_name JourneyValidator
 
 ## §8.1 authoring validator. Inspects a JourneyConfig (and optionally an
-## already-built JourneyPoolIndex) and returns a list of error/warning
-## messages naming the offenders. PURE INSPECTION — never mutates resources,
-## the Blackboard, or runtime state; never instantiates Nodes; never prints.
-## The CALLER decides what to do with the messages (push_error, surface in a
-## UI, write to a log). Studio [§8.1] will call this same entry on save so
-## the rules live in core and stay in lockstep with the runtime.
+## already-built JourneyEventIndex) and returns a list of error/warning messages
+## naming the offenders. PURE INSPECTION — never mutates resources, the
+## Blackboard, or runtime state; never instantiates Nodes; never prints. The
+## CALLER decides what to do with the messages (push_error, surface in a UI,
+## write to a log). Studio [§8.1] will call this same entry on save so the rules
+## live in core and stay in lockstep with the runtime.
 ##
 ## Result shape: Array of Dictionary { "severity": String, "message": String }
 ## where severity is SEVERITY_ERROR or SEVERITY_WARNING. Plain dicts (not a
 ## class) so the result is trivially serializable for Studio / logs / CI.
 ##
-## Stable ordering: resource_defs are iterated in declaration order; events
-## are collected start_event-first, then BFS in choice order, then resource-
-## def bottom/top-out events, then pool events (already sorted by id in
-## JourneyPoolIndex.build). Same input ⇒ same message list.
+## Routing is id-based: start_event_id, choice.target_event_id, and boundary
+## *_event_id are StringNames resolved against the event index. The validator's
+## central structural check is therefore ID RESOLUTION — every referenced id
+## must resolve to an indexed event — which REPLACES the old object-ref
+## cycle-detection check (a cycle of ids is serializable and loadable, so it is
+## no longer an error; a legitimate day-loop is now a supported shape). Because
+## resolution and per-event checks need the index, meaningful validation
+## REQUIRES a built JourneyEventIndex; called without one, only config-level
+## checks run and a note is appended.
+##
+## Stable ordering: resource_defs in declaration order; events from the index
+## (already id-sorted in JourneyEventIndex.build); index build problems sorted by
+## message. Same input ⇒ same message list.
 
 const SEVERITY_ERROR := "error"
 const SEVERITY_WARNING := "warning"
 
 ## §8.1 entry. Returns Array of {severity, message} dicts; empty = clean.
-## pool_index optional: when null, only deterministic events reachable from
-## config are validated and a note message is appended; when a built index
-## is passed, its events are included in the walk. Does NOT trigger a pool
-## build itself (author may not have set event_pool_dir yet).
-static func validate(config: JourneyConfig, pool_index: JourneyPoolIndex = null) -> Array:
+## event_index optional: when null, only config-level checks run (id resolution
+## and per-event rules need the index) and a note is appended; when a built index
+## is passed, all events are validated and every routing id is resolved against
+## it. Does NOT trigger an index build itself (author may not have set events_dir
+## yet) — JourneyRuntime.validate() builds one before delegating.
+static func validate(config: JourneyConfig, event_index: JourneyEventIndex = null) -> Array:
 	var messages: Array = []
 
 	if config == null:
 		messages.append(_err("config is null"))
 		return messages
 
-	# §8.1: start_event null is an error.
-	if config.start_event == null:
-		messages.append(_err("config.start_event is null"))
+	# §8.1: an empty start_event_id can never route — error.
+	if String(config.start_event_id) == "":
+		messages.append(_err("config.start_event_id is empty"))
 
 	# §3.7 / §8.1: resource def bounds.
 	_validate_resource_defs(config, messages)
 
-	# §8.1 typo catch + dead-choice walk operate over an event set: start_event
-	# ∪ BFS over choice.target_event ∪ resource_defs bottom/top-out ∪ pool
-	# events when an index is supplied. Mirrors the Step-6 _resolve_event_id
-	# walk but collects ALL reachable rather than returning the first id match
-	# (different return shapes — see Step-6 follow-ups note in PROGRESS.md).
-	var events: Array[JourneyEvent] = _collect_events(config, pool_index)
+	if event_index == null:
+		messages.append(_warn("events not indexed — pass a built JourneyEventIndex to check id resolution and per-event rules"))
+		return messages
 
-	# §3.8 / §8.1: empty + duplicate ids.
-	_validate_ids(events, messages)
+	# §3.8: empty / duplicate ids found while building the index. Recorded there
+	# (duplicates are dropped first-seen-wins, so the validator can't re-derive
+	# them from all_events) and surfaced here in the typed result.
+	for p in event_index.build_problems:
+		messages.append(p)
 
-	# §4.3 declared-key set: resource ops referencing keys outside this set
-	# warn (typo catch). Flag ops never warn — flags are created lazily by
-	# spec (§4.3) and have no "declared" concept.
+	# §4.3 declared-key set: resource ops referencing keys outside this set warn
+	# (typo catch). Flag ops never warn — flags are created lazily by spec (§4.3)
+	# and have no "declared" concept.
 	var declared_keys: Dictionary = _declared_resource_keys(config)
-	for event in events:
+	for event in event_index.all_events:
 		if event == null:
 			continue
 		_validate_event_conditions(event, declared_keys, messages)
 		_validate_event_choices(event, declared_keys, messages)
 
-	# §8.1 LOAD-TIME REALITY: a cycle in the choice.target_event hard-reference
-	# graph is perfectly legal in memory (which is why every other check above
-	# passes) but UNSERIALIZABLE — Godot's text resource format writes each
-	# target_event as an ext_resource/SubResource pointer, and a cyclic chain
-	# of those cannot be read back from disk. Detect it here so "validate +
-	# smoke test" can no longer bless content the engine's own load path
-	# rejects. See _detect_target_event_cycle for the algorithm and edge set.
-	_detect_target_event_cycle(config, pool_index, messages)
-
-	if pool_index == null:
-		messages.append(_warn("pool was not validated — pass a built JourneyPoolIndex to include pool events"))
+	# §8.1 STRUCTURAL: every routing id must resolve to an indexed event. This is
+	# the load-time guarantee that replaced cycle detection — a dangling id is the
+	# one way id-based routing can break, and it surfaces here as a named error
+	# (and at runtime as a journey_error) rather than a silent dead-end.
+	_validate_id_resolution(config, event_index, messages)
 
 	return messages
 
@@ -110,203 +114,39 @@ static func _validate_resource_defs(config: JourneyConfig, messages: Array) -> v
 		if def.default_value < def.min_value or def.default_value > def.max_value:
 			messages.append(_err("resource def '%s': default_value (%s) outside [%s, %s]" % [name, def.default_value, def.min_value, def.max_value]))
 
-## BFS-collect every JourneyEvent reachable for validation. Visited keyed by
-## object instance_id so two events sharing a String(id) (the duplicate-id
-## case) both end up in the output for _validate_ids to detect — keying by
-## id_str instead would silently dedupe duplicates and hide the bug.
-static func _collect_events(config: JourneyConfig, pool_index: JourneyPoolIndex) -> Array[JourneyEvent]:
-	var visited: Dictionary = {}
-	var out: Array[JourneyEvent] = []
-	var queue: Array[JourneyEvent] = []
+## §8.1 id-resolution. Every routing id (start, boundary routes, every choice
+## target across every indexed event) must resolve to an indexed event, else the
+## route dead-ends at runtime. Empty ids are NOT errors here — empty means "no
+## route" (a terminal choice, an unset boundary); only a NON-empty id that fails
+## to resolve is flagged. Deterministic order: start, then resource_defs in
+## declaration order, then events in index (id-sorted) × choice order.
+static func _validate_id_resolution(config: JourneyConfig, index: JourneyEventIndex, messages: Array) -> void:
+	var sid: String = String(config.start_event_id)
+	if sid != "" and index.find_by_id(sid) == null:
+		messages.append(_err("config.start_event_id '%s' does not resolve to an indexed event" % sid))
 
-	if config.start_event != null:
-		queue.append(config.start_event)
 	for def in config.resource_defs:
 		if def == null:
 			continue
-		if def.bottom_out_event != null:
-			queue.append(def.bottom_out_event)
-		if def.top_out_event != null:
-			queue.append(def.top_out_event)
-	if pool_index != null:
-		for e in pool_index.all_events:
-			queue.append(e)
+		var name: String = def.key if def.key != "" else "<unnamed>"
+		var bid: String = String(def.bottom_out_event_id)
+		if bid != "" and index.find_by_id(bid) == null:
+			messages.append(_err("resource def '%s' bottom_out_event_id '%s' does not resolve to an indexed event" % [name, bid]))
+		var tid: String = String(def.top_out_event_id)
+		if tid != "" and index.find_by_id(tid) == null:
+			messages.append(_err("resource def '%s' top_out_event_id '%s' does not resolve to an indexed event" % [name, tid]))
 
-	# Index-cursor BFS (avoids O(n) pop_front per step — same pattern Step-6
-	# follow-up #1 used in JourneySequenceManager._resolve_event_id).
-	var head: int = 0
-	while head < queue.size():
-		var ev: JourneyEvent = queue[head]
-		head += 1
-		if ev == null:
+	for event in index.all_events:
+		if event == null:
 			continue
-		var key: int = ev.get_instance_id()
-		if visited.has(key):
-			continue
-		visited[key] = true
-		out.append(ev)
-		for choice in ev.choices:
-			if choice != null and choice.target_event != null:
-				queue.append(choice.target_event)
-
-	return out
-
-## §8.1 unserializable-cycle detection. A directed cycle in the
-## choice.target_event graph cannot be saved/loaded by Godot's resource format
-## (verified: a single-file SubResource cycle fails to parse with
-## "[ext_resource]/[sub_resource] referenced non-existent resource"; a
-## cross-file ext_resource cycle is fragile and load-order dependent). The
-## genre's day-loop is expressible WITHOUT this hazard by using
-## `continue_to_pool` for loop-back edges (a bool — no serialized reference).
-##
-## Seed set mirrors `_resolve_event_id` / `_collect_events` EXACTLY:
-##   config.start_event ∪ every bottom_out/top_out boundary event ∪ every pool
-## event (only when a built index is supplied). Boundary ROUTES are NOT edges —
-## only `choice.target_event` is followed. `continue_to_pool` /
-## `pool_tags_filter` are NOT followed: they carry no serialized reference and
-## are the legitimate cycle-free loop-back mechanism.
-##
-## Algorithm: iterative DFS with white/grey/black coloring (no recursion — the
-## graph can be large and GDScript has a shallow stack). Nodes are keyed by
-## get_instance_id() so the duplicate-id case can't merge two distinct objects.
-## A back-edge to a GREY node (one currently on the DFS path) is a cycle; we
-## reconstruct the concrete path from the live DFS stack for the message.
-##
-## Emits at most ONE SEVERITY_ERROR (the first cycle found, in deterministic
-## root/choice order). Detecting and naming every cycle would be noisier
-## without being more actionable — one named cycle is enough to send the author
-## to the offending loop; re-running after the fix surfaces the next, if any.
-static func _detect_target_event_cycle(config: JourneyConfig, pool_index: JourneyPoolIndex, messages: Array) -> void:
-	# White = absent from `color`; values below mark in-progress / finished.
-	const GREY := 1
-	const BLACK := 2
-
-	var roots: Array[JourneyEvent] = []
-	if config.start_event != null:
-		roots.append(config.start_event)
-	for def in config.resource_defs:
-		if def == null:
-			continue
-		if def.bottom_out_event != null:
-			roots.append(def.bottom_out_event)
-		if def.top_out_event != null:
-			roots.append(def.top_out_event)
-	if pool_index != null:
-		for e in pool_index.all_events:
-			roots.append(e)
-
-	var color: Dictionary = {}  # instance_id -> GREY | BLACK
-	for root in roots:
-		if root == null:
-			continue
-		if color.get(root.get_instance_id(), 0) == BLACK:
-			continue
-		var cycle: Array[JourneyEvent] = _dfs_find_cycle(root, color, GREY, BLACK)
-		if not cycle.is_empty():
-			messages.append(_err(_format_cycle_message(cycle)))
-			return
-
-## Iterative DFS from `root` over choice.target_event edges. Returns the first
-## cycle found as the ordered list of events on it, closed (first == last):
-## e.g. [A, B, C, A]. Empty array ⇒ no cycle reachable from this root.
-## `color` is shared across roots so already-finished (BLACK) subgraphs are
-## not re-walked — overall O(V + E).
-static func _dfs_find_cycle(root: JourneyEvent, color: Dictionary, grey: int, black: int) -> Array[JourneyEvent]:
-	# Parallel stacks: the event path being explored, and per-frame the index
-	# of the NEXT choice to examine on that event.
-	var node_stack: Array[JourneyEvent] = [root]
-	var idx_stack: Array[int] = [0]
-	color[root.get_instance_id()] = grey
-
-	while not node_stack.is_empty():
-		var top: int = node_stack.size() - 1
-		var node: JourneyEvent = node_stack[top]
-		var i: int = idx_stack[top]
-
-		# Advance to the next choice that carries a target_event edge.
-		var next: JourneyEvent = null
-		while i < node.choices.size():
-			var choice: JourneyChoice = node.choices[i]
-			i += 1
-			if choice != null and choice.target_event != null:
-				next = choice.target_event
-				break
-		idx_stack[top] = i
-
-		if next == null:
-			# Fully explored this node — pop and mark BLACK.
-			color[node.get_instance_id()] = black
-			node_stack.pop_back()
-			idx_stack.pop_back()
-			continue
-
-		var nkey: int = next.get_instance_id()
-		var ncolor: int = color.get(nkey, 0)
-		if ncolor == grey:
-			# Back-edge to a node on the current path ⇒ cycle. Reconstruct it
-			# from the live stack: everything from `next`'s frame to the top,
-			# then `next` again to close the loop.
-			var cycle: Array[JourneyEvent] = []
-			var start_idx: int = node_stack.find(next)
-			for j in range(start_idx, node_stack.size()):
-				cycle.append(node_stack[j])
-			cycle.append(next)
-			return cycle
-		elif ncolor == 0:
-			color[nkey] = grey
-			node_stack.append(next)
-			idx_stack.append(0)
-		# BLACK target: already fully explored, no cycle through it — skip.
-
-	return []
-
-## Build the single SEVERITY_ERROR message for a detected target_event cycle:
-## a concrete arrow path, why it's unloadable, and the remedy.
-static func _format_cycle_message(cycle: Array[JourneyEvent]) -> String:
-	var ids: Array[String] = []
-	for ev in cycle:
-		var s: String = String(ev.id)
-		ids.append(s if s != "" else "<empty-id>")
-	var path: String = " → ".join(ids)
-	return ("target_event reference cycle: %s — a target_event reference cycle cannot be saved or loaded by Godot's resource format "
-		+ "(each target_event serializes as an ext_resource/SubResource pointer, and a cyclic chain of those fails to load from disk). "
-		+ "Break the loop with a continue_to_pool choice, or restructure so the loop-back carries no serialized reference.") % path
-
-## §3.8 id-validity rules. RULES MUST MATCH the load-time checks in
-## JourneyPoolIndex._ingest (empty id, duplicate id). The two implementations
-## differ in shape (this is collect-then-report; _ingest is reject-on-arrival)
-## but the predicates are identical — if one changes, the other must too.
-## (PROGRESS.md Step-7 entry flags this as a known parallel for the eventual
-## consolidation pass; not extracted to a shared helper because the call-time
-## semantics genuinely differ.)
-##
-## Note: events caught by _ingest's filter never reach pool_index.all_events,
-## so duplicates PURELY within the pool dir are detected at load time (loud
-## push_error) and not re-flagged here. This validator catches duplicates
-## across the deterministic+pool union — the case _ingest can't see.
-static func _validate_ids(events: Array[JourneyEvent], messages: Array) -> void:
-	var by_id: Dictionary = {}  # id String -> Array[JourneyEvent]
-	for ev in events:
-		if ev == null:
-			continue
-		var id_str: String = String(ev.id)
-		if id_str == "":
-			var path: String = ev.resource_path if ev.resource_path != "" else "<in-memory>"
-			messages.append(_err("event has empty id (resource: %s)" % path))
-			continue
-		var list: Array = by_id.get(id_str, [])
-		list.append(ev)
-		by_id[id_str] = list
-
-	# Sort keys so duplicate messages emerge in deterministic order regardless
-	# of dict insertion order (Godot Dictionary preserves insertion in 4.x,
-	# but sorting is the explicit contract — same input ⇒ same output).
-	var ids: Array = by_id.keys()
-	ids.sort()
-	for id_str in ids:
-		var list: Array = by_id[id_str]
-		if list.size() > 1:
-			messages.append(_err("duplicate event id '%s' (%d events share this id)" % [id_str, list.size()]))
+		var eid: String = String(event.id) if String(event.id) != "" else "<empty-id>"
+		for ci in range(event.choices.size()):
+			var choice: JourneyChoice = event.choices[ci]
+			if choice == null:
+				continue
+			var t: String = String(choice.target_event_id)
+			if t != "" and index.find_by_id(t) == null:
+				messages.append(_err("event '%s' choice[%d] target_event_id '%s' does not resolve to an indexed event" % [eid, ci, t]))
 
 # --- Per-event walks ---
 
@@ -355,11 +195,11 @@ static func _validate_event_choices(event: JourneyEvent, declared_keys: Dictiona
 			if not declared_keys.has(con.key):
 				messages.append(_warn("event '%s' choice[%d] consequence[%d]: references undeclared resource key '%s'" % [eid, ci, k, con.key]))
 		# §8.1 dead-choice heuristic — WARNING (not ERROR) because a legitimate
-		# terminal choice CAN have null target + no pool + no consequences if
-		# the author wanted a bare "End journey" button. But that's vanishingly
-		# rare; real terminal choices almost always carry consequences (a
-		# final state flip, an "ending kind" flag, etc.). The warning catches
-		# the unfinished-node case without false-positiving the deliberate
-		# one — and the author can suppress it by adding any consequence.
-		if choice.target_event == null and not choice.continue_to_pool and choice.consequences.is_empty():
-			messages.append(_warn("event '%s' choice[%d]: dead/unfinished — null target, no pool continuation, no consequences" % [eid, ci]))
+		# terminal choice CAN have empty target + no pool + no consequences if the
+		# author wanted a bare "End journey" button. But that's vanishingly rare;
+		# real terminal choices almost always carry consequences (a final state
+		# flip, an "ending kind" flag, etc.). The warning catches the
+		# unfinished-node case without false-positiving the deliberate one — and
+		# the author can suppress it by adding any consequence.
+		if String(choice.target_event_id) == "" and not choice.continue_to_pool and choice.consequences.is_empty():
+			messages.append(_warn("event '%s' choice[%d]: dead/unfinished — no target_event_id, no pool continuation, no consequences" % [eid, ci]))

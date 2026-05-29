@@ -20,7 +20,7 @@ extends Node
 ## with addons/journey_engine_core/plugin.cfg. Games can read JourneyRuntime.VERSION
 ## to assert compatibility at runtime. Independent of JourneyConfig.save_version,
 ## which only tracks the on-disk save format.
-const VERSION := "0.2.0"
+const VERSION := "0.3.0"
 
 # --- Signals (§5.3) — declare exactly these. ---
 signal event_changed(event: JourneyEvent, choices: Array[JourneyChoice])
@@ -43,12 +43,15 @@ func _ready() -> void:
 
 # --- Lifecycle (§9) ---
 
-func start_new_journey(config: JourneyConfig, seed: int = 0) -> void:
+## `events` (optional): supply an in-memory event list to route against instead
+## of scanning config.events_dir — for code-first / procedural content and tests.
+## Routing is still by id against the resulting index.
+func start_new_journey(config: JourneyConfig, seed: int = 0, events: Array[JourneyEvent] = []) -> void:
 	if _seq == null:
 		# Defensive: if a caller invokes this before _ready (e.g. another
 		# autoload's _enter_tree), construct the helper on demand.
 		_seq = JourneySequenceManager.new(self)
-	_seq.start_new_journey(config, seed)
+	_seq.start_new_journey(config, seed, events)
 
 func process_choice(choice: JourneyChoice) -> void:
 	if _seq == null:
@@ -148,23 +151,27 @@ func load_game(slot: String = "savegame") -> int:
 
 ## §8.1 dev-only authoring validator. Per §9 the public surface returns
 ## flattened [ERROR]/[WARNING]-prefixed strings (empty = clean). Internally
-## defers to JourneyValidator.validate(config, pool) — the richer typed form
-## that Studio calls directly on save (§8.1 [Studio]), so the same rules
-## govern both. If a journey is active and the runtime's pool index is
-## already built, it's passed through so pool events are validated too;
-## otherwise the validator notes that pool wasn't checked instead of
-## forcing a directory scan just for validation.
+## defers to JourneyValidator.validate(config, index) — the richer typed form
+## that Studio calls directly on save (§8.1 [Studio]), so the same rules govern
+## both. Routing is id-based, so the validator needs a built event index to
+## resolve ids and run per-event checks: we reuse the live index if a journey is
+## active, else build a throwaway one from config.events_dir so authoring-time
+## validate() still checks id resolution (the most important structural rule).
 ##
-## NOTE: §8.1 intends games to invoke this in _ready under
-## OS.is_debug_build() — shipping builds should not pay the walk cost.
-## Studio (separate plugin) calls JourneyValidator.validate directly to get
-## the typed dicts; this wrapper exists for games that want a plain string
-## list to drop into a debug log.
+## NOTE: §8.1 intends games to invoke this in _ready under OS.is_debug_build() —
+## shipping builds should not pay the walk cost. Studio (separate plugin) calls
+## JourneyValidator.validate directly to get the typed dicts; this wrapper exists
+## for games that want a plain string list to drop into a debug log.
 func validate(config: JourneyConfig) -> Array[String]:
-	var pool: JourneyPoolIndex = null
+	var index: JourneyEventIndex = null
 	if _seq != null:
-		pool = _seq.get_pool_index()
-	var typed: Array = JourneyValidator.validate(config, pool)
+		index = _seq.get_event_index()
+	if index == null and config != null and config.events_dir != "":
+		# No live index (validate called before start) — build a throwaway one so
+		# id resolution and per-event checks can run.
+		index = JourneyEventIndex.new()
+		index.build(config.events_dir)
+	var typed: Array = JourneyValidator.validate(config, index)
 	var out: Array[String] = []
 	for m in typed:
 		var sev: String = String(m.get("severity", ""))
@@ -173,10 +180,10 @@ func validate(config: JourneyConfig) -> Array[String]:
 	return out
 
 ## [Studio]/editor hot-reload hook (§9 / §3.7). Forwards to the SequenceManager,
-## which owns the pool index. Safe to call before the first pool pull; the
-## index itself is rebuilt against config.event_pool_dir.
-func rebuild_pool() -> void:
+## which owns the event index. Safe to call before the first pool pull; the index
+## itself is rebuilt against config.events_dir.
+func rebuild_index() -> void:
 	if _seq == null:
-		push_warning("JourneyRuntime.rebuild_pool: runtime not ready")
+		push_warning("JourneyRuntime.rebuild_index: runtime not ready")
 		return
-	_seq.rebuild_pool()
+	_seq.rebuild_index()

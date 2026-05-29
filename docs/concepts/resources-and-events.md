@@ -12,12 +12,12 @@ authoring workflow, see [Authoring Content](../guides/authoring-content.md).
 JourneyConfig
 ├── resource_defs: [JourneyResourceDef]      # the schema for numeric state
 ├── initial_flags: { String: bool }
-├── start_event: JourneyEvent ───────────────┐
-└── event_pool_dir: "res://.../pool/"         │
+├── start_event_id: StringName               # resolved against the event index ┐
+└── events_dir: "res://my_game/"             # scanned recursively for events    │
                                               ▼
-                                       JourneyEvent
+                                       JourneyEvent  (one .tres per event, keyed by id)
                                        ├── narrative_text, background_texture, ambient_audio
-                                       ├── id, event_tags, weight, repeatable
+                                       ├── id, event_tags, weight, repeatable, pool_eligible
                                        ├── pool_conditions: JourneyConditionGroup
                                        └── choices: [JourneyChoice]
                                                           │
@@ -26,7 +26,7 @@ JourneyConfig
                                                    ├── button_text
                                                    ├── visibility: JourneyConditionGroup
                                                    ├── consequences: [JourneyConsequence]
-                                                   ├── target_event: JourneyEvent
+                                                   ├── target_event_id: StringName  ── resolved against the index
                                                    ├── continue_to_pool: bool
                                                    └── pool_tags_filter: [String]
 ```
@@ -43,9 +43,9 @@ The per-game configuration object. One per game; passed to
 | --- | --- | --- |
 | `resource_defs` | `Array[JourneyResourceDef]` | The numeric-resource schema. |
 | `initial_flags` | `Dictionary` (`String → bool`) | Flags set true/false at journey start. |
-| `start_event` | `JourneyEvent` | The first event. **Required** — a null start is a validation error. |
-| `event_pool_dir` | `String` | Directory scanned for stochastic pool events. Default `res://events/`. |
-| `rebuild_pool_in_editor` | `bool` | Studio hot-reload hint. |
+| `start_event_id` | `StringName` | Id of the first event. **Required** — an empty start id is a validation error. |
+| `events_dir` | `String` | Directory scanned **recursively** for all events (deterministic + pool), indexed by id. Default `res://events/`. |
+| `rebuild_index_in_editor` | `bool` | Studio hot-reload hint. |
 | `save_encryption_key` | `String` | Empty ⇒ plaintext saves; non-empty ⇒ password-encrypted. |
 | `save_version` | `int` | Migration anchor; bump on breaking save-format changes. |
 
@@ -61,8 +61,8 @@ clamped).
 | `default_value` | `float` | Starting value. Should sit within the bounds. |
 | `min_value` | `float` | Lower bound (default `0.0`). |
 | `max_value` | `float` | Upper bound (default `100.0`). |
-| `bottom_out_event` | `JourneyEvent` | Forced route fired when a write **transitions** the value down to `min_value`. |
-| `top_out_event` | `JourneyEvent` | Optional. Forced route fired when a write transitions up to `max_value`. |
+| `bottom_out_event_id` | `StringName` | Id of the event fired when a write **transitions** the value down to `min_value`. |
+| `top_out_event_id` | `StringName` | Optional. Id of the event fired when a write transitions up to `max_value`. |
 
 Boundary routes are a powerful authoring tool — "sanity hits 0 → madness event".
 See [Routing](routing.md#forced-boundary-routes) for the exact (transition, not
@@ -70,16 +70,18 @@ presence) firing rule.
 
 ## JourneyEvent
 
-A narrative node: what the player reads, plus the choices they can take. Events
-are reachable either deterministically (as a choice's `target_event` or a
-config's `start_event`) or by living in the pool directory.
+A narrative node: what the player reads, plus the choices they can take. Every
+event lives as a `.tres` under `events_dir` and is reached **by id** — as a
+choice's `target_event_id`, the config's `start_event_id`, a boundary route, or a
+stochastic pool pull (`pool_eligible` events).
 
 | Field | Type | Notes |
 | --- | --- | --- |
 | `narrative_text` | `String` | The body text (multiline). |
 | `background_texture` | `Texture2D` | Optional presentation payload — the engine never displays it; your UI does. |
 | `ambient_audio` | `AudioStream` | Optional presentation payload. |
-| `id` | `StringName` | Stable identity used by saves and the pool index. **Must be unique and non-empty for pool events.** |
+| `id` | `StringName` | Stable identity used by saves, the event index, and all routing. **Must be unique and non-empty** for any routing target or pool event. |
+| `pool_eligible` | `bool` | If `true`, the event is a candidate for stochastic pool pulls. Deterministic-only events leave it `false`. |
 | `event_tags` | `Array[String]` | Tags for pool filtering. |
 | `weight` | `int` | Selection weight in the pool (default `100`). |
 | `pool_conditions` | `JourneyConditionGroup` | Eligibility gate for pool inclusion. |
@@ -96,11 +98,11 @@ applies, and how it routes.
 | `button_text` | `String` | The label (multiline). |
 | `visibility` | `JourneyConditionGroup` | Gate for *showing* the choice. **Null ⇒ always visible.** |
 | `consequences` | `Array[JourneyConsequence]` | State changes applied when chosen. |
-| `target_event` | `JourneyEvent` | Deterministic route; takes precedence over a pool pull. |
-| `continue_to_pool` | `bool` | If `true` **and** `target_event` is null, request a stochastic pool pull. |
+| `target_event_id` | `StringName` | Deterministic route by id; takes precedence over a pool pull. |
+| `continue_to_pool` | `bool` | If `true` **and** `target_event_id` is empty, request a stochastic pool pull. |
 | `pool_tags_filter` | `Array[String]` | Tag scope for that pull; empty ⇒ all events. |
 
-A choice with no `target_event`, no `continue_to_pool`, and no consequences is a
+A choice with an empty `target_event_id`, no `continue_to_pool`, and no consequences is a
 **terminal** choice — it ends the journey. (The validator warns on this shape in
 case it was unfinished; add any consequence to silence it for a deliberate "end"
 button.)
@@ -170,5 +172,5 @@ consequence against an undeclared key is skipped with a warning — the engine
 never auto-creates an unbounded resource.
 
 See also: [Authoring Content](../guides/authoring-content.md) for the
-inspector workflow · [Routing](routing.md) for how `target_event` /
+inspector workflow · [Routing](routing.md) for how `target_event_id` /
 `continue_to_pool` / boundary routes interact.

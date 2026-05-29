@@ -2,12 +2,11 @@
 
 [ext_resource type="Script" uid="uid://cd45ite7r06rf" path="res://addons/journey_engine_core/journey_event.gd" id="1_event"]
 [ext_resource type="Script" uid="uid://bsf1m3b2h1ukg" path="res://addons/journey_engine_core/journey_choice.gd" id="2_choice"]
-[ext_resource type="Resource" uid="uid://sg0evendrouter1" path="res://sample_game/events/evt_ending_router.tres" id="3_router"]
 
 [sub_resource type="Resource" id="Choice_madness_continue"]
 script = ExtResource("2_choice")
 button_text = "Stumble forward, whispering."
-target_event = ExtResource("3_router")
+target_event_id = &"evt_ending_router"
 metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 
 [resource]

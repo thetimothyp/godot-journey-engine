@@ -53,19 +53,24 @@ Common issues, what causes them, and where to read more.
     The one declared **first** in `config.resource_defs`. Boundary-route priority
     is declaration order; the rest are ignored for that batch.
 
-??? question "My content passes `validate()` but won't load — `[ext_resource] referenced non-existent resource`"
-    You almost certainly have a **`target_event` reference cycle** (event A's
-    choice targets B, B's targets back to A, possibly through a dispatcher hub).
-    `target_event` is an eager object reference, so Godot serializes it as a hard
-    `ext_resource`/`SubResource` pointer — and a cyclic chain of those **cannot
-    be loaded from disk**, even though the in-memory graph is legal (which is why
-    `validate()` and a smoke test pass). Replace the loop-back edge with a
-    `continue_to_pool` choice (a bool — no serialized reference) and gate
-    eligibility with `pool_conditions`. A current build's `validate()` now
-    **reports the cycle as an error** naming the loop; and
-    `JourneyLoadCheck.check()` catches it via a real disk round-trip. See
-    [Routing → `target_event` cycles](../concepts/routing.md#target_event-is-an-eager-object-reference-never-form-a-cycle)
-    and [Validation → round-trip from disk](../guides/validation.md#validate-is-not-enough-on-its-own-round-trip-from-disk).
+??? question "`journey_error: target_event_id '…' did not resolve to an indexed event` (a choice goes nowhere)"
+    The choice's `target_event_id` (or a `start_event_id` / boundary `*_event_id`)
+    has **no event behind it** — a typo, or an event that isn't under
+    `config.events_dir`, or one you deleted/renamed. Routing is by id, resolved
+    against the event index built from `events_dir`; an id with no match dead-ends.
+    Fix the id, or make sure the target event's `.tres` lives under `events_dir`
+    (which is scanned recursively). Catch these before running:
+    [`validate()`](../guides/validation.md#the-unresolved-id-error) reports every
+    unresolved id as an error, and `JourneyLoadCheck.check()` confirms it from a
+    fresh disk load. See
+    [Routing → routing is by id](../concepts/routing.md#routing-is-by-id-every-event-is-independently-loadable).
+
+??? question "A pool event is never drawn (or a deterministic event gets pulled at random)"
+    Pool draws are scoped by the per-event **`pool_eligible`** flag, not by which
+    folder the event sits in. An event that should appear in random pulls must have
+    `pool_eligible = true` (plus matching `event_tags` / `pool_conditions`); a
+    deterministic-only event must leave it `false` so it's never drawn — even
+    though it shares the index for routing resolution.
 
 ## State
 
@@ -106,11 +111,12 @@ Common issues, what causes them, and where to read more.
 ## Exporting
 
 ??? question "The pool is empty in my exported / Web build but fine in the editor"
-    Confirm `config.event_pool_dir` points at a folder that actually contains the
-    pool `.tres` files and that they were included in the export. The scan is
-    export-safe (it reads the PCK's virtual filesystem and `.remap` pointers), so
-    a genuine empty-in-export almost always means the directory path or export
-    filter is wrong. See [Exporting](../guides/exporting.md).
+    Confirm `config.events_dir` points at a folder that actually contains the
+    event `.tres` files (with `pool_eligible = true` on the pool ones) and that
+    they were included in the export. The scan is export-safe (it reads the PCK's
+    virtual filesystem and `.remap` pointers), so a genuine empty-in-export almost
+    always means the directory path or export filter is wrong. See
+    [Exporting](../guides/exporting.md).
 
 ??? question "The WASM build won't load from a file:// URL"
     Browsers block WASM over `file://`. Serve the build over HTTP

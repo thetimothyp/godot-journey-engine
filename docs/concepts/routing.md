@@ -15,12 +15,12 @@ The engine evaluates these in order and takes the **first** that applies:
 
 ```text
 1. Forced boundary route   (a resource transitioned to min/max with a route set)
-2. Deterministic target    (choice.target_event is non-null)
+2. Deterministic target    (choice.target_event_id is non-empty)
 3. Stochastic pool pull     (choice.continue_to_pool is true)
 4. End the journey          (none of the above)
 ```
 
-So a boundary route always wins over the choice's own `target_event`, which
+So a boundary route always wins over the choice's own `target_event_id`, which
 always wins over a pool pull. If nothing routes, the journey ends on the current
 event and `journey_ended` fires.
 
@@ -30,12 +30,12 @@ The difference is entirely in how you fill out the choice's **Routing** fields.
 
 === "Deterministic route"
 
-    Point `target_event` at a specific event. Always goes there.
+    Set `target_event_id` to a specific event's `id`. Always goes there.
 
     ```gdscript
     var choice := JourneyChoice.new()
     choice.button_text = "Help the stranger."
-    choice.target_event = evt_road_begins   # always routes here
+    choice.target_event_id = &"evt_road_begins"   # always routes here
     # continue_to_pool stays false; pool_tags_filter unused
     ```
 
@@ -44,8 +44,8 @@ The difference is entirely in how you fill out the choice's **Routing** fields.
 
 === "Stochastic pool pull"
 
-    Leave `target_event` null and set `continue_to_pool = true`. Optionally scope
-    the pull with tags.
+    Leave `target_event_id` empty and set `continue_to_pool = true`. Optionally
+    scope the pull with tags.
 
     ```gdscript
     var choice := JourneyChoice.new()
@@ -57,57 +57,41 @@ The difference is entirely in how you fill out the choice's **Routing** fields.
     *Use for:* the variable middle of a run — random encounters drawn from a
     [tagged pool](../guides/stochastic-pool.md).
 
-!!! note "`target_event` beats `continue_to_pool`"
-    If a choice has **both** a `target_event` and `continue_to_pool = true`, the
-    deterministic target wins and the pool is never consulted. The pool branch
-    only runs when `target_event` is null.
+!!! note "`target_event_id` beats `continue_to_pool`"
+    If a choice has **both** a non-empty `target_event_id` and
+    `continue_to_pool = true`, the deterministic target wins and the pool is never
+    consulted. The pool branch only runs when `target_event_id` is empty.
 
-### `target_event` is an eager object reference — never form a cycle
+### Routing is by id — every event is independently loadable
 
-`choice.target_event` is a **typed `JourneyEvent` reference**, so Godot
-serializes it as a hard pointer to that resource — an `ext_resource` (when the
-target is its own `.tres` file) or an inline `SubResource` (when it's embedded).
-That's great for static integrity, but it has one hard constraint:
+All routes are **`StringName` ids**, not object references: `target_event_id`,
+`config.start_event_id`, and the boundary `*_event_id` fields are resolved at
+runtime against the **event index** (every event under `config.events_dir`,
+keyed by `id`). Because no event holds a hard pointer to another, each event
+`.tres` loads independently, and routing graphs — including loops — are always
+serializable. (Game-id routing is the norm for narrative engines for exactly
+this reason; it's also why saves and the pool already resolve by id.)
 
-!!! danger "A `target_event` *cycle* cannot be saved or loaded"
-    Godot's text resource format **cannot represent a cyclic chain of resource
-    references.** If event A's choice targets B, B's targets C, and C's targets
-    back to A, the file(s) serialize but **fail to load from disk** — a
-    single-file `SubResource` cycle fails to parse outright (`referenced
-    non-existent resource`), and even a cross-file `ext_resource` cycle is
-    load-order fragile. UIDs do not help.
+!!! tip "Loops are fine"
+    A day-loop or return-to-hub is a normal, supported shape: an event can route
+    back to an earlier one by id, or loop through the pool with `continue_to_pool`
+    (a plain bool). There is no serialization hazard to avoid. Use
+    `continue_to_pool` + `pool_conditions` when you want the loop-back to draw a
+    *varied* next event, and a direct `target_event_id` when you want a *fixed* one.
 
-    The trap is that the in-memory object graph is *perfectly legal* — the
-    cycle only bites when content is read back from disk. So a routing loop
-    built entirely from `target_event` edges can pass in-memory `validate()`
-    and a runtime smoke test, yet be **unloadable** in a shipped build.
-
-**Loop back with `continue_to_pool` instead.** A day-loop or return-to-hub is a
-genuine cycle in your *story*, but it does **not** need to be a cycle in the
-*reference graph*. `continue_to_pool` is a plain `bool` — it carries no
-serialized reference — so a loop-back edge expressed that way is cycle-free on
-disk:
-
-```gdscript
-# Day loop WITHOUT a serialization cycle: the "another day" choice loops back
-# into the pool rather than hard-referencing the dispatcher event.
-var another_day := JourneyChoice.new()
-another_day.button_text = "Begin another day."
-another_day.continue_to_pool = true            # no target_event => no serialized edge
-another_day.pool_tags_filter = ["day_event"]
-```
-
-Condition- or day-gated routing belongs on the **pool side** too: gate which
-events are eligible with each event's `pool_conditions` (and per-choice
-`visibility`), not by hard-wiring a `target_event` ring. The validator now
-**detects `target_event` cycles and reports them as errors** naming the loop;
-see [Validation](../guides/validation.md).
+!!! warning "A dangling id dead-ends"
+    The one way id routing breaks is a `target_event_id` (or start/boundary id)
+    with **no event behind it** — a typo, or an event you deleted/renamed. At
+    runtime the engine emits `journey_error("… did not resolve to an indexed
+    event")` and does not advance. Catch these before running:
+    [`validate()`](../guides/validation.md) reports every unresolved id as an
+    error, and `JourneyLoadCheck` confirms it from a fresh disk load.
 
 ## Forced boundary routes
 
-Each `JourneyResourceDef` can name a `bottom_out_event` (fired at `min_value`)
-and a `top_out_event` (fired at `max_value`). These **override** the choice's own
-routing — the classic use is "sanity reaches 0 → forced madness event".
+Each `JourneyResourceDef` can name a `bottom_out_event_id` (fired at `min_value`)
+and a `top_out_event_id` (fired at `max_value`). These **override** the choice's
+own routing — the classic use is "sanity reaches 0 → forced madness event".
 
 !!! warning "Boundary routes fire on *transition*, not presence"
     A boundary route fires only when this batch of consequences **moves** the
@@ -135,8 +119,8 @@ boundary-route priority.
 
 ## Ending a journey
 
-A journey ends when a processed choice has no forced route, no `target_event`,
-and `continue_to_pool` is false. The engine emits `journey_ended(ending_event)`
+A journey ends when a processed choice has no forced route, an empty
+`target_event_id`, and `continue_to_pool` false. The engine emits `journey_ended(ending_event)`
 where `ending_event` is the event the terminal choice belonged to — your UI uses
 it to show an ending screen.
 
@@ -146,6 +130,10 @@ it to show an ending screen.
   candidate emits `journey_error("empty pool for tags: …")` and does **not**
   advance — the journey simply stays put rather than crashing. See
   [Stochastic Pool](../guides/stochastic-pool.md#empty-pools).
+- **Unresolved id.** A `target_event_id` / `start_event_id` / boundary id with no
+  matching event in the index emits `journey_error("… did not resolve to an
+  indexed event")` and does **not** advance. [`validate()`](../guides/validation.md)
+  catches these before you run.
 - **Null route.** A route resolving to a null event emits
   `journey_error("route resolved to null")`.
 

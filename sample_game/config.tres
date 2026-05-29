@@ -2,8 +2,6 @@
 
 [ext_resource type="Script" uid="uid://dj8boxtg50w8n" path="res://addons/journey_engine_core/journey_resource_def.gd" id="1_resdef"]
 [ext_resource type="Script" uid="uid://bhgg6f367cgd2" path="res://addons/journey_engine_core/journey_config.gd" id="2_config"]
-[ext_resource type="Resource" uid="uid://sg0evstartdet01" path="res://sample_game/events/evt_start.tres" id="3_start"]
-[ext_resource type="Resource" uid="uid://sg0evmadness001" path="res://sample_game/events/evt_madness.tres" id="4_madness"]
 
 [sub_resource type="Resource" id="ResourceDef_gold"]
 script = ExtResource("1_resdef")
@@ -19,7 +17,7 @@ key = "sanity"
 default_value = 50.0
 min_value = 0.0
 max_value = 100.0
-bottom_out_event = ExtResource("4_madness")
+bottom_out_event_id = &"evt_madness"
 metadata/_custom_type_script = "uid://dj8boxtg50w8n"
 
 [sub_resource type="Resource" id="ResourceDef_rations"]
@@ -44,8 +42,8 @@ resource_defs = Array[ExtResource("1_resdef")]([SubResource("ResourceDef_gold"),
 initial_flags = {
 "started": true
 }
-start_event = ExtResource("3_start")
-event_pool_dir = "res://sample_game/pool/"
+start_event_id = &"evt_start"
+events_dir = "res://sample_game/"
 save_encryption_key = ""
 save_version = 1
 metadata/_custom_type_script = "uid://bhgg6f367cgd2"

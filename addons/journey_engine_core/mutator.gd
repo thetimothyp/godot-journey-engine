@@ -42,8 +42,8 @@ static func apply_consequence(con: JourneyConsequence, bb: Blackboard, config: J
 ## configured. Per §4.4 / §5.1:
 ##  - Apply EVERY consequence first (batch completes before any forced route).
 ##  - Scan resource_defs in DEFINITION ORDER for clamped *result* == min_value
-##    with bottom_out_event set, or == max_value with top_out_event set, AND
-##    where the pre-batch value was OFF the boundary.
+##    with bottom_out_event_id set, or == max_value with top_out_event_id set,
+##    AND where the pre-batch value was OFF the boundary.
 ##  - Return the triggered defs in definition order.
 ##
 ## TRANSITION, not presence (the §4.4 line 257 "if clamped RESULT == min_value"
@@ -70,7 +70,7 @@ static func apply_batch(consequences: Array[JourneyConsequence], bb: Blackboard,
 	# the dict entry is wasted.
 	var pre: Dictionary = {}
 	for def in config.resource_defs:
-		if def.bottom_out_event != null or def.top_out_event != null:
+		if String(def.bottom_out_event_id) != "" or String(def.top_out_event_id) != "":
 			pre[def.key] = bb.resources.get(def.key, 0.0)
 
 	for con in consequences:
@@ -83,9 +83,9 @@ static func apply_batch(consequences: Array[JourneyConsequence], bb: Blackboard,
 		var v: float = bb.resources[def.key]
 		var pre_v: float = pre.get(def.key, v)
 		# Transition guard (pre_v != boundary) — see docstring above.
-		if v == def.min_value and def.bottom_out_event != null and pre_v != def.min_value:
+		if v == def.min_value and String(def.bottom_out_event_id) != "" and pre_v != def.min_value:
 			triggered.append(def)
-		elif v == def.max_value and def.top_out_event != null and pre_v != def.max_value:
+		elif v == def.max_value and String(def.top_out_event_id) != "" and pre_v != def.max_value:
 			triggered.append(def)
 	return triggered
 

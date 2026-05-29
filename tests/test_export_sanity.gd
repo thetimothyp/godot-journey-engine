@@ -1,64 +1,68 @@
 extends Node
 
-## Step-8 headless sanity check for the pool scan. Builds the JourneyPoolIndex
-## against sample_game/pool/ in-editor and asserts the expected event count +
-## per-id presence. Run before the Web/WASM export so a busted scan is caught
-## locally rather than after a 30-second export round trip.
+## Headless sanity check for the event-index scan. Builds the JourneyEventIndex
+## against the sample game's events_dir in-editor and asserts the expected event
+## count, per-id resolution, pool-eligibility split, and tag indexing. Run before
+## the Web/WASM export so a busted scan is caught locally rather than after a
+## 30-second export round trip.
 ##
-## This does NOT prove the export itself works — that's the browser
-## checklist. What it DOES prove is that JourneyPoolIndex.build() over the
-## sample_game/pool path:
-##   - opens the dir (would push_error otherwise)
-##   - finds every .tres (count matches)
-##   - assigns ids without collision (every expected id resolves)
-##   - tags index correctly (the "road" bucket should contain all 5)
+## What it proves about JourneyEventIndex.build() over res://sample_game/:
+##   - opens the dir and finds every event .tres (count matches), skipping the
+##     config / stage book / non-event resources in the tree
+##   - assigns ids without collision (every expected id resolves via find_by_id)
+##   - scopes pool draws by pool_eligible (exactly the 5 pool events), not folder
+##   - tags index correctly (the "road" bucket holds all 5 pool events)
 ##
-## A future regression that breaks the in-editor scan would fail HERE first;
-## a regression that breaks ONLY the PCK scan would fail in the browser.
-## Together they fence both code paths.
-##
-## Same execution shape as tests/test_save_load.gd: _ready() runs the checks
-## synchronously, _finish() prints + quits. No await dance — keep it boring
-## and identical to the other test scenes so the editor behaves the same way
-## (F6 with this tab focused; F5 will run the main scene instead).
+## Then a disk round-trip (JourneyLoadCheck) proves the WHOLE config loads from a
+## FRESH disk context with every routing id resolving — the "would this ship"
+## gate. Same execution shape as the other test scenes: _ready() runs checks,
+## _finish() prints (no auto-quit so the editor drains stdout).
 
-const POOL_DIR := "res://sample_game/pool/"
 const SAMPLE_CONFIG := "res://sample_game/config.tres"
+## The unified events_dir: recursively covers sample_game/events/ + pool/.
+const EVENTS_DIR := "res://sample_game/"
 
-## NOTE: bump this when you add/remove a sample-game pool event. Five pool
-## events ship with the sample: bandit, merchant, ally, camp, inn.
-const EXPECTED_POOL_COUNT := 5
+## NOTE: bump these when sample content changes. 7 deterministic + 5 pool = 12.
+const EXPECTED_EVENT_COUNT := 12
+const EXPECTED_POOL_ELIGIBLE := 5
 
 const EXPECTED_IDS := [
-	"evt_road_bandit",
-	"evt_road_merchant",
-	"evt_road_ally",
-	"evt_road_camp",
-	"evt_road_inn",
+	"evt_start", "evt_road_begins", "evt_madness", "evt_ending_router",
+	"evt_end_heroic", "evt_end_tragic", "evt_end_pragmatic",
+	"evt_road_bandit", "evt_road_merchant", "evt_road_ally", "evt_road_camp", "evt_road_inn",
 ]
 
 var _failures: int = 0
 
 func _ready() -> void:
-	print("[test_export_sanity] scanning %s" % POOL_DIR)
-	var index := JourneyPoolIndex.new()
-	index.build(POOL_DIR)
+	print("[test_export_sanity] scanning %s" % EVENTS_DIR)
+	var index := JourneyEventIndex.new()
+	index.build(EVENTS_DIR)
 
-	_expect(index.is_built(), "pool index built (scan opened dir and completed)")
-	_expect(index.all_events.size() == EXPECTED_POOL_COUNT,
-		"expected %d events, found %d" % [EXPECTED_POOL_COUNT, index.all_events.size()])
+	_expect(index.is_built(), "event index built (scan opened dir and completed)")
+	_expect(index.all_events.size() == EXPECTED_EVENT_COUNT,
+		"expected %d events, found %d" % [EXPECTED_EVENT_COUNT, index.all_events.size()])
+	_expect(index.build_problems.is_empty(),
+		"no build problems (empty/duplicate ids): %s" % str(index.build_problems))
 
 	for id_str in EXPECTED_IDS:
 		var ev: JourneyEvent = index.find_by_id(id_str)
 		_expect(ev != null, "id '%s' resolves via find_by_id" % id_str)
 
+	# Pool-eligibility is now a per-event flag, not a folder. Exactly the 5
+	# road events should be pool-eligible; the 7 deterministic events must not be.
+	var eligible := 0
+	for e in index.all_events:
+		if e.pool_eligible:
+			eligible += 1
+	_expect(eligible == EXPECTED_POOL_ELIGIBLE,
+		"%d events pool_eligible (expected %d)" % [eligible, EXPECTED_POOL_ELIGIBLE])
+
 	var road_bucket: Array = index.by_tag.get("road", [])
-	_expect(road_bucket.size() == EXPECTED_POOL_COUNT,
-		"'road' tag bucket has %d entries (expected %d)" % [road_bucket.size(), EXPECTED_POOL_COUNT])
+	_expect(road_bucket.size() == EXPECTED_POOL_ELIGIBLE,
+		"'road' tag bucket has %d entries (expected %d)" % [road_bucket.size(), EXPECTED_POOL_ELIGIBLE])
 
 	# Deterministic ordering check (§1.3): all_events sorted by String(id).
-	# Cross-platform reproducibility guarantee — a regression dropping the
-	# sort would break save/load determinism across machines invisibly.
 	var ordered := true
 	for i in range(index.all_events.size() - 1):
 		if String(index.all_events[i].id) > String(index.all_events[i + 1].id):
@@ -66,12 +70,10 @@ func _ready() -> void:
 			break
 	_expect(ordered, "all_events sorted by String(id) for cross-platform determinism")
 
-	# Load-time reality gate (the "would this ship" check). The pool scan above
-	# proves the pool dir indexes; this proves the WHOLE sample config — start
-	# event, boundary routes, and every reachable .tres — loads non-null from a
-	# FRESH disk context (no cache reuse). An unserializable target_event cycle
-	# would fail here, which is the gap that let unloadable content pass the
-	# in-memory validate + smoke test. See tests/journey_load_check.gd.
+	# Load-time reality gate (the "would this ship" check). Proves the WHOLE
+	# config loads from a FRESH disk context (no cache reuse) and every routing id
+	# — start, boundary routes, every choice target — resolves to a loaded event.
+	# See tests/journey_load_check.gd.
 	print("[test_export_sanity] disk round-trip of %s" % SAMPLE_CONFIG)
 	var problems: Array[String] = JourneyLoadCheck.check(SAMPLE_CONFIG)
 	_expect(problems.is_empty(),
@@ -84,10 +86,6 @@ func _finish() -> void:
 		print("[test_export_sanity] PASS (all checks)")
 	else:
 		print("[test_export_sanity] FAIL: %d check(s) failed" % _failures)
-	# Intentionally do NOT call get_tree().quit() — the child process
-	# terminates before the editor's debugger drains stdout, so an auto-quit
-	# eats the prints in the Output panel. Match the working pattern in
-	# test_blackboard/test_eval_mutate: user closes the window when done.
 
 func _expect(cond: bool, msg: String) -> void:
 	if cond:

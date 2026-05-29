@@ -27,6 +27,7 @@ metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 script = ExtResource("1_event")
 narrative_text = "A storm rolls in."
 id = &"evt_road_storm"
+pool_eligible = true
 event_tags = Array[String](["road", "danger"])
 weight = 50
 pool_conditions = SubResource("Group_rainy")

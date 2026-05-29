@@ -45,6 +45,9 @@ extends Control
 
 @onready var _ui: VBoxContainer = $UI
 
+# Events built in code, collected so we can hand them to the runtime to index.
+var _events: Array[JourneyEvent] = []
+
 func _ready() -> void:
     # 1. Subscribe to the engine's signals (the only way the engine talks back). (1)
     JourneyRuntime.event_changed.connect(_on_event_changed)
@@ -55,8 +58,10 @@ func _ready() -> void:
     # 2. Build the journey content (normally authored as .tres in the inspector).
     var config := _build_config()
 
-    # 3. Start. The fixed seed makes random pulls reproducible across runs. (2)
-    JourneyRuntime.start_new_journey(config, 12345)
+    # 3. Start. Routing is by id against an event index; here we pass our events
+    #    in memory (a real game points config.events_dir at a folder of .tres
+    #    instead). The fixed seed makes random pulls reproducible across runs. (2)
+    JourneyRuntime.start_new_journey(config, 12345, _events)
 
 # --- Content (built in code here; author as .tres resources in real projects) ---
 
@@ -80,7 +85,7 @@ func _build_config() -> JourneyConfig:
     road.narrative_text = "The crossroads is behind you. The road runs on."
     var rest := JourneyChoice.new()
     rest.button_text = "Rest here. (ends the journey)"
-    # No target_event, no continue_to_pool, no consequences => terminal choice.
+    # Empty target_event_id, no continue_to_pool, no consequences => terminal choice.
     road.choices = [rest]
 
     # The opening event with two choices, both routing to `road`.
@@ -91,18 +96,21 @@ func _build_config() -> JourneyConfig:
     var take := JourneyChoice.new()
     take.button_text = "Take the gold. (+50 gold)"
     take.consequences = [_add("gold", 50.0)]
-    take.target_event = road                      # deterministic route
+    take.target_event_id = &"evt_road"            # deterministic route, by id
 
     var leave := JourneyChoice.new()
     leave.button_text = "Leave it. (+5 sanity)"
     leave.consequences = [_add("sanity", 5.0)]
-    leave.target_event = road
+    leave.target_event_id = &"evt_road"
 
     start.choices = [take, leave]
 
+    # Collect the events so start_new_journey can index them by id.
+    _events = [start, road]
+
     var config := JourneyConfig.new()
     config.resource_defs = [gold, sanity]
-    config.start_event = start
+    config.start_event_id = &"evt_start"
     return config
 
 func _add(key: String, amount: float) -> JourneyConsequence:

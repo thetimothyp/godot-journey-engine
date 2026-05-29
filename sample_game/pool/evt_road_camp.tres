@@ -43,6 +43,7 @@ metadata/_custom_type_script = "uid://bsf1m3b2h1ukg"
 script = ExtResource("1_event")
 narrative_text = "A clearing opens beside the road. Good ground for a fire."
 id = &"evt_road_camp"
+pool_eligible = true
 event_tags = Array[String](["road"])
 repeatable = true
 choices = Array[ExtResource("2_choice")]([SubResource("Choice_camp_rest"), SubResource("Choice_camp_push")])

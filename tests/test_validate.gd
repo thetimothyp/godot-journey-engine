@@ -1,30 +1,32 @@
 extends Node
 
-## Step-7 programmatic test for JourneyValidator + JourneyRuntime.validate.
+## Programmatic test for JourneyValidator + JourneyRuntime.validate under
+## id-based routing.
 ##
-## Covers (matching the manual-test checklist in the Step-7 prompt):
-##   1. CLEAN: good test_config.tres returns no errors
-##   2. NULL START: missing start_event → ERROR
+## Covers:
+##   1. CLEAN: good test_config.tres (+ disk-built index) returns no errors
+##   2. EMPTY START: start_event_id == "" → ERROR
 ##   3. BAD BOUNDS: min>max AND default-out-of-range → two ERRORs
 ##   4. TYPO RESOURCE KEY: condition + consequence on undeclared resource →
-##      WARNINGs; HAS_FLAG reference does NOT warn
-##   5. DUPLICATE / EMPTY IDs: two events sharing an id → ERROR; empty id → ERROR
-##   6. DEAD CHOICE: null target + no pool + no consequences → WARNING; adding
+##      WARNINGs; HAS_FLAG / SET_FLAG references do NOT warn
+##   5. DUPLICATE / EMPTY IDs: surfaced from the index build → ERRORs
+##   6. DEAD CHOICE: no target id + no pool + no consequences → WARNING; adding
 ##      a consequence clears it
 ##   7. STABLE ORDER: two runs on the same input → identical message lists
+##   8. RUNTIME FLATTENING: JourneyRuntime.validate → [ERROR]/[WARNING] strings
+##   9. UNKNOWN IDS: start / target / boundary id that doesn't resolve → ERROR
+##  10. CONTINUE_TO_POOL LOOP: an id-resolving loop-back via the pool → clean
+##  11. DISK ROUND-TRIP: JourneyLoadCheck over the migrated test content → clean
 ##
-## Constructs configs/events programmatically — no per-case .tres files to
-## maintain. The CLEAN case loads the real test_config.tres so we catch any
-## drift between the authored test fixture and the validator's view.
+## The CLEAN case loads the real test_config.tres and builds the index from the
+## real tests/journey/ tree, so drift between fixture and validator is caught.
 
 const TEST_CONFIG_PATH := "res://tests/test_config.tres"
+const TEST_EVENTS_DIR := "res://tests/journey/"
 
 var _failures: int = 0
 
 func _ready() -> void:
-	# Early marker so a silent boot-and-exit is easy to spot — if you see
-	# this line in the Output panel but no checks below, _ready aborted
-	# somewhere (likely the config load).
 	print("[test_validate] starting…")
 	var clean_config: JourneyConfig = load(TEST_CONFIG_PATH)
 	if clean_config == null:
@@ -33,16 +35,16 @@ func _ready() -> void:
 		return
 
 	_test_clean(clean_config)
-	_test_null_start(clean_config)
+	_test_empty_start(clean_config)
 	_test_bad_bounds(clean_config)
 	_test_typo_resource_key(clean_config)
 	_test_duplicate_and_empty_ids(clean_config)
 	_test_dead_choice(clean_config)
 	_test_stable_order(clean_config)
 	_test_runtime_flattening(clean_config)
-	_test_target_event_cycle(clean_config)
-	_test_acyclic_pool_loop_validates_clean(clean_config)
-	_test_disk_round_trip_sample()
+	_test_unknown_ids(clean_config)
+	_test_pool_loop_validates_clean(clean_config)
+	_test_disk_round_trip_tests()
 	_finish()
 
 func _finish() -> void:
@@ -50,11 +52,6 @@ func _finish() -> void:
 		print("[test_validate] PASS (all checks)")
 	else:
 		print("[test_validate] FAIL: %d check(s) failed" % _failures)
-	# Intentionally do NOT call get_tree().quit() — even with a few
-	# process_frame yields, the child process terminates before the editor's
-	# debugger drains stdout, so prints get eaten. Match the
-	# test_blackboard/test_eval_mutate pattern: user closes the window when
-	# they're done reading. (Step-8 discovery applied to all three tests.)
 
 func _expect(cond: bool, msg: String) -> void:
 	if cond:
@@ -67,17 +64,19 @@ func _expect(cond: bool, msg: String) -> void:
 
 func _test_clean(config: JourneyConfig) -> void:
 	print("[1] CLEAN config produces no errors")
-	var msgs: Array = JourneyValidator.validate(config, null)
+	var index := JourneyEventIndex.new()
+	index.build(TEST_EVENTS_DIR)
+	var msgs: Array = JourneyValidator.validate(config, index)
 	var errs: Array = JourneyValidator.errors_only(msgs)
 	_expect(errs.is_empty(), "no errors on clean config (got %d: %s)" % [errs.size(), str(errs)])
 
-func _test_null_start(config: JourneyConfig) -> void:
-	print("[2] NULL start_event → ERROR")
+func _test_empty_start(config: JourneyConfig) -> void:
+	print("[2] EMPTY start_event_id → ERROR")
 	var c: JourneyConfig = _shallow_copy(config)
-	c.start_event = null
-	var msgs: Array = JourneyValidator.validate(c, null)
-	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "start_event"),
-		"error message mentions start_event (got: %s)" % _stringify(msgs))
+	c.start_event_id = &""
+	var msgs: Array = JourneyValidator.validate(c, _index([]))
+	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "start_event_id is empty"),
+		"error message names empty start_event_id (got: %s)" % _stringify(msgs))
 
 func _test_bad_bounds(config: JourneyConfig) -> void:
 	print("[3] BAD BOUNDS → two distinct ERRORs")
@@ -95,7 +94,7 @@ func _test_bad_bounds(config: JourneyConfig) -> void:
 	c.resource_defs = c.resource_defs.duplicate()
 	c.resource_defs.append(bad_minmax)
 	c.resource_defs.append(bad_default)
-	var msgs: Array = JourneyValidator.validate(c, null)
+	var msgs: Array = JourneyValidator.validate(c, _index([]))
 	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "bad_minmax"),
 		"min>max error names 'bad_minmax'")
 	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "bad_default"),
@@ -103,16 +102,13 @@ func _test_bad_bounds(config: JourneyConfig) -> void:
 
 func _test_typo_resource_key(config: JourneyConfig) -> void:
 	print("[4] TYPO'D resource key warns; flag key does NOT warn")
-	# Construct a tiny config with a single event whose visibility references
-	# resource "goldd" (typo), whose consequence touches "manna" (undeclared),
-	# and whose visibility also has a HAS_FLAG check that must NOT warn.
 	var c := JourneyConfig.new()
 	c.resource_defs = config.resource_defs  # 'gold' / 'sanity' / 'rations' declared
+	c.start_event_id = &"evt_typo_test"
 	var ev := JourneyEvent.new()
 	ev.id = &"evt_typo_test"
 	var choice := JourneyChoice.new()
 	choice.button_text = "Go"
-	# visibility: HAS_FLAG any_flag AND gold typo check
 	var vis_group := JourneyConditionGroup.new()
 	var flag_cond := JourneyCondition.new()
 	flag_cond.op = JourneyCondition.Op.HAS_FLAG
@@ -123,21 +119,18 @@ func _test_typo_resource_key(config: JourneyConfig) -> void:
 	typo_cond.value = 1.0
 	vis_group.conditions = [flag_cond, typo_cond]
 	choice.visibility = vis_group
-	# consequence: ADD to undeclared "manna"
 	var bad_con := JourneyConsequence.new()
 	bad_con.operation = JourneyConsequence.Operation.ADD
 	bad_con.key = "manna"
 	bad_con.value = 5.0
-	# consequence: SET_FLAG on undeclared 'whatever' — must NOT warn
 	var flag_con := JourneyConsequence.new()
 	flag_con.operation = JourneyConsequence.Operation.SET_FLAG
 	flag_con.key = "any_other_flag"
 	flag_con.flag_value = true
 	choice.consequences = [bad_con, flag_con]
 	ev.choices = [choice]
-	c.start_event = ev
 
-	var msgs: Array = JourneyValidator.validate(c, null)
+	var msgs: Array = JourneyValidator.validate(c, _index([ev]))
 	_expect(_has_message(msgs, JourneyValidator.SEVERITY_WARNING, "goldd"),
 		"typo'd 'goldd' produces WARNING")
 	_expect(_has_message(msgs, JourneyValidator.SEVERITY_WARNING, "manna"),
@@ -148,34 +141,21 @@ func _test_typo_resource_key(config: JourneyConfig) -> void:
 		"SET_FLAG 'any_other_flag' does NOT produce a warning")
 
 func _test_duplicate_and_empty_ids(config: JourneyConfig) -> void:
-	print("[5] DUPLICATE and EMPTY ids → ERRORs")
-	var c := JourneyConfig.new()
-	c.resource_defs = config.resource_defs
-	# start_event has duplicate id; its only choice leads to another event
-	# with the same id; the resource_defs bottom_out points at a third event
-	# with empty id.
+	print("[5] DUPLICATE and EMPTY ids → ERRORs (surfaced from index build)")
+	# Two events sharing an id + one empty-id event. The index records both as
+	# build problems; the validator surfaces them.
 	var dupe1 := JourneyEvent.new()
 	dupe1.id = &"evt_dupe"
 	var dupe2 := JourneyEvent.new()
 	dupe2.id = &"evt_dupe"
 	var empty_id := JourneyEvent.new()
 	empty_id.id = &""
-	var hop_choice := JourneyChoice.new()
-	hop_choice.button_text = "Hop"
-	hop_choice.target_event = dupe2
-	dupe1.choices = [hop_choice]
-	c.start_event = dupe1
-	# Attach empty-id event via a resource_def boundary so the collector sees it.
-	var rd := JourneyResourceDef.new()
-	rd.key = "boundary"
-	rd.min_value = 0.0
-	rd.max_value = 10.0
-	rd.default_value = 5.0
-	rd.bottom_out_event = empty_id
-	c.resource_defs = c.resource_defs.duplicate()
-	c.resource_defs.append(rd)
 
-	var msgs: Array = JourneyValidator.validate(c, null)
+	var c := JourneyConfig.new()
+	c.resource_defs = config.resource_defs
+	c.start_event_id = &"evt_dupe"
+	var events: Array[JourneyEvent] = [dupe1, dupe2, empty_id]
+	var msgs: Array = JourneyValidator.validate(c, _index(events))
 	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "evt_dupe"),
 		"duplicate-id error names 'evt_dupe'")
 	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "empty id"),
@@ -185,41 +165,41 @@ func _test_dead_choice(config: JourneyConfig) -> void:
 	print("[6] DEAD choice warns; adding a consequence clears the warning")
 	var c := JourneyConfig.new()
 	c.resource_defs = config.resource_defs
+	c.start_event_id = &"evt_dead"
 	var ev := JourneyEvent.new()
 	ev.id = &"evt_dead"
 	var dead := JourneyChoice.new()
 	dead.button_text = "Dead end"
-	# null target + continue_to_pool default false + no consequences
+	# no target_event_id + continue_to_pool default false + no consequences
 	ev.choices = [dead]
-	c.start_event = ev
 
-	var msgs_before: Array = JourneyValidator.validate(c, null)
+	var msgs_before: Array = JourneyValidator.validate(c, _index([ev]))
 	_expect(_has_message(msgs_before, JourneyValidator.SEVERITY_WARNING, "dead/unfinished"),
 		"dead-choice WARNING fires before consequence")
 
-	# Add a consequence; warning should disappear.
 	var con := JourneyConsequence.new()
 	con.operation = JourneyConsequence.Operation.SET_FLAG
 	con.key = "journey_complete"
 	con.flag_value = true
 	dead.consequences = [con]
-	var msgs_after: Array = JourneyValidator.validate(c, null)
+	var msgs_after: Array = JourneyValidator.validate(c, _index([ev]))
 	_expect(not _has_message(msgs_after, JourneyValidator.SEVERITY_WARNING, "dead/unfinished"),
 		"dead-choice WARNING clears after consequence added")
 
 func _test_stable_order(config: JourneyConfig) -> void:
 	print("[7] STABLE ordering — two runs produce identical message lists")
 	var c: JourneyConfig = _shallow_copy(config)
-	c.start_event = null  # produce at least one error
-	var run1: Array = JourneyValidator.validate(c, null)
-	var run2: Array = JourneyValidator.validate(c, null)
+	c.start_event_id = &""  # produce at least one error
+	var run1: Array = JourneyValidator.validate(c, _index([]))
+	var run2: Array = JourneyValidator.validate(c, _index([]))
 	_expect(_stringify(run1) == _stringify(run2),
 		"two runs produce identical output (n=%d)" % run1.size())
 
 func _test_runtime_flattening(config: JourneyConfig) -> void:
 	print("[8] JourneyRuntime.validate flattens to [ERROR]/[WARNING]-prefixed strings")
 	var c: JourneyConfig = _shallow_copy(config)
-	c.start_event = null
+	c.start_event_id = &""
+	c.events_dir = ""  # no index built → config-level checks still fire start_event_id
 	var msgs: Array[String] = JourneyRuntime.validate(c)
 	var has_error_prefix := false
 	for m in msgs:
@@ -228,88 +208,92 @@ func _test_runtime_flattening(config: JourneyConfig) -> void:
 			break
 	_expect(has_error_prefix, "at least one [ERROR]-prefixed string (got: %s)" % str(msgs))
 
-func _test_target_event_cycle(config: JourneyConfig) -> void:
-	print("[9] TARGET_EVENT CYCLE → ERROR naming the cycle")
-	# Three-node loop mirroring the failing game's shape:
-	#   response → dispatcher → event → response
+func _test_unknown_ids(config: JourneyConfig) -> void:
+	print("[9] UNKNOWN start/target/boundary ids → ERRORs naming the dangling id")
+	# evt_a (start, resolves) routes to evt_missing (does not); a boundary route
+	# points at evt_ghost (does not).
+	var a := JourneyEvent.new()
+	a.id = &"evt_a"
+	var go := JourneyChoice.new()
+	go.button_text = "onward"
+	go.target_event_id = &"evt_missing"
+	a.choices = [go]
+
 	var c := JourneyConfig.new()
-	c.resource_defs = config.resource_defs
-	var response := JourneyEvent.new(); response.id = &"evt_response"
-	var dispatcher := JourneyEvent.new(); dispatcher.id = &"evt_day_dispatcher"
-	var event := JourneyEvent.new(); event.id = &"evt_event"
+	c.resource_defs = config.resource_defs.duplicate()
+	var rd := JourneyResourceDef.new()
+	rd.key = "boundary"
+	rd.min_value = 0.0
+	rd.max_value = 10.0
+	rd.default_value = 5.0
+	rd.bottom_out_event_id = &"evt_ghost"
+	c.resource_defs.append(rd)
+	c.start_event_id = &"evt_a"
 
-	var c_resp := JourneyChoice.new(); c_resp.button_text = "back to dispatcher"; c_resp.target_event = dispatcher
-	response.choices = [c_resp]
-	var c_disp := JourneyChoice.new(); c_disp.button_text = "to event"; c_disp.target_event = event
-	dispatcher.choices = [c_disp]
-	var c_evt := JourneyChoice.new(); c_evt.button_text = "to response"; c_evt.target_event = response
-	event.choices = [c_evt]
+	var msgs: Array = JourneyValidator.validate(c, _index([a]))
+	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "evt_missing"),
+		"dangling target_event_id 'evt_missing' is an ERROR")
+	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "evt_ghost"),
+		"dangling bottom_out_event_id 'evt_ghost' is an ERROR")
 
-	c.start_event = response
-	var msgs: Array = JourneyValidator.validate(c, null)
-	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "reference cycle"),
-		"cycle produces a SEVERITY_ERROR (got: %s)" % _stringify(msgs))
-	# The message must name a concrete arrow path through the cycle members.
-	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "evt_day_dispatcher")
-			and _has_message(msgs, JourneyValidator.SEVERITY_ERROR, "→"),
-		"cycle message names a concrete arrow path")
-	_expect(_has_message(msgs, JourneyValidator.SEVERITY_ERROR, "continue_to_pool"),
-		"cycle message gives the continue_to_pool remedy")
-
-	# Self-loop (A → A) is also a cycle and must be caught.
+	# Dangling START id, on its own.
 	var c2 := JourneyConfig.new()
 	c2.resource_defs = config.resource_defs
-	var solo := JourneyEvent.new(); solo.id = &"evt_solo"
-	var self_choice := JourneyChoice.new(); self_choice.target_event = solo
-	solo.choices = [self_choice]
-	c2.start_event = solo
-	var msgs2: Array = JourneyValidator.validate(c2, null)
-	_expect(_has_message(msgs2, JourneyValidator.SEVERITY_ERROR, "reference cycle"),
-		"self-loop A→A is detected as a cycle")
+	c2.start_event_id = &"evt_nope"
+	var msgs2: Array = JourneyValidator.validate(c2, _index([a]))
+	_expect(_has_message(msgs2, JourneyValidator.SEVERITY_ERROR, "evt_nope"),
+		"dangling start_event_id 'evt_nope' is an ERROR")
 
-func _test_acyclic_pool_loop_validates_clean(config: JourneyConfig) -> void:
-	print("[10] ACYCLIC loop-back via continue_to_pool → validator clean")
-	# A diamond that "loops" semantically but carries NO target_event cycle:
-	# start → hub; hub loops back to itself via continue_to_pool (a bool, no
-	# serialized ref). This is the cycle-free way to express a day-loop.
-	var c := JourneyConfig.new()
-	c.resource_defs = config.resource_defs
-	var start := JourneyEvent.new(); start.id = &"evt_loop_start"
-	var hub := JourneyEvent.new(); hub.id = &"evt_loop_hub"
-	var go := JourneyChoice.new(); go.button_text = "enter hub"; go.target_event = hub
+func _test_pool_loop_validates_clean(config: JourneyConfig) -> void:
+	print("[10] id-resolving loop-back via continue_to_pool → no errors")
+	# start → hub; hub loops back to the pool via continue_to_pool (a bool, no
+	# id reference). Every routing id resolves, so this is clean.
+	var start := JourneyEvent.new()
+	start.id = &"evt_loop_start"
+	var hub := JourneyEvent.new()
+	hub.id = &"evt_loop_hub"
+	var go := JourneyChoice.new()
+	go.button_text = "enter hub"
+	go.target_event_id = &"evt_loop_hub"
 	start.choices = [go]
-	var loop := JourneyChoice.new(); loop.button_text = "another day"; loop.continue_to_pool = true
-	# A consequence so it isn't also flagged as a dead choice.
+	var loop := JourneyChoice.new()
+	loop.button_text = "another day"
+	loop.continue_to_pool = true
 	var con := JourneyConsequence.new()
 	con.operation = JourneyConsequence.Operation.SET_FLAG
 	con.key = "looped"
 	con.flag_value = true
 	loop.consequences = [con]
 	hub.choices = [loop]
-	c.start_event = start
-	var errs: Array = JourneyValidator.errors_only(JourneyValidator.validate(c, null))
+
+	var c := JourneyConfig.new()
+	c.resource_defs = config.resource_defs
+	c.start_event_id = &"evt_loop_start"
+	var errs: Array = JourneyValidator.errors_only(JourneyValidator.validate(c, _index([start, hub])))
 	_expect(errs.is_empty(), "continue_to_pool loop produces NO errors (got %d: %s)" % [errs.size(), str(errs)])
 
-func _test_disk_round_trip_sample() -> void:
-	print("[11] DISK ROUND-TRIP — sample content loads cleanly from disk")
-	# The canonical "would this ship" check. sample_game/config.tres is acyclic
-	# and loops back via continue_to_pool, so a fresh-from-disk walk of
-	# start_event + boundaries + pool must come back with zero problems.
-	var problems: Array[String] = JourneyLoadCheck.check("res://sample_game/config.tres")
-	_expect(problems.is_empty(), "sample config round-trips clean (got %d: %s)" % [problems.size(), str(problems)])
+func _test_disk_round_trip_tests() -> void:
+	print("[11] DISK ROUND-TRIP — migrated test content loads cleanly from disk")
+	var problems: Array[String] = JourneyLoadCheck.check(TEST_CONFIG_PATH)
+	_expect(problems.is_empty(), "test config round-trips clean (got %d: %s)" % [problems.size(), str(problems)])
 
 # --- Utility ---
 
+## Build a JourneyEventIndex from an in-memory event list (no disk).
+func _index(events: Array[JourneyEvent]) -> JourneyEventIndex:
+	var idx := JourneyEventIndex.new()
+	idx.build_from_events(events)
+	return idx
+
 ## Shallow-copy a JourneyConfig so tests can mutate top-level fields without
-## affecting the loaded resource (Resource.duplicate(false) shares sub-objects;
-## we don't mutate those, only the resource_defs Array and start_event ref).
+## affecting the loaded resource.
 func _shallow_copy(config: JourneyConfig) -> JourneyConfig:
 	var c := JourneyConfig.new()
 	c.resource_defs = config.resource_defs.duplicate()
 	c.initial_flags = config.initial_flags.duplicate()
-	c.start_event = config.start_event
-	c.event_pool_dir = config.event_pool_dir
-	c.rebuild_pool_in_editor = config.rebuild_pool_in_editor
+	c.start_event_id = config.start_event_id
+	c.events_dir = config.events_dir
+	c.rebuild_index_in_editor = config.rebuild_index_in_editor
 	c.save_encryption_key = config.save_encryption_key
 	c.save_version = config.save_version
 	return c

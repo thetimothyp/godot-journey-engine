@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://btestrouting001"]
+
+[ext_resource type="Script" path="res://tests/test_routing.gd" id="1_routing"]
+
+[node name="test_routing" type="Node"]
+script = ExtResource("1_routing")

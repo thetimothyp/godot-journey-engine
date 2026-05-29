@@ -8,24 +8,25 @@ inside an exported build.
 ## Why exporting "just works"
 
 When Godot exports, it bakes your `.tres`/`.res` files into the PCK (or, for Web,
-into the packed data the WASM build loads). The pool index scans
-`config.event_pool_dir` using `DirAccess` over the **`res://` virtual
-filesystem**, not the OS filesystem — and that virtual filesystem is exactly what
-the PCK exposes. The scan also recognizes the `.remap` pointer files Godot
-generates when it strips resources into the export, so it resolves them back to
-the real resource.
+into the packed data the WASM build loads). The event index scans
+`config.events_dir` using `DirAccess` over the **`res://` virtual filesystem**,
+not the OS filesystem — and that virtual filesystem is exactly what the PCK
+exposes. The scan also recognizes the `.remap` pointer files Godot generates when
+it strips resources into the export, so it resolves them back to the real
+resource.
 
 The upshot: the same directory-scan code path runs identically in the editor and
 in an exported build. The bundled sample game was verified end-to-end this way,
-including a full Web/WASM browser playthrough where the pool builds correctly
+including a full Web/WASM browser playthrough where the index builds correctly
 from the baked data.
 
-!!! tip "Verify your pool before shipping"
-    Add a tiny headless check that builds a `JourneyPoolIndex` from your pool
-    directory and asserts the expected events resolve — running it before export
-    catches a misconfigured `event_pool_dir` or a stray bad `.tres` before it
-    becomes a runtime `empty pool` error. The sample's `tests/test_export_sanity`
-    scene is a working template.
+!!! tip "Verify your content before shipping"
+    Run a headless check that builds a `JourneyEventIndex` from your `events_dir`
+    and `JourneyLoadCheck.check(config_path)` to confirm every event loads and
+    every routing id resolves — before export, catching a misconfigured
+    `events_dir`, a dangling `target_event_id`, or a stray bad `.tres` before it
+    becomes a runtime error. The sample's `tests/test_export_sanity` scene is a
+    working template.
 
 ## Web / WASM
 
@@ -66,11 +67,11 @@ killed at any time.
 
 ## Pre-export checklist
 
-- [ ] `config.event_pool_dir` points at the folder your pool `.tres` files
-      actually live in.
-- [ ] Every pool event has a unique, non-empty `id`
-      ([run the validator](validation.md)).
-- [ ] A headless pool-build check passes (template:
+- [ ] `config.events_dir` points at the tree your event `.tres` files actually
+      live in (scanned recursively).
+- [ ] Every event has a unique, non-empty `id`, and every routing id resolves
+      ([run the validator](validation.md) + `JourneyLoadCheck`).
+- [ ] A headless index-build + round-trip check passes (template:
       `tests/test_export_sanity`).
 - [ ] For Web: renderer is Compatibility, and you serve the build over HTTP.
 
