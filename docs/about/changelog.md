@@ -4,7 +4,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/) conventions
 and [Semantic Versioning](https://semver.org/). The engine version is exposed at
 runtime as `JourneyRuntime.VERSION`.
 
-## Unreleased
+## 0.2.0 — 2026-05-28
 
 ### Added
 
