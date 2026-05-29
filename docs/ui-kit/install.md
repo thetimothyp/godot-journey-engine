@@ -65,4 +65,5 @@ exactly this way — open it for a working reference.
 The project's `sample_game/journey_stage_demo.tscn` instances `JourneyStageView`
 against the sample game's `config.tres` and `stage_book.tres`. It is the project's
 main scene, so **F5** runs it; the original raw Dumb-UI sample
-(`sample_game/main.tscn`) is still there and runs via **F6**.
+(`sample_game/main.tscn`) is still there — open it in the editor and press **F6**
+to run that scene directly.

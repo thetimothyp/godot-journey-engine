@@ -43,7 +43,7 @@ restaging carry the change between events, rather than a full-screen wipe. Set i
 `FADE`/`WIPE` for a harder cut.
 
 The bundled demo is `res://sample_game/journey_stage_demo.tscn` (the project's main
-scene — run with **F5**).
+scene — **F5** runs it from anywhere).
 
 ## Staging events: the stage book
 
