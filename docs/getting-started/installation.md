@@ -82,5 +82,12 @@ func _ready() -> void:
     print(JourneyRuntime.blackboard) # -> a Blackboard instance
 ```
 
-You're ready to build a journey. The [Quick Start](quick-start.md) takes you from
-here to a clickable two-event journey running in the editor.
+You're ready to build a journey.
+
+!!! tip "Two ways forward — pick your goal"
+    - **Build a game, no code.** Author your story as inspector resources and let
+      the UI Kit present it — **no programming required.** You'll also copy in the
+      [UI Kit](../ui-kit/install.md) (one folder).
+      → **[Author Your First Event](first-event.md)**
+    - **Understand the engine / integrate in code.** See the full data-flow loop
+      in ~50 lines of GDScript. → [Quick Start](quick-start.md)

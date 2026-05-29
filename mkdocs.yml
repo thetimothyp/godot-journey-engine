@@ -85,6 +85,7 @@ nav:
   - Getting Started:
       - getting-started/installation.md
       - getting-started/quick-start.md
+      - getting-started/first-event.md
   - Concepts:
       - concepts/overview.md
       - concepts/blackboard.md

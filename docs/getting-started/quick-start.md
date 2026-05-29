@@ -1,5 +1,11 @@
 # Quick Start
 
+!!! tip "Not a coder? You may want the other path"
+    This page builds the journey in **GDScript** to show the engine loop. If your
+    goal is to **build a game without writing code**, skip to
+    **[Author Your First Event](first-event.md)** — the same engine, authored
+    entirely in the inspector.
+
 This page takes you from an empty project to a **clickable two-event journey**
 running in the editor. Every snippet is copy-pasteable and uses the real engine
 API. To keep it self-contained and reproducible, we build the content in code;
