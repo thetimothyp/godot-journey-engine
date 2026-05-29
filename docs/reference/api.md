@@ -13,7 +13,7 @@ at the end maps each entry to its source line.
 
 ### `VERSION: String`
 
-The engine version, [SemVer](https://semver.org)-formatted (currently `"0.2.0"`).
+The engine version, [SemVer](https://semver.org)-formatted (currently `"0.3.0"`).
 Read `JourneyRuntime.VERSION` to assert compatibility at runtime. It is
 independent of [`JourneyConfig.save_version`](../guides/save-and-load.md#versioning-migration),
 which tracks only the on-disk save format.
