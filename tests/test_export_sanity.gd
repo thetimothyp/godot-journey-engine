@@ -73,7 +73,7 @@ func _ready() -> void:
 	# Load-time reality gate (the "would this ship" check). Proves the WHOLE
 	# config loads from a FRESH disk context (no cache reuse) and every routing id
 	# — start, boundary routes, every choice target — resolves to a loaded event.
-	# See tests/journey_load_check.gd.
+	# See addons/journey_engine_core/journey_load_check.gd.
 	print("[test_export_sanity] disk round-trip of %s" % SAMPLE_CONFIG)
 	var problems: Array[String] = JourneyLoadCheck.check(SAMPLE_CONFIG)
 	_expect(problems.is_empty(),

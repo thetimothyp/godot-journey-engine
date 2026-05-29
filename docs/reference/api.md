@@ -13,7 +13,7 @@ at the end maps each entry to its source line.
 
 ### `VERSION: String`
 
-The engine version, [SemVer](https://semver.org)-formatted (currently `"0.3.0"`).
+The engine version, [SemVer](https://semver.org)-formatted (currently `"0.3.1"`).
 Read `JourneyRuntime.VERSION` to assert compatibility at runtime. It is
 independent of [`JourneyConfig.save_version`](../guides/save-and-load.md#versioning-migration),
 which tracks only the on-disk save format.
@@ -143,7 +143,7 @@ Intended for `OS.is_debug_build()` use.
 
 !!! warning "Pair it with a disk round-trip"
     `validate()` checks events held in memory. Before shipping, also run
-    `JourneyLoadCheck.check("res://…/config.tres")` (`tests/journey_load_check.gd`)
+    `JourneyLoadCheck.check("res://…/config.tres")` (`addons/journey_engine_core/journey_load_check.gd`)
     and require zero problems — it proves every event file loads from a fresh disk
     context and every routing id resolves. See
     [Validation → round-trip from disk](../guides/validation.md#validate-is-not-enough-on-its-own-round-trip-from-disk).
@@ -243,4 +243,4 @@ verified against. Spot-check any row against the code.
 | `JourneyConditionGroup.Logic` enum | `addons/journey_engine_core/journey_condition_group.gd` | 7 |
 | `JourneyValidator.validate(config, event_index=null)` | `addons/journey_engine_core/validator.gd` | 39 |
 | `JourneyEventIndex.find_by_id(id_str)` | `addons/journey_engine_core/event_index.gd` | 189 |
-| `JourneyLoadCheck.check(config_path)` | `tests/journey_load_check.gd` | 32 |
+| `JourneyLoadCheck.check(config_path)` | `addons/journey_engine_core/journey_load_check.gd` | 32 |

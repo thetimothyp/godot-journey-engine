@@ -80,7 +80,7 @@ authoritative "would this ship?" check also proves the content survives a real
 trip to and from disk in a fresh load context — catching an unloadable event file
 or a dangling id that only an honest disk build reveals.
 
-The engine ships that check as `JourneyLoadCheck` (`tests/journey_load_check.gd`).
+The engine ships that check as `JourneyLoadCheck` (`addons/journey_engine_core/journey_load_check.gd`).
 It loads your config from disk with `CACHE_MODE_IGNORE` (never the cached
 in-memory instance), builds the event index straight from `events_dir`, and
 asserts every event file loads and every routing id resolves:
@@ -93,7 +93,7 @@ if not problems.is_empty():
 ```
 
 A pre-ship gate (or CI) should require **both** `validate()` *and*
-`JourneyLoadCheck.check()` to come back clean. The bundled
+`JourneyLoadCheck.check()` to come back clean. The repo's own
 `tests/test_export_sanity.gd` runs the round-trip over `sample_game/` before
 export for exactly this reason.
 

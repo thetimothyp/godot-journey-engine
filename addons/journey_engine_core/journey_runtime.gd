@@ -20,7 +20,7 @@ extends Node
 ## with addons/journey_engine_core/plugin.cfg. Games can read JourneyRuntime.VERSION
 ## to assert compatibility at runtime. Independent of JourneyConfig.save_version,
 ## which only tracks the on-disk save format.
-const VERSION := "0.3.0"
+const VERSION := "0.3.1"
 
 # --- Signals (§5.3) — declare exactly these. ---
 signal event_changed(event: JourneyEvent, choices: Array[JourneyChoice])

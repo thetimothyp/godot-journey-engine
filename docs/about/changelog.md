@@ -4,6 +4,21 @@ This project follows [Keep a Changelog](https://keepachangelog.com/) conventions
 and [Semantic Versioning](https://semver.org/). The engine version is exposed at
 runtime as `JourneyRuntime.VERSION`.
 
+## 0.3.1 — 2026-05-29
+
+### Fixed
+
+- **`JourneyLoadCheck` now ships with the addon.** 0.3.0 documented it as the
+  canonical pre-ship disk round-trip check, but the file lived in the repo's
+  `tests/` folder — which is **not** part of the distributed
+  `addons/journey_engine_core/` package — so an installed project had no
+  `JourneyLoadCheck` class and the documented `JourneyLoadCheck.check(...)` call
+  failed to compile. Moved `tests/journey_load_check.gd` →
+  **`addons/journey_engine_core/journey_load_check.gd`**; it is now included in the
+  core zip and available to every install. No API change — call
+  `JourneyLoadCheck.check(config_path)` exactly as before. (The engine's own
+  pre-export gate, `tests/test_export_sanity.gd`, stays in `tests/`.)
+
 ## 0.3.0 — 2026-05-29
 
 ### Changed (BREAKING — content format)
