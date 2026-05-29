@@ -2044,7 +2044,7 @@ serializable, so a loop-back is a supported shape.)</p>
 authoritative "would this ship?" check also proves the content survives a real
 trip to and from disk in a fresh load context — catching an unloadable event file
 or a dangling id that only an honest disk build reveals.</p>
-<p>The engine ships that check as <code>JourneyLoadCheck</code> (<code>tests/journey_load_check.gd</code>).
+<p>The engine ships that check as <code>JourneyLoadCheck</code> (<code>addons/journey_engine_core/journey_load_check.gd</code>).
 It loads your config from disk with <code>CACHE_MODE_IGNORE</code> (never the cached
 in-memory instance), builds the event index straight from <code>events_dir</code>, and
 asserts every event file loads and every routing id resolves:</p>
@@ -2054,7 +2054,7 @@ asserts every event file loads and every routing id resolves:</p>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">        </span><span class="n">push_error</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="w">   </span><span class="c1"># content is unloadable / has a dangling id — do not ship</span>
 </code></pre></div>
 <p>A pre-ship gate (or CI) should require <strong>both</strong> <code>validate()</code> <em>and</em>
-<code>JourneyLoadCheck.check()</code> to come back clean. The bundled
+<code>JourneyLoadCheck.check()</code> to come back clean. The repo's own
 <code>tests/test_export_sanity.gd</code> runs the round-trip over <code>sample_game/</code> before
 export for exactly this reason.</p>
 <h2 id="what-validation-needs-an-index-for">What validation needs an index for<a class="headerlink" href="#what-validation-needs-an-index-for" title="Permanent link">&para;</a></h2>

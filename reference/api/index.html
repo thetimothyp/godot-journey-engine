@@ -2316,7 +2316,7 @@ documented at the bottom as <a href="#advanced-internal-surface">advanced surfac
 at the end maps each entry to its source line.</p>
 <h2 id="constants">Constants<a class="headerlink" href="#constants" title="Permanent link">&para;</a></h2>
 <h3 id="version-string"><code>VERSION: String</code><a class="headerlink" href="#version-string" title="Permanent link">&para;</a></h3>
-<p>The engine version, <a href="https://semver.org">SemVer</a>-formatted (currently <code>"0.3.0"</code>).
+<p>The engine version, <a href="https://semver.org">SemVer</a>-formatted (currently <code>"0.3.1"</code>).
 Read <code>JourneyRuntime.VERSION</code> to assert compatibility at runtime. It is
 independent of <a href="../../guides/save-and-load/#versioning-migration"><code>JourneyConfig.save_version</code></a>,
 which tracks only the on-disk save format.</p>
@@ -2450,7 +2450,7 @@ Intended for <code>OS.is_debug_build()</code> use.</p>
 <div class="admonition warning">
 <p class="admonition-title">Pair it with a disk round-trip</p>
 <p><code>validate()</code> checks events held in memory. Before shipping, also run
-<code>JourneyLoadCheck.check("res://…/config.tres")</code> (<code>tests/journey_load_check.gd</code>)
+<code>JourneyLoadCheck.check("res://…/config.tres")</code> (<code>addons/journey_engine_core/journey_load_check.gd</code>)
 and require zero problems — it proves every event file loads from a fresh disk
 context and every routing id resolves. See
 <a href="../../guides/validation/#validate-is-not-enough-on-its-own-round-trip-from-disk">Validation → round-trip from disk</a>.</p>
@@ -2710,7 +2710,7 @@ verified against. Spot-check any row against the code.</p>
 </tr>
 <tr>
 <td><code>JourneyLoadCheck.check(config_path)</code></td>
-<td><code>tests/journey_load_check.gd</code></td>
+<td><code>addons/journey_engine_core/journey_load_check.gd</code></td>
 <td>32</td>
 </tr>
 </tbody>

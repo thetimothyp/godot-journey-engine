@@ -1706,6 +1706,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#031-2026-05-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.1 — 2026-05-29
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.1 — 2026-05-29">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#030-2026-05-29" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1826,6 +1854,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#031-2026-05-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.1 — 2026-05-29
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.1 — 2026-05-29">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#030-2026-05-29" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1927,6 +1983,20 @@
 <p>This project follows <a href="https://keepachangelog.com/">Keep a Changelog</a> conventions
 and <a href="https://semver.org/">Semantic Versioning</a>. The engine version is exposed at
 runtime as <code>JourneyRuntime.VERSION</code>.</p>
+<h2 id="031-2026-05-29">0.3.1 — 2026-05-29<a class="headerlink" href="#031-2026-05-29" title="Permanent link">&para;</a></h2>
+<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>JourneyLoadCheck</code> now ships with the addon.</strong> 0.3.0 documented it as the
+  canonical pre-ship disk round-trip check, but the file lived in the repo's
+  <code>tests/</code> folder — which is <strong>not</strong> part of the distributed
+  <code>addons/journey_engine_core/</code> package — so an installed project had no
+  <code>JourneyLoadCheck</code> class and the documented <code>JourneyLoadCheck.check(...)</code> call
+  failed to compile. Moved <code>tests/journey_load_check.gd</code> →
+  <strong><code>addons/journey_engine_core/journey_load_check.gd</code></strong>; it is now included in the
+  core zip and available to every install. No API change — call
+  <code>JourneyLoadCheck.check(config_path)</code> exactly as before. (The engine's own
+  pre-export gate, <code>tests/test_export_sanity.gd</code>, stays in <code>tests/</code>.)</li>
+</ul>
 <h2 id="030-2026-05-29">0.3.0 — 2026-05-29<a class="headerlink" href="#030-2026-05-29" title="Permanent link">&para;</a></h2>
 <h3 id="changed-breaking-content-format">Changed (BREAKING — content format)<a class="headerlink" href="#changed-breaking-content-format" title="Permanent link">&para;</a></h3>
 <ul>
